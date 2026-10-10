@@ -6,19 +6,26 @@
     <title>Lapor Jalan Rusak</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
-        header { background: #6f42c1; color: white; padding: 14px; text-align: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .page { padding: 20px; max-width: 800px; margin: 0 auto; }
+        header { background: #6f42c1; color: white; padding: 14px 10px 0; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header .judul { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .tabs { display: flex; gap: 6px; justify-content: center; }
+        .tab { background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 18px; font-size: 15px; border-radius: 8px 8px 0 0; cursor: pointer; }
+        .tab.aktif { background: #f4f6f9; color: #6f42c1; font-weight: bold; }
+        .page { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
+        .page.aktif { display: block; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
         .btn { background: #6f42c1; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 0; width: 100%; transition: 0.2s; }
         .btn:disabled { background: #cccccc; cursor: not-allowed; }
         .btn-success { background: #28a745; }
         .btn-danger { background: #dc3545; }
         .btn-warning { background: #fd7e14; }
+        .btn-kecil { width: auto; padding: 8px 14px; font-size: 14px; margin: 0; }
         #preview { max-width: 100%; max-height: 250px; margin-top: 15px; display: none; border-radius: 8px; border: 2px dashed #ddd; }
         .info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; text-align: left; font-size: 14px; line-height: 1.5; }
         #areaForm { display: none; margin-top: 15px; text-align: left; }
-        #areaForm label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
-        #deskripsi { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; resize: vertical; }
+        #areaForm label, .lbl { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
+        textarea, input[type=text] { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; }
+        textarea { resize: vertical; }
         #hitung { font-size: 12px; color: #777; text-align: right; margin-bottom: 10px; }
         .tingkat-wrap { display: flex; gap: 8px; margin-bottom: 5px; }
         .tingkat-btn { flex: 1; padding: 12px 4px; border: 3px solid transparent; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; opacity: 0.55; transition: 0.15s; }
@@ -28,14 +35,42 @@
         .tingkat-btn.dipilih { opacity: 1; border-color: #222; transform: scale(1.04); }
         #areaKonfirmasi { display: none; margin-top: 10px; }
         #areaKonfirmasi .pertanyaan { font-weight: bold; margin: 10px 0 0; }
+
+        /* Kode tiket */
+        #kotakTiket { display: none; background: #e6fcf5; border: 2px dashed #20c997; border-radius: 10px; padding: 15px; margin-top: 15px; }
+        #kodeTiket { font-size: 28px; font-weight: bold; letter-spacing: 2px; color: #087f5b; margin: 6px 0; word-break: break-all; }
+
+        /* Cek status */
+        .baris-cek { display: flex; gap: 8px; text-align: left; }
+        .baris-cek input { flex: 1; text-transform: uppercase; }
+        #hasilCek { margin-top: 16px; text-align: left; display: none; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 14px; font-size: 13px; font-weight: bold; color: white; }
+        .badge.baru { background: #868e96; }
+        .badge.diproses { background: #1c7ed6; }
+        .badge.selesai { background: #2f9e44; }
+        .badge.ringan { background: #f2b705; color: #333; }
+        .badge.sedang { background: #ff922b; }
+        .badge.parah { background: #e03131; }
+        .hasil-baris { margin: 8px 0; font-size: 14px; line-height: 1.5; }
+        .catatan { background: #fff9db; border-left: 4px solid #fab005; padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 14px; }
+        #riwayat { margin-top: 18px; text-align: left; }
+        .chip { display: inline-block; background: #e9ecef; border-radius: 16px; padding: 6px 12px; margin: 4px 4px 0 0; font-size: 13px; cursor: pointer; }
+        .chip:hover { background: #dee2e6; }
     </style>
 </head>
 <body>
-    <header>📱 Lapor Jalan Rusak</header>
+    <header>
+        <div class="judul">📱 Lapor Jalan Rusak</div>
+        <div class="tabs">
+            <button class="tab aktif" data-page="pageLapor">📸 Buat Laporan</button>
+            <button class="tab" data-page="pageStatus">🔎 Cek Status</button>
+        </div>
+    </header>
 
-    <div class="page">
+    <!-- ============ BUAT LAPORAN ============ -->
+    <div class="page aktif" id="pageLapor">
         <div class="card">
-            <h2>Lapor Jalan Rusak</h2>
+            <h2 style="margin-top:0">Lapor Jalan Rusak</h2>
             <p>Ambil foto kerusakannya, lokasi GPS akan otomatis terekam. Anda bisa memeriksa dulu sebelum mengirim.</p>
 
             <input type="file" accept="image/*" capture="environment" id="pilihKamera" style="display: none;">
@@ -67,6 +102,27 @@
                 <button class="btn btn-success" id="btnKirim">✅ Ya, Kirim Laporan</button>
                 <button class="btn btn-danger" id="btnBatal">❌ Batal / Foto Ulang</button>
             </div>
+
+            <div id="kotakTiket">
+                <div>🎫 <b>Kode laporan Anda</b></div>
+                <div id="kodeTiket">-</div>
+                <div style="font-size:13px; color:#555;">Simpan kode ini untuk memantau status laporan di tab "Cek Status".</div>
+                <button class="btn btn-kecil" id="btnSalin" style="margin-top:10px;">📋 Salin Kode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ CEK STATUS ============ -->
+    <div class="page" id="pageStatus">
+        <div class="card">
+            <h2 style="margin-top:0">Cek Status Laporan</h2>
+            <p>Masukkan kode laporan untuk melihat apakah laporan Anda sudah ditindaklanjuti.</p>
+            <div class="baris-cek">
+                <input type="text" id="inKode" placeholder="LJ-XXXXXXXX" maxlength="20" autocomplete="off">
+                <button class="btn btn-kecil" id="btnCek">Cek</button>
+            </div>
+            <div id="hasilCek"></div>
+            <div id="riwayat"></div>
         </div>
     </div>
 
@@ -76,30 +132,81 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbW5oeXlhcnVycXN6Y3lpZG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1Nzc0MzQsImV4cCI6MjEwNzE1MzQzNH0.sbvZvD_WOHvpTpwy6dc9Kcdql4BLqKjQR10v5VmJrFo";
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const inputKamera = document.getElementById('pilihKamera');
-        const previewImg = document.getElementById('preview');
-        const infoStatus = document.getElementById('infoStatus');
-        const statusTeks = document.getElementById('statusTeks');
-        const areaKonfirmasi = document.getElementById('areaKonfirmasi');
-        const btnKirim = document.getElementById('btnKirim');
-        const btnBatal = document.getElementById('btnBatal');
-        const btnUlangGPS = document.getElementById('btnUlangGPS');
-        const btnFoto = document.getElementById('btnFoto');
+        const $ = id => document.getElementById(id);
+        function esc(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
 
-        const areaForm = document.getElementById('areaForm');
-        const inDeskripsi = document.getElementById('deskripsi');
-        const hitung = document.getElementById('hitung');
+        // ---------- Tab ----------
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(x => x.classList.toggle('aktif', x === t));
+            document.querySelectorAll('.page').forEach(p => p.classList.toggle('aktif', p.id === t.dataset.page));
+            if (t.dataset.page === 'pageStatus') tampilRiwayat();
+        }));
+
+        // ---------- Riwayat kode (disimpan di browser) ----------
+        const KUNCI = 'lapor_riwayat';
+        function ambilRiwayat() { try { return JSON.parse(localStorage.getItem(KUNCI)) || []; } catch (e) { return []; } }
+        function simpanRiwayat(kode) {
+            try {
+                const r = ambilRiwayat().filter(x => x !== kode);
+                r.unshift(kode);
+                localStorage.setItem(KUNCI, JSON.stringify(r.slice(0, 10)));
+            } catch (e) { /* abaikan */ }
+        }
+        function tampilRiwayat() {
+            const r = ambilRiwayat();
+            const box = $('riwayat');
+            if (!r.length) { box.innerHTML = ""; return; }
+            box.innerHTML = '<div class="lbl">🕘 Laporan saya di perangkat ini</div>' +
+                r.map(k => `<span class="chip" data-k="${esc(k)}">${esc(k)}</span>`).join('');
+            box.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+                $('inKode').value = c.dataset.k;
+                cekStatus();
+            }));
+        }
+
+        // ---------- Kode tiket ----------
+        function buatKode() {
+            const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            const acak = new Uint32Array(8);
+            crypto.getRandomValues(acak);
+            return 'LJ-' + Array.from(acak, n => huruf[n % huruf.length]).join('');
+        }
+
+        // ---------- Kompres foto agar upload cepat & hemat kuota ----------
+        async function kompres(file, maxSisi = 1280, kualitas = 0.8) {
+            try {
+                const bmp = await createImageBitmap(file);
+                const skala = Math.min(1, maxSisi / Math.max(bmp.width, bmp.height));
+                const c = document.createElement('canvas');
+                c.width = Math.round(bmp.width * skala);
+                c.height = Math.round(bmp.height * skala);
+                c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+                const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
+                return (blob && blob.size < file.size) ? blob : file;
+            } catch (e) {
+                return file;
+            }
+        }
+
+        // ---------- Form laporan ----------
+        const inputKamera = $('pilihKamera'), previewImg = $('preview'), infoStatus = $('infoStatus'),
+              statusTeks = $('statusTeks'), areaKonfirmasi = $('areaKonfirmasi'), btnKirim = $('btnKirim'),
+              btnBatal = $('btnBatal'), btnUlangGPS = $('btnUlangGPS'), btnFoto = $('btnFoto'),
+              areaForm = $('areaForm'), inDeskripsi = $('deskripsi'), hitung = $('hitung'),
+              kotakTiket = $('kotakTiket');
         const tombolTingkat = document.querySelectorAll('.tingkat-btn');
+
         let tingkatDipilih = null;
+        let fileFotoRaw = null;
+        let dataLokasi = { latitude: null, longitude: null, akurasi: null };
 
         inDeskripsi.addEventListener('input', () => { hitung.innerText = inDeskripsi.value.length + "/500"; });
         tombolTingkat.forEach(b => b.addEventListener('click', () => {
             tingkatDipilih = b.dataset.nilai;
             tombolTingkat.forEach(x => x.classList.toggle('dipilih', x === b));
         }));
-
-        let fileFotoRaw = null;
-        let dataLokasi = { latitude: null, longitude: null, akurasi: null };
 
         btnFoto.addEventListener('click', () => inputKamera.click());
 
@@ -125,6 +232,7 @@
                 infoStatus.style.display = "block";
                 areaForm.style.display = "block";
                 areaKonfirmasi.style.display = "none";
+                kotakTiket.style.display = "none";
                 btnUlangGPS.style.display = "none";
                 ambilGPS();
             }
@@ -150,7 +258,7 @@
                     btnBatal.disabled = false;
                 },
                 (error) => {
-                    statusTeks.innerHTML = "❌ GPS gagal (" + error.message + "). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.";
+                    statusTeks.innerHTML = "❌ GPS gagal (" + esc(error.message) + "). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.";
                     btnUlangGPS.style.display = "block";
                 },
                 { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
@@ -173,39 +281,89 @@
             }
             btnKirim.disabled = true;
             btnBatal.disabled = true;
-            statusTeks.innerText = "⏳ Mengunggah foto...";
 
             try {
+                statusTeks.innerText = "⏳ Mengompres foto...";
+                const fotoKirim = await kompres(fileFotoRaw);
+
+                statusTeks.innerText = "⏳ Mengunggah foto...";
                 const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
                 const { error: uploadError } = await db.storage
                     .from('foto_laporan')
-                    .upload(namaFile, fileFotoRaw, { contentType: fileFotoRaw.type || 'image/jpeg' });
+                    .upload(namaFile, fotoKirim, { contentType: fotoKirim.type || 'image/jpeg' });
                 if (uploadError) throw uploadError;
 
                 const { data: urlData } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
 
-                statusTeks.innerText = "⏳ Menyimpan data lokasi...";
-
-                const { error: insertError } = await db
-                    .from('laporan_jalan')
-                    .insert([{
-                        latitude: dataLokasi.latitude,
-                        longitude: dataLokasi.longitude,
-                        foto_url: urlData.publicUrl,
-                        deskripsi: inDeskripsi.value.trim(),
-                        tingkat: tingkatDipilih
-                    }]);
+                statusTeks.innerText = "⏳ Menyimpan data laporan...";
+                const kode = buatKode();
+                const { error: insertError } = await db.from('laporan_jalan').insert([{
+                    latitude: dataLokasi.latitude,
+                    longitude: dataLokasi.longitude,
+                    foto_url: urlData.publicUrl,
+                    deskripsi: inDeskripsi.value.trim(),
+                    tingkat: tingkatDipilih,
+                    kode: kode
+                }]);
                 if (insertError) throw insertError;
 
+                simpanRiwayat(kode);
                 resetFormUser();
-                statusTeks.innerHTML = "🎉 Sukses! Laporan jalan rusak Anda sudah terkirim. Terima kasih!";
+                statusTeks.innerHTML = "🎉 Sukses! Laporan Anda sudah terkirim. Terima kasih!";
+                $('kodeTiket').innerText = kode;
+                kotakTiket.style.display = "block";
+                kotakTiket.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } catch (error) {
                 console.error(error);
-                statusTeks.innerHTML = "❌ Gagal mengirim: " + (error.message || "gangguan jaringan");
+                statusTeks.innerHTML = "❌ Gagal mengirim: " + esc(error.message || "gangguan jaringan");
                 btnKirim.disabled = false;
                 btnBatal.disabled = false;
             }
         });
+
+        $('btnSalin').addEventListener('click', async () => {
+            const kode = $('kodeTiket').innerText;
+            try { await navigator.clipboard.writeText(kode); $('btnSalin').innerText = "✅ Tersalin"; }
+            catch (e) { $('btnSalin').innerText = "Salin manual: " + kode; }
+        });
+
+        // ---------- Cek status ----------
+        const LABEL_STATUS = { baru: '🆕 Baru diterima', diproses: '🛠️ Sedang diproses', selesai: '✅ Selesai ditangani' };
+
+        async function cekStatus() {
+            const kode = $('inKode').value.trim().toUpperCase();
+            const hasil = $('hasilCek');
+            hasil.style.display = "block";
+            if (!kode) { hasil.innerHTML = "⚠️ Masukkan kode laporan dulu."; return; }
+            hasil.innerHTML = "⏳ Mencari laporan...";
+
+            try {
+                const { data, error } = await db.rpc('cek_laporan', { p_kode: kode });
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    hasil.innerHTML = "❌ Kode tidak ditemukan. Periksa kembali penulisannya.";
+                    return;
+                }
+                const r = data[0];
+                const waktu = new Date(r.waktu).toLocaleString('id-ID');
+                const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
+                const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
+                hasil.innerHTML = `
+                    <div class="hasil-baris"><b>Kode:</b> ${esc(r.kode)}</div>
+                    <div class="hasil-baris"><b>Status:</b> <span class="badge ${st}">${LABEL_STATUS[st]}</span></div>
+                    ${tg ? `<div class="hasil-baris"><b>Tingkat:</b> <span class="badge ${tg}">${tg}</span></div>` : ''}
+                    <div class="hasil-baris"><b>Dilaporkan:</b> ${esc(waktu)}</div>
+                    ${r.deskripsi ? `<div class="hasil-baris"><b>Deskripsi:</b> ${esc(r.deskripsi)}</div>` : ''}
+                    ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}`;
+            } catch (err) {
+                console.error(err);
+                hasil.innerHTML = "❌ Gagal mengecek: " + esc(err.message || "gangguan jaringan");
+            }
+        }
+
+        $('btnCek').addEventListener('click', cekStatus);
+        $('inKode').addEventListener('keydown', e => { if (e.key === 'Enter') cekStatus(); });
+        tampilRiwayat();
     </script>
 </body>
 </html>
