@@ -16,6 +16,16 @@
         .btn-warning { background: #fd7e14; }
         #preview { max-width: 100%; max-height: 250px; margin-top: 15px; display: none; border-radius: 8px; border: 2px dashed #ddd; }
         .info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; text-align: left; font-size: 14px; line-height: 1.5; }
+        #areaForm { display: none; margin-top: 15px; text-align: left; }
+        #areaForm label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
+        #deskripsi { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; resize: vertical; }
+        #hitung { font-size: 12px; color: #777; text-align: right; margin-bottom: 10px; }
+        .tingkat-wrap { display: flex; gap: 8px; margin-bottom: 5px; }
+        .tingkat-btn { flex: 1; padding: 12px 4px; border: 3px solid transparent; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; opacity: 0.55; transition: 0.15s; }
+        .tingkat-btn[data-nilai="ringan"] { background: #ffd43b; }
+        .tingkat-btn[data-nilai="sedang"] { background: #ff922b; color: white; }
+        .tingkat-btn[data-nilai="parah"]  { background: #e03131; color: white; }
+        .tingkat-btn.dipilih { opacity: 1; border-color: #222; transform: scale(1.04); }
         #areaKonfirmasi { display: none; margin-top: 10px; }
         #areaKonfirmasi .pertanyaan { font-weight: bold; margin: 10px 0 0; }
     </style>
@@ -32,6 +42,19 @@
             <button class="btn" id="btnFoto">📸 Ambil Foto Jalan</button>
 
             <img id="preview" alt="Preview Foto">
+
+            <div id="areaForm">
+                <label for="deskripsi">📝 Deskripsi kerusakan</label>
+                <textarea id="deskripsi" rows="3" maxlength="500" placeholder="Contoh: Lubang besar di tengah jalan, dalam ±20 cm, berbahaya untuk motor"></textarea>
+                <div id="hitung">0/500</div>
+
+                <label>⚠️ Tingkat kerusakan / bahaya <span style="color:#dc3545">*</span></label>
+                <div class="tingkat-wrap">
+                    <button type="button" class="tingkat-btn" data-nilai="ringan">🟡 Ringan</button>
+                    <button type="button" class="tingkat-btn" data-nilai="sedang">🟠 Sedang</button>
+                    <button type="button" class="tingkat-btn" data-nilai="parah">🔴 Parah</button>
+                </div>
+            </div>
 
             <div id="infoStatus" class="info">
                 <span id="statusTeks">Menunggu kiriman foto...</span>
@@ -63,6 +86,18 @@
         const btnUlangGPS = document.getElementById('btnUlangGPS');
         const btnFoto = document.getElementById('btnFoto');
 
+        const areaForm = document.getElementById('areaForm');
+        const inDeskripsi = document.getElementById('deskripsi');
+        const hitung = document.getElementById('hitung');
+        const tombolTingkat = document.querySelectorAll('.tingkat-btn');
+        let tingkatDipilih = null;
+
+        inDeskripsi.addEventListener('input', () => { hitung.innerText = inDeskripsi.value.length + "/500"; });
+        tombolTingkat.forEach(b => b.addEventListener('click', () => {
+            tingkatDipilih = b.dataset.nilai;
+            tombolTingkat.forEach(x => x.classList.toggle('dipilih', x === b));
+        }));
+
         let fileFotoRaw = null;
         let dataLokasi = { latitude: null, longitude: null, akurasi: null };
 
@@ -75,6 +110,11 @@
             previewImg.style.display = "none";
             areaKonfirmasi.style.display = "none";
             btnUlangGPS.style.display = "none";
+            areaForm.style.display = "none";
+            inDeskripsi.value = "";
+            hitung.innerText = "0/500";
+            tingkatDipilih = null;
+            tombolTingkat.forEach(x => x.classList.remove('dipilih'));
         }
 
         inputKamera.addEventListener('change', function(e) {
@@ -83,6 +123,7 @@
                 previewImg.src = URL.createObjectURL(fileFotoRaw);
                 previewImg.style.display = "inline-block";
                 infoStatus.style.display = "block";
+                areaForm.style.display = "block";
                 areaKonfirmasi.style.display = "none";
                 btnUlangGPS.style.display = "none";
                 ambilGPS();
@@ -125,6 +166,11 @@
 
         btnKirim.addEventListener('click', async () => {
             if (!fileFotoRaw || dataLokasi.latitude === null) return;
+            if (!tingkatDipilih) {
+                statusTeks.innerHTML = "⚠️ Pilih dulu <b>tingkat kerusakan</b> (Ringan / Sedang / Parah) sebelum mengirim.";
+                areaForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
             btnKirim.disabled = true;
             btnBatal.disabled = true;
             statusTeks.innerText = "⏳ Mengunggah foto...";
@@ -142,7 +188,13 @@
 
                 const { error: insertError } = await db
                     .from('laporan_jalan')
-                    .insert([{ latitude: dataLokasi.latitude, longitude: dataLokasi.longitude, foto_url: urlData.publicUrl }]);
+                    .insert([{
+                        latitude: dataLokasi.latitude,
+                        longitude: dataLokasi.longitude,
+                        foto_url: urlData.publicUrl,
+                        deskripsi: inDeskripsi.value.trim(),
+                        tingkat: tingkatDipilih
+                    }]);
                 if (insertError) throw insertError;
 
                 resetFormUser();
