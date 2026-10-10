@@ -99,12 +99,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Kredensial API Supabase khusus milik Anda
+        // Masukkan URL dan Anon Key Supabase Anda di sini
         const SUPABASE_URL = "https://ilmnhyyarurqszcyidnx.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_7w3KZhi9QkMOhRiIRoAGGg_JY9M0Mcy";
 
-        // Inisialisasi Supabase Client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inisialisasi Supabase Client yang Aman
+        let supabase = null;
+        try {
+            if (window.supabase && SUPABASE_URL !== "https://xxxx.supabase.co") {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Gagal menginisialisasi Supabase:", e);
+        }
 
         // Pengaturan Awal Peta Admin (Default fokus di tengah Indonesia)
         let map = L.map('map').setView([-2.5489, 118.0149], 5); 
@@ -160,21 +167,36 @@
                     (position) => {
                         dataLokasi.latitude = position.coords.latitude;
                         dataLokasi.longitude = position.coords.longitude;
-                        statusTeks.innerHTML = `✅ <b>GPS Berhasil Dikunci!</b><br>Lat: ${dataLokasi.latitude}<br>Lng: ${dataLokasi.longitude}<br>Akurasi: ±${Math.round(position.coords.accuracy)} meter`;
+                        statusTeks.innerHTML = `✅ <b>GPS Berhasil Dikunci!</b><br>Lat: ${dataLokasi.latitude.toFixed(5)}<br>Lng: ${dataLokasi.longitude.toFixed(5)}<br>Akurasi: ±${Math.round(position.coords.accuracy)} meter`;
                         btnKirim.disabled = false;
+                        btnKirim.style.display = "block";
                     },
                     (error) => {
-                        statusTeks.innerHTML = "❌ GPS Gagal. Silakan aktifkan layanan lokasi di pengaturan HP Anda dan refresh web.";
+                        let pesanError = "❌ GPS Gagal Diakses.";
+                        if (error.code === error.PERMISSION_DENIED) {
+                            pesanError = "❌ Izin lokasi ditolak. Harap izinkan akses GPS di pengaturan browser/HP Anda.";
+                        } else if (error.code === error.TIMEOUT) {
+                            pesanError = "❌ Waktu permintaan GPS habis (Timeout). Pastikan Anda berada di area terbuka.";
+                        }
+                        statusTeks.innerHTML = pesanError;
+                        btnKirim.style.display = "none";
                     },
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
                 );
             } else {
                 statusTeks.innerText = "Browser perangkat Anda tidak mendukung sensor GPS.";
+                btnKirim.style.display = "none";
             }
         }
 
         btnKirim.addEventListener('click', async () => {
             if (!fileFotoRaw || !dataLokasi.latitude) return;
+            
+            if (!supabase) {
+                alert("Koneksi Supabase belum dikonfigurasi dengan benar di dalam kode!");
+                return;
+            }
+
             btnKirim.disabled = true;
             statusTeks.innerText = "⏳ Sedang mengunggah laporan ke cloud storage Supabase...";
 
@@ -205,11 +227,12 @@
 
                 if (insertError) throw insertError;
                 
-                statusTeks.innerHTML = "🎉 Sukses! Laporan jalan rusak Anda telah tersimpan aman selamanya di Supabase.";
+                statusTeks.innerHTML = "🎉 Sukses! Laporan jalan rusak Anda telah tersimpan aman di Supabase.";
                 btnKirim.style.display = "none";
                 previewImg.style.display = "none";
+                inputKamera.value = "";
             } catch (error) {
-                statusTeks.innerText = "❌ Terjadi gangguan jaringan saat mengirim data.";
+                statusTeks.innerHTML = `❌ Gagal mengirim data: ${error.message || error}`;
                 console.error(error);
                 btnKirim.disabled = false;
             }
@@ -220,6 +243,11 @@
             const tabelLaporan = document.getElementById('tabelLaporan');
             tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center;">Memuat data laporan...</td></tr>`;
             
+            if (!supabase) {
+                tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">Supabase URL & Key belum diatur dengan benar.</td></tr>`;
+                return;
+            }
+
             try {
                 const { data: logs, error } = await supabase
                     .from('laporan_jalan')
@@ -232,7 +260,7 @@
                 penandaPeta.forEach(marker => map.removeLayer(marker));
                 penandaPeta = [];
 
-                if (logs.length === 0) {
+                if (!logs || logs.length === 0) {
                     tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center;">Belum ada data laporan masuk.</td></tr>`;
                     return;
                 }
@@ -240,14 +268,14 @@
                 let koordinatTerbaru = null;
 
                 logs.forEach((row_data) => {
-                    const tanggalFormat = new Date(row_data.waktu).toLocaleString('id-ID');
+                    const tanggalFormat = row_data.waktu ? new Date(row_data.waktu).toLocaleString('id-ID') : '-';
                     
                     // Masukkan Baris Baru ke Tabel HTML
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td><img src="${row_data.foto_url}" class="img-thumbnail" onclick="window.open('${row_data.foto_url}', '_blank')"></td>
                         <td>${tanggalFormat}</td>
-                        <td>${row_data.latitude.toFixed(6)}, ${row_data.longitude.toFixed(6)}</td>
+                        <td>${row_data.latitude.toFixed(5)}, ${row_data.longitude.toFixed(5)}</td>
                         <td><a href="https://www.google.com/maps?q=${row_data.latitude},${row_data.longitude}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 12px; width: auto; display: inline-block; margin: 0;">🗺️ Peta</a></td>
                     `;
                     tabelLaporan.appendChild(row);
@@ -263,7 +291,7 @@
 
                 if (koordinatTerbaru) map.setView(koordinatTerbaru, 14);
             } catch (err) {
-                tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center;">Gagal sinkronisasi data dari server cloud Supabase.</td></tr>`;
+                tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">Gagal sinkronisasi data dari server cloud Supabase.</td></tr>`;
                 console.error(err);
             }
         }
