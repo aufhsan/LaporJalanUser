@@ -3,55 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Lapor Jalan - Supabase Edition</title>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+    <title>Lapor Jalan Rusak</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f4f6f9; color: #333; }
-        nav { background: #6f42c1; padding: 10px; text-align: center; display: flex; justify-content: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        nav button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        nav button.active { background: white; color: #6f42c1; font-weight: bold; }
-
-        .page { display: none; padding: 20px; max-width: 800px; margin: 0 auto; }
-        .page.active { display: block; }
-
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
+        header { background: #6f42c1; color: white; padding: 14px; text-align: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .page { padding: 20px; max-width: 800px; margin: 0 auto; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
         .btn { background: #6f42c1; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 0; width: 100%; transition: 0.2s; }
         .btn:disabled { background: #cccccc; cursor: not-allowed; }
         .btn-success { background: #28a745; }
         .btn-danger { background: #dc3545; }
         .btn-warning { background: #fd7e14; }
-
         #preview { max-width: 100%; max-height: 250px; margin-top: 15px; display: none; border-radius: 8px; border: 2px dashed #ddd; }
         .info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; text-align: left; font-size: 14px; line-height: 1.5; }
         #areaKonfirmasi { display: none; margin-top: 10px; }
         #areaKonfirmasi .pertanyaan { font-weight: bold; margin: 10px 0 0; }
-
-        #map { height: 350px; width: 100%; border-radius: 10px; margin-bottom: 20px; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
-        .table-responsive { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background: #343a40; color: white; }
-        tr:hover { background: #f8f9fa; }
-        .img-thumbnail { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
+    <header>📱 Lapor Jalan Rusak</header>
 
-    <nav>
-        <button id="btnTabUser" class="active" onclick="bukaHalaman('pageUser')">📱 Mode User</button>
-        <button id="btnTabAdmin" onclick="bukaHalaman('pageAdmin')">💻 Mode Admin</button>
-    </nav>
-
-    <!-- 1. ANTARMUKA USER -->
-    <div id="pageUser" class="page active">
+    <div class="page">
         <div class="card">
             <h2>Lapor Jalan Rusak</h2>
             <p>Ambil foto kerusakannya, lokasi GPS akan otomatis terekam. Anda bisa memeriksa dulu sebelum mengirim.</p>
 
             <input type="file" accept="image/*" capture="environment" id="pilihKamera" style="display: none;">
-            <button class="btn" id="btnFoto" onclick="document.getElementById('pilihKamera').click()">📸 Ambil Foto Jalan</button>
+            <button class="btn" id="btnFoto">📸 Ambil Foto Jalan</button>
 
             <img id="preview" alt="Preview Foto">
 
@@ -61,7 +39,6 @@
 
             <button class="btn btn-warning" id="btnUlangGPS" style="display: none;">🔄 Coba GPS Lagi</button>
 
-            <!-- Konfirmasi sebelum kirim -->
             <div id="areaKonfirmasi">
                 <p class="pertanyaan">Periksa foto dan lokasi di atas. Kirim laporan ini?</p>
                 <button class="btn btn-success" id="btnKirim">✅ Ya, Kirim Laporan</button>
@@ -70,72 +47,12 @@
         </div>
     </div>
 
-    <!-- 2. ANTARMUKA ADMIN -->
-    <div id="pageAdmin" class="page">
-        <h2>Dashboard Admin - Pemetaan Supabase</h2>
-
-        <div id="map"></div>
-
-        <div class="card" style="text-align: left;">
-            <h3>Daftar Laporan Masuk</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Foto</th>
-                            <th>Waktu</th>
-                            <th>Koordinat (Lat, Lng)</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelLaporan">
-                        <tr><td colspan="4" style="text-align: center;">Memuat data laporan...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
         const SUPABASE_URL = "https://ilmnhyyarurqszcyidnx.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbW5oeXlhcnVycXN6Y3lpZG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1Nzc0MzQsImV4cCI6MjEwNzE1MzQzNH0.sbvZvD_WOHvpTpwy6dc9Kcdql4BLqKjQR10v5VmJrFo";
-
-        // PERBAIKAN: jangan pakai nama "supabase" (bentrok dengan library global)
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Peta admin (dijaga agar error peta tidak mematikan seluruh aplikasi)
-        let map = null;
-        let penandaPeta = [];
-        try {
-            map = L.map('map').setView([-2.5489, 118.0149], 5);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-        } catch (e) {
-            console.error("Peta gagal dimuat:", e);
-            document.getElementById('map').innerHTML = "<p style='padding:20px'>Peta gagal dimuat. Periksa koneksi internet.</p>";
-        }
-
-        // Perpindahan tab
-        window.bukaHalaman = function(idHalaman) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(idHalaman).classList.add('active');
-
-            document.getElementById('btnTabUser').classList.remove('active');
-            document.getElementById('btnTabAdmin').classList.remove('active');
-
-            if (idHalaman === 'pageUser') document.getElementById('btnTabUser').classList.add('active');
-            if (idHalaman === 'pageAdmin') {
-                document.getElementById('btnTabAdmin').classList.add('active');
-                if (map) setTimeout(() => { map.invalidateSize(); }, 200);
-                muatDataDariSupabase();
-            }
-        };
-
-        // --- LOGIKA USER ---
         const inputKamera = document.getElementById('pilihKamera');
         const previewImg = document.getElementById('preview');
         const infoStatus = document.getElementById('infoStatus');
@@ -149,6 +66,8 @@
         let fileFotoRaw = null;
         let dataLokasi = { latitude: null, longitude: null, akurasi: null };
 
+        btnFoto.addEventListener('click', () => inputKamera.click());
+
         function resetFormUser() {
             fileFotoRaw = null;
             dataLokasi = { latitude: null, longitude: null, akurasi: null };
@@ -156,7 +75,6 @@
             previewImg.style.display = "none";
             areaKonfirmasi.style.display = "none";
             btnUlangGPS.style.display = "none";
-            btnFoto.style.display = "block";
         }
 
         inputKamera.addEventListener('change', function(e) {
@@ -164,12 +82,9 @@
                 fileFotoRaw = e.target.files[0];
                 previewImg.src = URL.createObjectURL(fileFotoRaw);
                 previewImg.style.display = "inline-block";
-
                 infoStatus.style.display = "block";
-                statusTeks.innerHTML = "📸 Foto terekam.<br>⏳ Mencari sinyal GPS akurat...";
                 areaKonfirmasi.style.display = "none";
                 btnUlangGPS.style.display = "none";
-
                 ambilGPS();
             }
         });
@@ -189,13 +104,12 @@
                     dataLokasi.longitude = position.coords.longitude;
                     dataLokasi.akurasi = position.coords.accuracy;
                     statusTeks.innerHTML = `✅ <b>GPS Berhasil Dikunci!</b><br>Lat: ${dataLokasi.latitude}<br>Lng: ${dataLokasi.longitude}<br>Akurasi: ±${Math.round(dataLokasi.akurasi)} meter`;
-                    // Tampilkan konfirmasi kirim / batal
                     areaKonfirmasi.style.display = "block";
                     btnKirim.disabled = false;
                     btnBatal.disabled = false;
                 },
                 (error) => {
-                    statusTeks.innerHTML = "❌ GPS gagal (" + error.message + "). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.<br><small>Catatan: GPS umumnya hanya jalan di halaman HTTPS.</small>";
+                    statusTeks.innerHTML = "❌ GPS gagal (" + error.message + "). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.";
                     btnUlangGPS.style.display = "block";
                 },
                 { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
@@ -213,86 +127,33 @@
             if (!fileFotoRaw || dataLokasi.latitude === null) return;
             btnKirim.disabled = true;
             btnBatal.disabled = true;
-            statusTeks.innerText = "⏳ Mengunggah foto ke Supabase Storage...";
+            statusTeks.innerText = "⏳ Mengunggah foto...";
 
             try {
-                const namaFile = `jalan_${Date.now()}.jpg`;
+                const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
                 const { error: uploadError } = await db.storage
                     .from('foto_laporan')
                     .upload(namaFile, fileFotoRaw, { contentType: fileFotoRaw.type || 'image/jpeg' });
                 if (uploadError) throw uploadError;
 
                 const { data: urlData } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
-                const downloadURL = urlData.publicUrl;
 
-                statusTeks.innerText = "⏳ Menyimpan data lokasi ke database...";
+                statusTeks.innerText = "⏳ Menyimpan data lokasi...";
 
                 const { error: insertError } = await db
                     .from('laporan_jalan')
-                    .insert([{ latitude: dataLokasi.latitude, longitude: dataLokasi.longitude, foto_url: downloadURL }]);
+                    .insert([{ latitude: dataLokasi.latitude, longitude: dataLokasi.longitude, foto_url: urlData.publicUrl }]);
                 if (insertError) throw insertError;
 
                 resetFormUser();
                 statusTeks.innerHTML = "🎉 Sukses! Laporan jalan rusak Anda sudah terkirim. Terima kasih!";
             } catch (error) {
                 console.error(error);
-                statusTeks.innerHTML = "❌ Gagal mengirim: " + (error.message || "gangguan jaringan") + "<br><small>Periksa juga pengaturan Policy (RLS) di Supabase.</small>";
+                statusTeks.innerHTML = "❌ Gagal mengirim: " + (error.message || "gangguan jaringan");
                 btnKirim.disabled = false;
                 btnBatal.disabled = false;
             }
         });
-
-        // --- LOGIKA ADMIN ---
-        async function muatDataDariSupabase() {
-            const tabelLaporan = document.getElementById('tabelLaporan');
-            tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center;">Memuat data laporan...</td></tr>`;
-
-            try {
-                const { data: logs, error } = await db
-                    .from('laporan_jalan')
-                    .select('*')
-                    .order('waktu', { ascending: false });
-
-                if (error) throw error;
-
-                tabelLaporan.innerHTML = "";
-                if (map) penandaPeta.forEach(marker => map.removeLayer(marker));
-                penandaPeta = [];
-
-                if (!logs || logs.length === 0) {
-                    tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center;">Belum ada data laporan masuk.</td></tr>`;
-                    return;
-                }
-
-                let koordinatTerbaru = null;
-
-                logs.forEach((row_data) => {
-                    const tanggalFormat = new Date(row_data.waktu).toLocaleString('id-ID');
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><img src="${row_data.foto_url}" class="img-thumbnail" onclick="window.open('${row_data.foto_url}', '_blank')"></td>
-                        <td>${tanggalFormat}</td>
-                        <td>${Number(row_data.latitude).toFixed(6)}, ${Number(row_data.longitude).toFixed(6)}</td>
-                        <td><a href="https://www.google.com/maps?q=${row_data.latitude},${row_data.longitude}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 12px; width: auto; display: inline-block; margin: 0; text-decoration:none;">🗺️ Peta</a></td>
-                    `;
-                    tabelLaporan.appendChild(row);
-
-                    if (map) {
-                        const marker = L.marker([row_data.latitude, row_data.longitude]).addTo(map)
-                            .bindPopup(`<b>Laporan Kerusakan</b><br>Waktu: ${tanggalFormat}<br><img src="${row_data.foto_url}" style="width:120px; margin-top:5px; border-radius:5px;">`);
-                        penandaPeta.push(marker);
-                    }
-
-                    if (!koordinatTerbaru) koordinatTerbaru = [row_data.latitude, row_data.longitude];
-                });
-
-                if (map && koordinatTerbaru) map.setView(koordinatTerbaru, 14);
-            } catch (err) {
-                console.error(err);
-                tabelLaporan.innerHTML = `<tr><td colspan="4" style="text-align: center;">Gagal memuat data: ${err.message || 'cek koneksi / policy Supabase'}</td></tr>`;
-            }
-        }
     </script>
 </body>
 </html>
