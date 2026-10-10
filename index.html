@@ -147,8 +147,9 @@
         let dataLokasi = { latitude: null, longitude: null };
 
         inputKamera.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                fileFotoRaw = e.target.files[0];
+            // Memastikan file foto benar-benar ada
+            if (e.target.files && e.target.files[0]) {
+                fileFotoRaw = e.target.files[0]; // Memperbaiki penangkapan file tunggal
                 previewImg.src = URL.createObjectURL(fileFotoRaw);
                 previewImg.style.display = "inline-block";
                 
@@ -158,6 +159,8 @@
                 btnKirim.disabled = true;
 
                 ambilGPS();
+            } else {
+                alert("Gagal membaca file foto. Silakan coba ambil foto kembali.");
             }
         });
 
