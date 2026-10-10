@@ -5,26 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lapor Jalan Rusak</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
-        header { background: #6f42c1; color: white; padding: 14px 10px 0; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        header .judul { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .tabs { display: flex; gap: 6px; justify-content: center; }
-        .tab { background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 18px; font-size: 15px; border-radius: 8px 8px 0 0; cursor: pointer; }
-        .tab.aktif { background: #f4f6f9; color: #6f42c1; font-weight: bold; }
-        .page { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
-        .page.aktif { display: block; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .btn { background: #6f42c1; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 0; width: 100%; transition: 0.2s; }
-        .btn:disabled { background: #cccccc; cursor: not-allowed; }
+        .halaman { display: none; }
+        .halaman.aktif { display: block; }
+
+        /* ===== Halaman autentikasi ===== */
+        .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(160deg, #efe7fb 0%, #f4f6f9 55%); }
+        .auth-card { background: white; width: 100%; max-width: 420px; padding: 28px 24px; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .brand { text-align: center; font-size: 15px; color: #6f42c1; font-weight: bold; margin-bottom: 4px; }
+        .auth-card h1 { margin: 0 0 6px; font-size: 24px; text-align: center; }
+        .sub { text-align: center; color: #777; font-size: 14px; margin: 0 0 20px; }
+        .field { margin-bottom: 14px; }
+        .field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+        .field input, .field select { width: 100%; padding: 12px; border: 1.5px solid #ccd0d5; border-radius: 8px; font-size: 15px; font-family: inherit; background: white; }
+        .field input:focus { outline: none; border-color: #6f42c1; }
+        .field.salah input { border-color: #dc3545; }
+        .err { color: #dc3545; font-size: 12.5px; margin-top: 4px; min-height: 0; }
+        .ok-teks { color: #2f9e44; font-size: 12.5px; margin-top: 4px; }
+        .hint { color: #888; font-size: 12px; margin-top: 4px; }
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 56px; }
+        .pw-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6f42c1; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px; }
+        .btn { background: #6f42c1; color: white; padding: 13px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: 0.2s; }
+        .btn:hover { filter: brightness(1.08); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; filter: none; }
         .btn-success { background: #28a745; }
         .btn-danger { background: #dc3545; }
         .btn-warning { background: #fd7e14; }
-        .btn-kecil { width: auto; padding: 8px 14px; font-size: 14px; margin: 0; }
+        .btn-navy { background: #0a2463; }
+        .btn-kecil { width: auto; padding: 8px 14px; font-size: 14px; }
+        .tautan { text-align: center; margin-top: 16px; font-size: 14px; }
+        .tautan a, a.lupa { color: #6f42c1; font-weight: 600; text-decoration: none; cursor: pointer; }
+        a.lupa { font-size: 13px; float: right; }
+        .notice { padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; display: none; line-height: 1.45; }
+        .notice.ok { display: block; background: #d3f9d8; color: #1b5e20; }
+        .notice.err { display: block; background: #ffe3e3; color: #a61e1e; }
+        .notice.info { display: block; background: #e7f5ff; color: #1864ab; }
+
+        /* ===== Foto profil ===== */
+        .foto-wrap { min-height: 100vh; background: #dce8fb; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .foto-card { width: 100%; max-width: 420px; text-align: center; padding: 20px; }
+        .foto-card h1 { color: #0a2463; font-size: 28px; margin: 0 0 8px; }
+        .foto-card p { color: #4a5b7c; font-size: 14px; margin: 0 0 34px; }
+        .avatar-box { position: relative; width: 190px; height: 190px; margin: 0 auto 36px; }
+        .avatar { width: 190px; height: 190px; border-radius: 50%; background: #fff; box-shadow: 0 6px 20px rgba(10,36,99,0.18); overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .avatar-badge { position: absolute; right: 6px; bottom: 6px; width: 48px; height: 48px; border-radius: 50%; background: #0a2463; border: 4px solid #dce8fb; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+        .avatar-badge svg { width: 22px; height: 22px; fill: white; }
+        #pesanFoto { margin-top: 14px; font-size: 14px; min-height: 20px; }
+
+        /* ===== Dashboard ===== */
+        .dash-head { background: #6f42c1; color: white; padding: 12px 16px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .dash-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 700px; margin: 0 auto 10px; }
+        .profil-mini { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .mini-avatar { width: 42px; height: 42px; border-radius: 50%; background: white; object-fit: cover; flex-shrink: 0; }
+        .profil-mini div { min-width: 0; }
+        #dashNama { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #dashUser { font-size: 12px; opacity: 0.85; }
+        .btn-keluar { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .tabs { display: flex; gap: 6px; justify-content: center; }
+        .tab { background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 18px; font-size: 15px; border-radius: 8px 8px 0 0; cursor: pointer; }
+        .tab.aktif { background: #f4f6f9; color: #6f42c1; font-weight: bold; }
+        .tabisi { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
+        .tabisi.aktif { display: block; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .card .btn { margin: 10px 0; }
         #preview { max-width: 100%; max-height: 250px; margin-top: 15px; display: none; border-radius: 8px; border: 2px dashed #ddd; }
         .info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; text-align: left; font-size: 14px; line-height: 1.5; }
         #areaForm { display: none; margin-top: 15px; text-align: left; }
         #areaForm label, .lbl { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
-        textarea, input[type=text] { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; }
+        textarea, #inKode { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; }
         textarea { resize: vertical; }
         #hitung { font-size: 12px; color: #777; text-align: right; margin-bottom: 10px; }
         .tingkat-wrap { display: flex; gap: 8px; margin-bottom: 5px; }
@@ -35,335 +86,928 @@
         .tingkat-btn.dipilih { opacity: 1; border-color: #222; transform: scale(1.04); }
         #areaKonfirmasi { display: none; margin-top: 10px; }
         #areaKonfirmasi .pertanyaan { font-weight: bold; margin: 10px 0 0; }
-
-        /* Kode tiket */
         #kotakTiket { display: none; background: #e6fcf5; border: 2px dashed #20c997; border-radius: 10px; padding: 15px; margin-top: 15px; }
         #kodeTiket { font-size: 28px; font-weight: bold; letter-spacing: 2px; color: #087f5b; margin: 6px 0; word-break: break-all; }
-
-        /* Cek status */
-        .baris-cek { display: flex; gap: 8px; text-align: left; }
+        .baris-cek { display: flex; gap: 8px; text-align: left; margin-top: 8px; }
         .baris-cek input { flex: 1; text-transform: uppercase; }
         #hasilCek { margin-top: 16px; text-align: left; display: none; }
         .badge { display: inline-block; padding: 4px 12px; border-radius: 14px; font-size: 13px; font-weight: bold; color: white; }
-        .badge.baru { background: #868e96; }
-        .badge.diproses { background: #1c7ed6; }
-        .badge.selesai { background: #2f9e44; }
-        .badge.ringan { background: #f2b705; color: #333; }
-        .badge.sedang { background: #ff922b; }
-        .badge.parah { background: #e03131; }
+        .badge.baru { background: #868e96; } .badge.diproses { background: #1c7ed6; } .badge.selesai { background: #2f9e44; }
+        .badge.ringan { background: #f2b705; color: #333; } .badge.sedang { background: #ff922b; } .badge.parah { background: #e03131; }
         .hasil-baris { margin: 8px 0; font-size: 14px; line-height: 1.5; }
-        .catatan { background: #fff9db; border-left: 4px solid #fab005; padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 14px; }
-        #riwayat { margin-top: 18px; text-align: left; }
-        .chip { display: inline-block; background: #e9ecef; border-radius: 16px; padding: 6px 12px; margin: 4px 4px 0 0; font-size: 13px; cursor: pointer; }
-        .chip:hover { background: #dee2e6; }
+        .catatan { background: #fff9db; border-left: 4px solid #fab005; padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 14px; text-align: left; }
+        .item-laporan { display: flex; gap: 12px; text-align: left; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .item-laporan:last-child { border-bottom: none; }
+        .item-laporan img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .item-laporan .meta { font-size: 13px; color: #777; margin: 4px 0; }
+        .item-laporan .kode { font-family: monospace; font-weight: bold; }
+        .garis { border: none; border-top: 1px solid #eee; margin: 22px 0; }
     </style>
 </head>
 <body>
-    <header>
-        <div class="judul">📱 Lapor Jalan Rusak</div>
-        <div class="tabs">
-            <button class="tab aktif" data-page="pageLapor">📸 Buat Laporan</button>
-            <button class="tab" data-page="pageStatus">🔎 Cek Status</button>
+
+<!-- ================= 1. REGISTER ================= -->
+<section class="halaman" id="r-register">
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="brand">🚧 Lapor Jalan</div>
+    <h1>Buat Akun</h1>
+    <p class="sub">Daftar untuk mulai melaporkan jalan rusak</p>
+    <div class="notice" id="notReg"></div>
+
+    <form id="formReg" novalidate autocomplete="on">
+      <div class="field" data-f="kontak">
+        <label for="regKontak">Email / No. Telp</label>
+        <input id="regKontak" type="text" inputmode="email" autocomplete="email" placeholder="nama@email.com atau 08123456789">
+        <div class="err"></div>
+      </div>
+      <div class="field" data-f="nama">
+        <label for="regNama">Nama</label>
+        <input id="regNama" type="text" autocomplete="name" maxlength="60" placeholder="Nama lengkap">
+        <div class="err"></div>
+      </div>
+      <div class="field" data-f="tgl">
+        <label for="regTgl">Tanggal Lahir</label>
+        <input id="regTgl" type="date" autocomplete="bday">
+        <div class="err"></div>
+      </div>
+      <div class="field" data-f="kota">
+        <label for="regKota">Kota</label>
+        <input id="regKota" type="text" autocomplete="address-level2" maxlength="60" placeholder="Contoh: Bandung">
+        <div class="err"></div>
+      </div>
+      <div class="field" data-f="username">
+        <label for="regUser">Username</label>
+        <input id="regUser" type="text" autocomplete="username" maxlength="20" autocapitalize="none" spellcheck="false" placeholder="huruf kecil, angka, _ atau .">
+        <div class="err"></div>
+        <div class="hint">4–20 karakter, diawali huruf.</div>
+      </div>
+      <div class="field" data-f="password">
+        <label for="regPass">Password</label>
+        <div class="pw-wrap">
+          <input id="regPass" type="password" autocomplete="new-password" maxlength="72" placeholder="Minimal 8 karakter">
+          <button type="button" class="pw-toggle" data-target="regPass">Lihat</button>
         </div>
-    </header>
+        <div class="err"></div>
+        <div class="hint">Minimal 8 karakter, mengandung huruf dan angka.</div>
+      </div>
+      <button class="btn" id="btnLanjut" type="submit">Lanjut</button>
+    </form>
+    <div class="tautan">Sudah punya akun? <a href="#/login">Masuk</a></div>
+  </div></div>
+</section>
 
-    <!-- ============ BUAT LAPORAN ============ -->
-    <div class="page aktif" id="pageLapor">
-        <div class="card">
-            <h2 style="margin-top:0">Lapor Jalan Rusak</h2>
-            <p>Ambil foto kerusakannya, lokasi GPS akan otomatis terekam. Anda bisa memeriksa dulu sebelum mengirim.</p>
+<!-- ================= 2. LOGIN ================= -->
+<section class="halaman" id="r-login">
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="brand">🚧 Lapor Jalan</div>
+    <h1>Masuk</h1>
+    <p class="sub">Selamat datang kembali</p>
+    <div class="notice" id="notLogin"></div>
 
-            <input type="file" accept="image/*" capture="environment" id="pilihKamera" style="display: none;">
-            <button class="btn" id="btnFoto">📸 Ambil Foto Jalan</button>
-
-            <img id="preview" alt="Preview Foto">
-
-            <div id="areaForm">
-                <label for="deskripsi">📝 Deskripsi kerusakan</label>
-                <textarea id="deskripsi" rows="3" maxlength="500" placeholder="Contoh: Lubang besar di tengah jalan, dalam ±20 cm, berbahaya untuk motor"></textarea>
-                <div id="hitung">0/500</div>
-
-                <label>⚠️ Tingkat kerusakan / bahaya <span style="color:#dc3545">*</span></label>
-                <div class="tingkat-wrap">
-                    <button type="button" class="tingkat-btn" data-nilai="ringan">🟡 Ringan</button>
-                    <button type="button" class="tingkat-btn" data-nilai="sedang">🟠 Sedang</button>
-                    <button type="button" class="tingkat-btn" data-nilai="parah">🔴 Parah</button>
-                </div>
-            </div>
-
-            <div id="infoStatus" class="info">
-                <span id="statusTeks">Menunggu kiriman foto...</span>
-            </div>
-
-            <button class="btn btn-warning" id="btnUlangGPS" style="display: none;">🔄 Coba GPS Lagi</button>
-
-            <div id="areaKonfirmasi">
-                <p class="pertanyaan">Periksa foto dan lokasi di atas. Kirim laporan ini?</p>
-                <button class="btn btn-success" id="btnKirim">✅ Ya, Kirim Laporan</button>
-                <button class="btn btn-danger" id="btnBatal">❌ Batal / Foto Ulang</button>
-            </div>
-
-            <div id="kotakTiket">
-                <div>🎫 <b>Kode laporan Anda</b></div>
-                <div id="kodeTiket">-</div>
-                <div style="font-size:13px; color:#555;">Simpan kode ini untuk memantau status laporan di tab "Cek Status".</div>
-                <button class="btn btn-kecil" id="btnSalin" style="margin-top:10px;">📋 Salin Kode</button>
-            </div>
+    <form id="formLogin" novalidate>
+      <div class="field" data-f="username">
+        <label for="logUser">Username</label>
+        <input id="logUser" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
+        <div class="err"></div>
+      </div>
+      <div class="field" data-f="password">
+        <label for="logPass">Password <a class="lupa" href="#/lupa">Lupa Kata Sandi?</a></label>
+        <div class="pw-wrap">
+          <input id="logPass" type="password" autocomplete="current-password" maxlength="72">
+          <button type="button" class="pw-toggle" data-target="logPass">Lihat</button>
         </div>
+        <div class="err"></div>
+      </div>
+      <button class="btn" id="btnMasuk" type="submit">Masuk</button>
+    </form>
+    <div class="tautan">Belum punya akun? <a href="#/register">Daftar</a></div>
+  </div></div>
+</section>
+
+<!-- ================= Lupa kata sandi ================= -->
+<section class="halaman" id="r-lupa">
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="brand">🚧 Lapor Jalan</div>
+    <h1>Lupa Kata Sandi</h1>
+    <p class="sub">Masukkan username atau email akun Anda. Kami kirim tautan untuk membuat password baru.</p>
+    <div class="notice" id="notLupa"></div>
+    <form id="formLupa" novalidate>
+      <div class="field" data-f="id">
+        <label for="lupaId">Username atau Email</label>
+        <input id="lupaId" type="text" autocapitalize="none" spellcheck="false">
+        <div class="err"></div>
+      </div>
+      <button class="btn" id="btnLupa" type="submit">Kirim Tautan Reset</button>
+    </form>
+    <div class="tautan"><a href="#/login">← Kembali ke Masuk</a></div>
+  </div></div>
+</section>
+
+<!-- ================= Reset password (dari link email) ================= -->
+<section class="halaman" id="r-reset">
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="brand">🚧 Lapor Jalan</div>
+    <h1>Password Baru</h1>
+    <p class="sub">Buat password baru untuk akun Anda</p>
+    <div class="notice" id="notReset"></div>
+    <form id="formReset" novalidate>
+      <div class="field" data-f="password">
+        <label for="resPass">Password baru</label>
+        <div class="pw-wrap">
+          <input id="resPass" type="password" autocomplete="new-password" maxlength="72">
+          <button type="button" class="pw-toggle" data-target="resPass">Lihat</button>
+        </div>
+        <div class="err"></div>
+        <div class="hint">Minimal 8 karakter, mengandung huruf dan angka.</div>
+      </div>
+      <div class="field" data-f="ulang">
+        <label for="resPass2">Ulangi password baru</label>
+        <input id="resPass2" type="password" autocomplete="new-password" maxlength="72">
+        <div class="err"></div>
+      </div>
+      <button class="btn" id="btnReset" type="submit">Simpan Password</button>
+    </form>
+  </div></div>
+</section>
+
+<!-- ================= 3. FOTO PROFIL ================= -->
+<section class="halaman" id="r-foto-profil">
+  <div class="foto-wrap"><div class="foto-card">
+    <h1>Tambah Foto Profil</h1>
+    <p>Pilih foto agar akun Anda mudah dikenali.</p>
+    <input type="file" accept="image/*" id="inFotoProfil" style="display:none">
+    <div class="avatar-box">
+      <div class="avatar" id="avatarKlik" title="Pilih foto">
+        <img id="avatarImg" alt="Foto profil">
+      </div>
+      <button type="button" class="avatar-badge" id="avatarBadge" aria-label="Tambah foto">
+        <svg viewBox="0 0 24 24"><path d="M9 3L7.17 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.17L15 3H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+      </button>
     </div>
+    <button class="btn btn-navy" id="btnMulai">Mulai</button>
+    <div id="pesanFoto"></div>
+  </div></div>
+</section>
 
-    <!-- ============ CEK STATUS ============ -->
-    <div class="page" id="pageStatus">
-        <div class="card">
-            <h2 style="margin-top:0">Cek Status Laporan</h2>
-            <p>Masukkan kode laporan untuk melihat apakah laporan Anda sudah ditindaklanjuti.</p>
-            <div class="baris-cek">
-                <input type="text" id="inKode" placeholder="LJ-XXXXXXXX" maxlength="20" autocomplete="off">
-                <button class="btn btn-kecil" id="btnCek">Cek</button>
-            </div>
-            <div id="hasilCek"></div>
-            <div id="riwayat"></div>
-        </div>
+<!-- ================= DASHBOARD USER ================= -->
+<section class="halaman" id="r-dashboard">
+  <div class="dash-head">
+    <div class="dash-top">
+      <div class="profil-mini">
+        <img class="mini-avatar" id="dashAvatar" alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10' fill='white'/></svg>">
+        <div><div id="dashNama">-</div><div id="dashUser"></div></div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-keluar" id="btnFotoUbah">📷 Foto</button>
+        <button class="btn-keluar" id="btnKeluar">Keluar</button>
+      </div>
     </div>
+    <div class="tabs">
+      <button class="tab aktif" data-tab="tabLapor">📸 Buat Laporan</button>
+      <button class="tab" data-tab="tabSaya">📋 Laporan Saya</button>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const SUPABASE_URL = "https://ilmnhyyarurqszcyidnx.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbW5oeXlhcnVycXN6Y3lpZG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1Nzc0MzQsImV4cCI6MjEwNzE1MzQzNH0.sbvZvD_WOHvpTpwy6dc9Kcdql4BLqKjQR10v5VmJrFo";
-        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <!-- Buat laporan -->
+  <div class="tabisi aktif" id="tabLapor">
+    <div class="card">
+      <h2 style="margin-top:0">Lapor Jalan Rusak</h2>
+      <p>Ambil foto kerusakannya, lokasi GPS akan otomatis terekam. Anda bisa memeriksa dulu sebelum mengirim.</p>
 
-        const $ = id => document.getElementById(id);
-        function esc(s) {
-            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      <input type="file" accept="image/*" capture="environment" id="pilihKamera" style="display:none;">
+      <button class="btn" id="btnFoto">📸 Ambil Foto Jalan</button>
+      <img id="preview" alt="Preview Foto">
+
+      <div id="areaForm">
+        <label for="deskripsi">📝 Deskripsi kerusakan</label>
+        <textarea id="deskripsi" rows="3" maxlength="500" placeholder="Contoh: Lubang besar di tengah jalan, dalam ±20 cm, berbahaya untuk motor"></textarea>
+        <div id="hitung">0/500</div>
+        <label>⚠️ Tingkat kerusakan / bahaya <span style="color:#dc3545">*</span></label>
+        <div class="tingkat-wrap">
+          <button type="button" class="tingkat-btn" data-nilai="ringan">🟡 Ringan</button>
+          <button type="button" class="tingkat-btn" data-nilai="sedang">🟠 Sedang</button>
+          <button type="button" class="tingkat-btn" data-nilai="parah">🔴 Parah</button>
+        </div>
+      </div>
+
+      <div id="infoStatus" class="info"><span id="statusTeks">Menunggu kiriman foto...</span></div>
+      <button class="btn btn-warning" id="btnUlangGPS" style="display:none;">🔄 Coba GPS Lagi</button>
+
+      <div id="areaKonfirmasi">
+        <p class="pertanyaan">Periksa foto dan lokasi di atas. Kirim laporan ini?</p>
+        <button class="btn btn-success" id="btnKirim">✅ Ya, Kirim Laporan</button>
+        <button class="btn btn-danger" id="btnBatal">❌ Batal / Foto Ulang</button>
+      </div>
+
+      <div id="kotakTiket">
+        <div>🎫 <b>Kode laporan Anda</b></div>
+        <div id="kodeTiket">-</div>
+        <div style="font-size:13px; color:#555;">Simpan kode ini atau lihat di tab "Laporan Saya".</div>
+        <button class="btn btn-kecil" id="btnSalin" style="margin-top:10px;">📋 Salin Kode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Laporan saya -->
+  <div class="tabisi" id="tabSaya">
+    <div class="card" style="text-align:left;">
+      <h3 style="margin-top:0">Laporan Saya</h3>
+      <div id="daftarSaya">Memuat...</div>
+      <hr class="garis">
+      <div class="lbl">🔎 Cek status dengan kode laporan</div>
+      <div class="baris-cek">
+        <input type="text" id="inKode" placeholder="LJ-XXXXXXXX" maxlength="20" autocomplete="off">
+        <button class="btn btn-kecil" id="btnCek">Cek</button>
+      </div>
+      <div id="hasilCek"></div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* =====================================================================
+   Konfigurasi & Supabase
+   ===================================================================== */
+// Simpan hash awal SEBELUM library Supabase memprosesnya (link email: konfirmasi / reset)
+const HASH_AWAL = location.hash;
+const DARI_RECOVERY = HASH_AWAL.includes('type=recovery');
+const DARI_SIGNUP   = HASH_AWAL.includes('type=signup');
+const GALAT_LINK    = (/error_description=([^&]+)/.exec(HASH_AWAL) || [])[1];
+
+const SUPABASE_URL = "https://ilmnhyyarurqszcyidnx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbW5oeXlhcnVycXN6Y3lpZG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1Nzc0MzQsImV4cCI6MjEwNzE1MzQzNH0.sbvZvD_WOHvpTpwy6dc9Kcdql4BLqKjQR10v5VmJrFo";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { flowType: 'implicit', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const BASE_URL = location.origin + location.pathname;   // tujuan redirect link email (tanpa hash)
+
+/* =====================================================================
+   Validasi input
+   ===================================================================== */
+const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const RE_USERNAME = /^[a-z][a-z0-9_.]{3,19}$/;
+const RE_NAMA = /^[\p{L}][\p{L}\s.'-]{1,59}$/u;
+
+function normalisasiTelp(s) {
+    const d = String(s).replace(/[\s\-().]/g, '');
+    const m = /^(?:\+62|62|0)(8[1-9][0-9]{7,10})$/.exec(d);
+    return m ? '+62' + m[1] : null;
+}
+function umurDari(tglStr) {
+    const t = new Date(tglStr + 'T00:00:00');
+    if (isNaN(t)) return null;
+    const now = new Date();
+    let umur = now.getFullYear() - t.getFullYear();
+    const m = now.getMonth() - t.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < t.getDate())) umur--;
+    return umur;
+}
+function cekPassword(p) {
+    if (p.length < 8) return "Password minimal 8 karakter.";
+    if (p.length > 72) return "Password maksimal 72 karakter.";
+    if (!/[A-Za-z]/.test(p) || !/[0-9]/.test(p)) return "Password harus mengandung huruf dan angka.";
+    return null;
+}
+
+/* Tampilkan / hapus pesan error pada field */
+function setErr(form, nama, pesan) {
+    const f = form.querySelector(`.field[data-f="${nama}"]`);
+    if (!f) return;
+    f.classList.toggle('salah', !!pesan);
+    const e = f.querySelector('.err, .ok-teks');
+    e.className = 'err';
+    e.textContent = pesan || '';
+}
+function bersihkanErr(form) { form.querySelectorAll('.field').forEach(f => { f.classList.remove('salah'); const e = f.querySelector('.err, .ok-teks'); e.className = 'err'; e.textContent = ''; }); }
+function notice(id, teks, tipe) {
+    const el = $(id);
+    el.className = 'notice' + (teks ? ' ' + tipe : '');
+    el.textContent = teks || '';
+}
+
+// Tombol "Lihat/Sembunyikan" password
+document.querySelectorAll('.pw-toggle').forEach(b => b.addEventListener('click', () => {
+    const inp = $(b.dataset.target);
+    const tampil = inp.type === 'password';
+    inp.type = tampil ? 'text' : 'password';
+    b.textContent = tampil ? 'Sembunyi' : 'Lihat';
+}));
+
+/* =====================================================================
+   Router berbasis hash
+   ===================================================================== */
+let modeReset = false;            // true hanya saat datang dari link reset password di email
+let pesanLoginBerikut = null;     // pesan yang ditampilkan di halaman login berikutnya
+let profil = null;
+
+const RUTE = {
+    '/register':    { el: 'r-register' },
+    '/login':       { el: 'r-login' },
+    '/lupa':        { el: 'r-lupa' },
+    '/reset':       { el: 'r-reset' },
+    '/foto-profil': { el: 'r-foto-profil', butuhLogin: true },
+    '/dashboard':   { el: 'r-dashboard',   butuhLogin: true }
+};
+
+function go(path) {
+    if (location.hash === '#' + path) router(); else location.hash = path;
+}
+
+async function router() {
+    let path = location.hash.replace(/^#/, '');
+    const { data: { session } } = await db.auth.getSession();
+
+    if (!RUTE[path]) path = session ? '/dashboard' : '/login';
+    if (path === '/reset' && !(modeReset && session)) path = '/login';
+    if (RUTE[path].butuhLogin && !session) path = '/login';
+    if (session && !modeReset && ['/login', '/register', '/lupa'].includes(path)) path = '/dashboard';
+
+    if (location.hash !== '#' + path) history.replaceState(null, '', '#' + path);
+
+    document.querySelectorAll('.halaman').forEach(h => h.classList.toggle('aktif', h.id === RUTE[path].el));
+    window.scrollTo(0, 0);
+
+    if (path === '/login' && pesanLoginBerikut) {
+        notice('notLogin', pesanLoginBerikut.teks, pesanLoginBerikut.tipe);
+        pesanLoginBerikut = null;
+    }
+    if (path === '/foto-profil') await masukFotoProfil(session);
+    if (path === '/dashboard') await masukDashboard(session);
+}
+
+window.addEventListener('hashchange', router);
+
+db.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') { modeReset = true; go('/reset'); }
+});
+
+async function muatProfil(session) {
+    const { data } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    profil = data || null;
+    return profil;
+}
+
+/* =====================================================================
+   1. REGISTER
+   ===================================================================== */
+const formReg = $('formReg');
+const hariIni = new Date();
+$('regTgl').max = hariIni.toISOString().slice(0, 10);
+$('regTgl').min = `${hariIni.getFullYear() - 120}-01-01`;
+
+let cekUserTimer = null;
+$('regUser').addEventListener('input', () => {
+    const v = $('regUser').value.trim().toLowerCase();
+    const f = formReg.querySelector('.field[data-f="username"]');
+    clearTimeout(cekUserTimer);
+    setErr(formReg, 'username', '');
+    f.querySelector('.hint').style.display = '';
+    if (!v) return;
+    if (!RE_USERNAME.test(v)) { setErr(formReg, 'username', 'Username 4–20 karakter: huruf kecil, angka, _ atau ., diawali huruf.'); return; }
+    cekUserTimer = setTimeout(async () => {
+        const { data, error } = await db.rpc('username_tersedia', { p_username: v });
+        if ($('regUser').value.trim().toLowerCase() !== v) return;
+        if (error) return;
+        if (data === false) setErr(formReg, 'username', 'Username sudah dipakai.');
+        else { const e = f.querySelector('.err'); e.className = 'ok-teks'; e.textContent = '✓ Username tersedia'; }
+    }, 450);
+});
+
+function petaGalatDaftar(err) {
+    const m = (err.message || '').toLowerCase();
+    if (err.status === 429 || m.includes('rate limit')) return "Terlalu banyak percobaan pendaftaran. Coba lagi beberapa saat lagi.";
+    if (m.includes('already registered') || m.includes('already been registered')) return "Email/nomor ini sudah terdaftar. Silakan masuk.";
+    if (m.includes('database error')) return "Pendaftaran ditolak: username mungkin sudah dipakai atau data tidak valid.";
+    if (m.includes('phone') && (m.includes('provider') || m.includes('unsupported') || m.includes('disabled'))) return "Pendaftaran dengan nomor telepon belum diaktifkan di server. Gunakan email.";
+    if (m.includes('invalid') && m.includes('email')) return "Format email tidak diterima server.";
+    if (m.includes('password')) return "Password ditolak server: " + err.message;
+    return "Pendaftaran gagal: " + err.message;
+}
+
+formReg.addEventListener('submit', async e => {
+    e.preventDefault();
+    bersihkanErr(formReg);
+    notice('notReg', '');
+
+    const kontakRaw = $('regKontak').value.trim();
+    const nama = $('regNama').value.trim().replace(/\s+/g, ' ');
+    const tgl = $('regTgl').value;
+    const kota = $('regKota').value.trim().replace(/\s+/g, ' ');
+    const username = $('regUser').value.trim().toLowerCase();
+    const password = $('regPass').value;
+
+    let valid = true;
+    const salah = (f, p) => { setErr(formReg, f, p); valid = false; };
+
+    let email = null, telp = null;
+    if (!kontakRaw) salah('kontak', 'Email atau nomor telepon wajib diisi.');
+    else if (kontakRaw.includes('@')) {
+        if (!RE_EMAIL.test(kontakRaw)) salah('kontak', 'Format email tidak valid.');
+        else email = kontakRaw.toLowerCase();
+    } else {
+        telp = normalisasiTelp(kontakRaw);
+        if (!telp) salah('kontak', 'Nomor telepon tidak valid. Contoh: 08123456789.');
+    }
+    if (!RE_NAMA.test(nama)) salah('nama', 'Nama 2–60 karakter, hanya huruf, spasi, titik, apostrof, atau strip.');
+    if (!tgl) salah('tgl', 'Tanggal lahir wajib diisi.');
+    else {
+        const u = umurDari(tgl);
+        if (u === null) salah('tgl', 'Tanggal lahir tidak valid.');
+        else if (u < 0) salah('tgl', 'Tanggal lahir tidak boleh di masa depan.');
+        else if (u < 13) salah('tgl', 'Usia minimal 13 tahun untuk mendaftar.');
+        else if (u > 120) salah('tgl', 'Tanggal lahir tidak valid.');
+    }
+    if (kota.length < 2 || kota.length > 60) salah('kota', 'Kota 2–60 karakter.');
+    if (!RE_USERNAME.test(username)) salah('username', 'Username 4–20 karakter: huruf kecil, angka, _ atau ., diawali huruf.');
+    const pw = cekPassword(password);
+    if (pw) salah('password', pw);
+    if (!valid) { formReg.querySelector('.salah input')?.focus(); return; }
+
+    const btn = $('btnLanjut');
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    try {
+        const { data: tersedia, error: eU } = await db.rpc('username_tersedia', { p_username: username });
+        if (eU) throw eU;
+        if (tersedia === false) { setErr(formReg, 'username', 'Username sudah dipakai.'); return; }
+
+        const meta = { username, nama, tgl_lahir: tgl, kota };
+        const payload = email
+            ? { email, password, options: { data: meta, emailRedirectTo: BASE_URL } }
+            : { phone: telp, password, options: { data: meta } };
+
+        const { data, error } = await db.auth.signUp(payload);
+        if (error) { notice('notReg', petaGalatDaftar(error), 'err'); return; }
+
+        // Email sudah terdaftar (Supabase menyamarkannya sebagai sukses tanpa identitas)
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+            notice('notReg', 'Email ini sudah terdaftar. Silakan masuk atau gunakan "Lupa Kata Sandi".', 'err');
+            return;
         }
 
-        // ---------- Tab ----------
-        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(x => x.classList.toggle('aktif', x === t));
-            document.querySelectorAll('.page').forEach(p => p.classList.toggle('aktif', p.id === t.dataset.page));
-            if (t.dataset.page === 'pageStatus') tampilRiwayat();
-        }));
+        const perluKonfirmasi = !data.session;
+        if (data.session) await db.auth.signOut();   // alur: setelah daftar, user masuk lewat halaman login
+        formReg.reset();
+        pesanLoginBerikut = {
+            tipe: 'ok',
+            teks: perluKonfirmasi && email
+                ? 'Akun berhasil dibuat. Kami mengirim email konfirmasi — buka tautannya, lalu masuk dengan username Anda.'
+                : 'Akun berhasil dibuat. Silakan masuk dengan username dan password Anda.'
+        };
+        go('/login');
+    } catch (err) {
+        console.error(err);
+        notice('notReg', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Lanjut';
+    }
+});
 
-        // ---------- Riwayat kode (disimpan di browser) ----------
-        const KUNCI = 'lapor_riwayat';
-        function ambilRiwayat() { try { return JSON.parse(localStorage.getItem(KUNCI)) || []; } catch (e) { return []; } }
-        function simpanRiwayat(kode) {
-            try {
-                const r = ambilRiwayat().filter(x => x !== kode);
-                r.unshift(kode);
-                localStorage.setItem(KUNCI, JSON.stringify(r.slice(0, 10)));
-            } catch (e) { /* abaikan */ }
-        }
-        function tampilRiwayat() {
-            const r = ambilRiwayat();
-            const box = $('riwayat');
-            if (!r.length) { box.innerHTML = ""; return; }
-            box.innerHTML = '<div class="lbl">🕘 Laporan saya di perangkat ini</div>' +
-                r.map(k => `<span class="chip" data-k="${esc(k)}">${esc(k)}</span>`).join('');
-            box.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-                $('inKode').value = c.dataset.k;
-                cekStatus();
-            }));
+/* =====================================================================
+   2. LOGIN
+   ===================================================================== */
+const formLogin = $('formLogin');
+let gagalBeruntun = 0, kunciSampai = 0;
+
+formLogin.addEventListener('submit', async e => {
+    e.preventDefault();
+    bersihkanErr(formLogin);
+    notice('notLogin', '');
+
+    const username = $('logUser').value.trim().toLowerCase();
+    const password = $('logPass').value;
+    let valid = true;
+    if (!username) { setErr(formLogin, 'username', 'Username wajib diisi.'); valid = false; }
+    else if (!RE_USERNAME.test(username)) { setErr(formLogin, 'username', 'Format username tidak valid.'); valid = false; }
+    if (!password) { setErr(formLogin, 'password', 'Password wajib diisi.'); valid = false; }
+    if (!valid) return;
+
+    if (Date.now() < kunciSampai) {
+        alert(`Terlalu banyak percobaan gagal. Coba lagi dalam ${Math.ceil((kunciSampai - Date.now()) / 1000)} detik.`);
+        return;
+    }
+
+    const btn = $('btnMasuk');
+    btn.disabled = true; btn.textContent = 'Memeriksa...';
+    try {
+        // Cari identitas login (email/telepon) milik username ini
+        const { data: kontak, error: eK } = await db.rpc('kontak_dari_username', { p_username: username });
+        if (eK) throw eK;
+
+        let hasil = { error: { message: 'Invalid login credentials' } };
+        if (kontak) {
+            hasil = kontak.includes('@')
+                ? await db.auth.signInWithPassword({ email: kontak, password })
+                : await db.auth.signInWithPassword({ phone: kontak, password });
         }
 
-        // ---------- Kode tiket ----------
-        function buatKode() {
-            const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            const acak = new Uint32Array(8);
-            crypto.getRandomValues(acak);
-            return 'LJ-' + Array.from(acak, n => huruf[n % huruf.length]).join('');
+        if (hasil.error) {
+            const m = (hasil.error.message || '').toLowerCase();
+            if (m.includes('not confirmed')) {
+                alert('Email Anda belum dikonfirmasi. Buka email konfirmasi yang kami kirim, lalu coba masuk lagi.');
+            } else if (hasil.error.status === 429) {
+                alert('Terlalu banyak percobaan. Coba lagi beberapa saat lagi.');
+            } else {
+                gagalBeruntun++;
+                if (gagalBeruntun >= 5) { kunciSampai = Date.now() + 30000; gagalBeruntun = 0; }
+                alert('password itu salah');   // pesan sama untuk username tak dikenal / password salah
+            }
+            return;
         }
 
-        // ---------- Kompres foto agar upload cepat & hemat kuota ----------
-        async function kompres(file, maxSisi = 1280, kualitas = 0.8) {
-            try {
-                const bmp = await createImageBitmap(file);
-                const skala = Math.min(1, maxSisi / Math.max(bmp.width, bmp.height));
-                const c = document.createElement('canvas');
-                c.width = Math.round(bmp.width * skala);
-                c.height = Math.round(bmp.height * skala);
-                c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-                const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
-                return (blob && blob.size < file.size) ? blob : file;
-            } catch (e) {
-                return file;
+        gagalBeruntun = 0;
+        $('logPass').value = '';
+        go('/foto-profil');
+    } catch (err) {
+        console.error(err);
+        notice('notLogin', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Masuk';
+    }
+});
+
+/* ---------- Lupa kata sandi ---------- */
+const formLupa = $('formLupa');
+formLupa.addEventListener('submit', async e => {
+    e.preventDefault();
+    bersihkanErr(formLupa);
+    notice('notLupa', '');
+    const v = $('lupaId').value.trim().toLowerCase();
+    if (!v) { setErr(formLupa, 'id', 'Isi username atau email Anda.'); return; }
+    if (v.includes('@') ? !RE_EMAIL.test(v) : !RE_USERNAME.test(v)) {
+        setErr(formLupa, 'id', 'Format username atau email tidak valid.'); return;
+    }
+
+    const btn = $('btnLupa');
+    btn.disabled = true; btn.textContent = 'Mengirim...';
+    try {
+        let email = null;
+        if (v.includes('@')) email = v;
+        else {
+            const { data: kontak } = await db.rpc('kontak_dari_username', { p_username: v });
+            if (kontak && kontak.includes('@')) email = kontak;
+        }
+        if (email) {
+            const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: BASE_URL });
+            if (error && error.status === 429) {
+                notice('notLupa', 'Terlalu banyak permintaan. Coba lagi beberapa saat lagi.', 'err'); return;
             }
         }
+        // Pesan sama apa pun hasilnya, agar tidak membocorkan akun mana yang terdaftar
+        notice('notLupa', 'Jika akun tersebut terdaftar dengan email, tautan untuk membuat password baru sudah dikirim. Cek inbox/spam Anda. (Akun yang mendaftar dengan nomor telepon tidak bisa reset mandiri — hubungi admin.)', 'info');
+    } catch (err) {
+        console.error(err);
+        notice('notLupa', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Kirim Tautan Reset';
+    }
+});
 
-        // ---------- Form laporan ----------
-        const inputKamera = $('pilihKamera'), previewImg = $('preview'), infoStatus = $('infoStatus'),
-              statusTeks = $('statusTeks'), areaKonfirmasi = $('areaKonfirmasi'), btnKirim = $('btnKirim'),
-              btnBatal = $('btnBatal'), btnUlangGPS = $('btnUlangGPS'), btnFoto = $('btnFoto'),
-              areaForm = $('areaForm'), inDeskripsi = $('deskripsi'), hitung = $('hitung'),
-              kotakTiket = $('kotakTiket');
-        const tombolTingkat = document.querySelectorAll('.tingkat-btn');
+/* ---------- Reset password (setelah klik link di email) ---------- */
+const formReset = $('formReset');
+formReset.addEventListener('submit', async e => {
+    e.preventDefault();
+    bersihkanErr(formReset);
+    notice('notReset', '');
+    const p1 = $('resPass').value, p2 = $('resPass2').value;
+    let valid = true;
+    const pw = cekPassword(p1);
+    if (pw) { setErr(formReset, 'password', pw); valid = false; }
+    if (p1 !== p2) { setErr(formReset, 'ulang', 'Konfirmasi password tidak sama.'); valid = false; }
+    if (!valid) return;
 
-        let tingkatDipilih = null;
-        let fileFotoRaw = null;
-        let dataLokasi = { latitude: null, longitude: null, akurasi: null };
-
-        inDeskripsi.addEventListener('input', () => { hitung.innerText = inDeskripsi.value.length + "/500"; });
-        tombolTingkat.forEach(b => b.addEventListener('click', () => {
-            tingkatDipilih = b.dataset.nilai;
-            tombolTingkat.forEach(x => x.classList.toggle('dipilih', x === b));
-        }));
-
-        btnFoto.addEventListener('click', () => inputKamera.click());
-
-        function resetFormUser() {
-            fileFotoRaw = null;
-            dataLokasi = { latitude: null, longitude: null, akurasi: null };
-            inputKamera.value = "";
-            previewImg.style.display = "none";
-            areaKonfirmasi.style.display = "none";
-            btnUlangGPS.style.display = "none";
-            areaForm.style.display = "none";
-            inDeskripsi.value = "";
-            hitung.innerText = "0/500";
-            tingkatDipilih = null;
-            tombolTingkat.forEach(x => x.classList.remove('dipilih'));
+    const btn = $('btnReset');
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    try {
+        const { error } = await db.auth.updateUser({ password: p1 });
+        if (error) {
+            const m = (error.message || '').toLowerCase();
+            notice('notReset', m.includes('different') ? 'Password baru harus berbeda dari password lama.' : 'Gagal menyimpan: ' + error.message, 'err');
+            return;
         }
+        modeReset = false;
+        await db.auth.signOut();
+        formReset.reset();
+        pesanLoginBerikut = { tipe: 'ok', teks: 'Password berhasil diubah. Silakan masuk dengan password baru.' };
+        go('/login');
+    } catch (err) {
+        notice('notReset', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi.'), 'err');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Simpan Password';
+    }
+});
 
-        inputKamera.addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
-                fileFotoRaw = e.target.files[0];
-                previewImg.src = URL.createObjectURL(fileFotoRaw);
-                previewImg.style.display = "inline-block";
-                infoStatus.style.display = "block";
-                areaForm.style.display = "block";
-                areaKonfirmasi.style.display = "none";
-                kotakTiket.style.display = "none";
-                btnUlangGPS.style.display = "none";
-                ambilGPS();
-            }
-        });
+/* =====================================================================
+   3. FOTO PROFIL
+   ===================================================================== */
+const inFotoProfil = $('inFotoProfil'), avatarImg = $('avatarImg'), pesanFoto = $('pesanFoto');
+let fotoProfilDipilih = null;      // Blob hasil crop, siap upload
 
-        function ambilGPS() {
-            if (!navigator.geolocation) {
-                statusTeks.innerText = "❌ Browser perangkat Anda tidak mendukung GPS.";
-                btnUlangGPS.style.display = "block";
-                return;
-            }
-            statusTeks.innerHTML = "📸 Foto terekam.<br>⏳ Mencari sinyal GPS akurat...";
-            btnUlangGPS.style.display = "none";
+function tampilAvatar(src) {
+    if (src) { avatarImg.src = src; avatarImg.style.display = 'block'; }
+    else { avatarImg.removeAttribute('src'); avatarImg.style.display = 'none'; }
+}
 
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    dataLokasi.latitude = position.coords.latitude;
-                    dataLokasi.longitude = position.coords.longitude;
-                    dataLokasi.akurasi = position.coords.accuracy;
-                    statusTeks.innerHTML = `✅ <b>GPS Berhasil Dikunci!</b><br>Lat: ${dataLokasi.latitude}<br>Lng: ${dataLokasi.longitude}<br>Akurasi: ±${Math.round(dataLokasi.akurasi)} meter`;
-                    areaKonfirmasi.style.display = "block";
-                    btnKirim.disabled = false;
-                    btnBatal.disabled = false;
-                },
-                (error) => {
-                    statusTeks.innerHTML = "❌ GPS gagal (" + esc(error.message) + "). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.";
-                    btnUlangGPS.style.display = "block";
-                },
-                { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-            );
-        }
+async function masukFotoProfil(session) {
+    fotoProfilDipilih = null;
+    inFotoProfil.value = '';
+    pesanFoto.textContent = '';
+    await muatProfil(session);
+    tampilAvatar(profil && profil.foto_url);
+}
 
-        btnUlangGPS.addEventListener('click', ambilGPS);
+$('avatarKlik').addEventListener('click', () => inFotoProfil.click());
+$('avatarBadge').addEventListener('click', () => inFotoProfil.click());
 
-        btnBatal.addEventListener('click', () => {
-            resetFormUser();
-            statusTeks.innerText = "Laporan dibatalkan. Silakan ambil foto ulang.";
-        });
+// Potong persegi dari tengah, kecilkan ke 512px, simpan JPEG
+async function cropAvatar(file, ukuran = 512, kualitas = 0.85) {
+    const bmp = await createImageBitmap(file);
+    const sisi = Math.min(bmp.width, bmp.height);
+    const sx = (bmp.width - sisi) / 2, sy = (bmp.height - sisi) / 2;
+    const c = document.createElement('canvas');
+    c.width = c.height = Math.min(ukuran, sisi);
+    c.getContext('2d').drawImage(bmp, sx, sy, sisi, sisi, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
+}
 
-        btnKirim.addEventListener('click', async () => {
-            if (!fileFotoRaw || dataLokasi.latitude === null) return;
-            if (!tingkatDipilih) {
-                statusTeks.innerHTML = "⚠️ Pilih dulu <b>tingkat kerusakan</b> (Ringan / Sedang / Parah) sebelum mengirim.";
-                areaForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
-            btnKirim.disabled = true;
-            btnBatal.disabled = true;
+inFotoProfil.addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    pesanFoto.style.color = '#c92a2a';
+    if (!f.type.startsWith('image/')) { pesanFoto.textContent = 'File harus berupa gambar.'; return; }
+    if (f.size > 15 * 1024 * 1024) { pesanFoto.textContent = 'Ukuran foto terlalu besar (maks. 15 MB).'; return; }
+    try {
+        const blob = await cropAvatar(f);
+        if (!blob) throw new Error('gagal memproses gambar');
+        fotoProfilDipilih = blob;
+        tampilAvatar(URL.createObjectURL(blob));
+        pesanFoto.textContent = '';
+    } catch (err) {
+        pesanFoto.textContent = 'Foto tidak bisa dibaca. Coba foto lain.';
+    }
+});
 
-            try {
-                statusTeks.innerText = "⏳ Mengompres foto...";
-                const fotoKirim = await kompres(fileFotoRaw);
+$('btnMulai').addEventListener('click', async () => {
+    const btn = $('btnMulai');
+    pesanFoto.style.color = '#c92a2a';
+    pesanFoto.textContent = '';
+    if (!fotoProfilDipilih) { go('/dashboard'); return; }   // foto bersifat opsional
 
-                statusTeks.innerText = "⏳ Mengunggah foto...";
-                const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-                const { error: uploadError } = await db.storage
-                    .from('foto_laporan')
-                    .upload(namaFile, fotoKirim, { contentType: fotoKirim.type || 'image/jpeg' });
-                if (uploadError) throw uploadError;
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) { go('/login'); return; }
+        const uid = session.user.id;
+        const path = `${uid}/avatar.jpg`;
 
-                const { data: urlData } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
+        const { error: eUp } = await db.storage.from('avatar')
+            .upload(path, fotoProfilDipilih, { contentType: 'image/jpeg', upsert: true });
+        if (eUp) throw eUp;
 
-                statusTeks.innerText = "⏳ Menyimpan data laporan...";
-                const kode = buatKode();
-                const { error: insertError } = await db.from('laporan_jalan').insert([{
-                    latitude: dataLokasi.latitude,
-                    longitude: dataLokasi.longitude,
-                    foto_url: urlData.publicUrl,
-                    deskripsi: inDeskripsi.value.trim(),
-                    tingkat: tingkatDipilih,
-                    kode: kode
-                }]);
-                if (insertError) throw insertError;
+        const { data: u } = db.storage.from('avatar').getPublicUrl(path);
+        const url = `${u.publicUrl}?v=${Date.now()}`;      // paksa browser memuat ulang foto baru
+        const { error: eDb } = await db.from('profiles').update({ foto_url: url }).eq('id', uid);
+        if (eDb) throw eDb;
 
-                simpanRiwayat(kode);
-                resetFormUser();
-                statusTeks.innerHTML = "🎉 Sukses! Laporan Anda sudah terkirim. Terima kasih!";
-                $('kodeTiket').innerText = kode;
-                kotakTiket.style.display = "block";
-                kotakTiket.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } catch (error) {
-                console.error(error);
-                statusTeks.innerHTML = "❌ Gagal mengirim: " + esc(error.message || "gangguan jaringan");
-                btnKirim.disabled = false;
-                btnBatal.disabled = false;
-            }
-        });
+        fotoProfilDipilih = null;
+        go('/dashboard');
+    } catch (err) {
+        console.error(err);
+        pesanFoto.textContent = 'Gagal menyimpan foto: ' + (err.message || 'periksa koneksi.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Mulai';
+    }
+});
 
-        $('btnSalin').addEventListener('click', async () => {
-            const kode = $('kodeTiket').innerText;
-            try { await navigator.clipboard.writeText(kode); $('btnSalin').innerText = "✅ Tersalin"; }
-            catch (e) { $('btnSalin').innerText = "Salin manual: " + kode; }
-        });
+/* =====================================================================
+   DASHBOARD USER
+   ===================================================================== */
+async function masukDashboard(session) {
+    await muatProfil(session);
+    $('dashNama').textContent = (profil && profil.nama) || session.user.email || 'Pengguna';
+    $('dashUser').textContent = profil ? '@' + profil.username : '';
+    if (profil && profil.foto_url) $('dashAvatar').src = profil.foto_url;
+    pilihTab('tabLapor');
+}
 
-        // ---------- Cek status ----------
-        const LABEL_STATUS = { baru: '🆕 Baru diterima', diproses: '🛠️ Sedang diproses', selesai: '✅ Selesai ditangani' };
+$('btnKeluar').addEventListener('click', async () => { await db.auth.signOut(); profil = null; go('/login'); });
+$('btnFotoUbah').addEventListener('click', () => go('/foto-profil'));
 
-        async function cekStatus() {
-            const kode = $('inKode').value.trim().toUpperCase();
-            const hasil = $('hasilCek');
-            hasil.style.display = "block";
-            if (!kode) { hasil.innerHTML = "⚠️ Masukkan kode laporan dulu."; return; }
-            hasil.innerHTML = "⏳ Mencari laporan...";
+function pilihTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('aktif', t.dataset.tab === id));
+    document.querySelectorAll('.tabisi').forEach(p => p.classList.toggle('aktif', p.id === id));
+    if (id === 'tabSaya') muatLaporanSaya();
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => pilihTab(t.dataset.tab)));
 
-            try {
-                const { data, error } = await db.rpc('cek_laporan', { p_kode: kode });
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    hasil.innerHTML = "❌ Kode tidak ditemukan. Periksa kembali penulisannya.";
-                    return;
-                }
-                const r = data[0];
-                const waktu = new Date(r.waktu).toLocaleString('id-ID');
-                const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
-                const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
-                hasil.innerHTML = `
-                    <div class="hasil-baris"><b>Kode:</b> ${esc(r.kode)}</div>
-                    <div class="hasil-baris"><b>Status:</b> <span class="badge ${st}">${LABEL_STATUS[st]}</span></div>
-                    ${tg ? `<div class="hasil-baris"><b>Tingkat:</b> <span class="badge ${tg}">${tg}</span></div>` : ''}
-                    <div class="hasil-baris"><b>Dilaporkan:</b> ${esc(waktu)}</div>
-                    ${r.deskripsi ? `<div class="hasil-baris"><b>Deskripsi:</b> ${esc(r.deskripsi)}</div>` : ''}
-                    ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}`;
-            } catch (err) {
-                console.error(err);
-                hasil.innerHTML = "❌ Gagal mengecek: " + esc(err.message || "gangguan jaringan");
-            }
-        }
+/* ---------- Laporan saya ---------- */
+const LABEL_STATUS = { baru: '🆕 Baru diterima', diproses: '🛠️ Sedang diproses', selesai: '✅ Selesai ditangani' };
 
-        $('btnCek').addEventListener('click', cekStatus);
-        $('inKode').addEventListener('keydown', e => { if (e.key === 'Enter') cekStatus(); });
-        tampilRiwayat();
-    </script>
+async function muatLaporanSaya() {
+    const box = $('daftarSaya');
+    box.textContent = 'Memuat...';
+    try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) return;
+        const { data, error } = await db.from('laporan_jalan')
+            .select('kode,tingkat,status,waktu,deskripsi,catatan_admin,foto_url')
+            .eq('user_id', session.user.id)
+            .order('waktu', { ascending: false }).limit(50);
+        if (error) throw error;
+        if (!data.length) { box.innerHTML = '<p style="color:#777">Belum ada laporan. Buat laporan pertama Anda di tab "Buat Laporan".</p>'; return; }
+        box.innerHTML = data.map(r => {
+            const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
+            const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
+            return `<div class="item-laporan">
+                <img src="${esc(r.foto_url)}" alt="">
+                <div>
+                    <div><span class="kode">${esc(r.kode || '-')}</span>
+                        ${tg ? `<span class="badge ${tg}">${tg}</span>` : ''}
+                        <span class="badge ${st}">${LABEL_STATUS[st]}</span></div>
+                    <div class="meta">${esc(new Date(r.waktu).toLocaleString('id-ID'))}</div>
+                    ${r.deskripsi ? `<div style="font-size:14px">${esc(r.deskripsi)}</div>` : ''}
+                    ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}
+                </div></div>`;
+        }).join('');
+    } catch (err) {
+        console.error(err);
+        box.textContent = 'Gagal memuat laporan: ' + (err.message || 'periksa koneksi.');
+    }
+}
+
+/* ---------- Cek status dengan kode ---------- */
+async function cekStatus() {
+    const kode = $('inKode').value.trim().toUpperCase();
+    const hasil = $('hasilCek');
+    hasil.style.display = 'block';
+    if (!kode) { hasil.textContent = '⚠️ Masukkan kode laporan dulu.'; return; }
+    hasil.textContent = '⏳ Mencari laporan...';
+    try {
+        const { data, error } = await db.rpc('cek_laporan', { p_kode: kode });
+        if (error) throw error;
+        if (!data || !data.length) { hasil.textContent = '❌ Kode tidak ditemukan. Periksa kembali penulisannya.'; return; }
+        const r = data[0];
+        const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
+        const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
+        hasil.innerHTML = `
+            <div class="hasil-baris"><b>Kode:</b> ${esc(r.kode)}</div>
+            <div class="hasil-baris"><b>Status:</b> <span class="badge ${st}">${LABEL_STATUS[st]}</span></div>
+            ${tg ? `<div class="hasil-baris"><b>Tingkat:</b> <span class="badge ${tg}">${tg}</span></div>` : ''}
+            <div class="hasil-baris"><b>Dilaporkan:</b> ${esc(new Date(r.waktu).toLocaleString('id-ID'))}</div>
+            ${r.deskripsi ? `<div class="hasil-baris"><b>Deskripsi:</b> ${esc(r.deskripsi)}</div>` : ''}
+            ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}`;
+    } catch (err) {
+        hasil.textContent = '❌ Gagal mengecek: ' + (err.message || 'gangguan jaringan');
+    }
+}
+$('btnCek').addEventListener('click', cekStatus);
+$('inKode').addEventListener('keydown', e => { if (e.key === 'Enter') cekStatus(); });
+
+/* ---------- Buat laporan (fitur lama, kini terikat akun) ---------- */
+function buatKode() {
+    const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const acak = new Uint32Array(8);
+    crypto.getRandomValues(acak);
+    return 'LJ-' + Array.from(acak, n => huruf[n % huruf.length]).join('');
+}
+async function kompres(file, maxSisi = 1280, kualitas = 0.8) {
+    try {
+        const bmp = await createImageBitmap(file);
+        const skala = Math.min(1, maxSisi / Math.max(bmp.width, bmp.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(bmp.width * skala); c.height = Math.round(bmp.height * skala);
+        c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+        const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
+        return (blob && blob.size < file.size) ? blob : file;
+    } catch (e) { return file; }
+}
+
+const inputKamera = $('pilihKamera'), previewImg = $('preview'), infoStatus = $('infoStatus'),
+      statusTeks = $('statusTeks'), areaKonfirmasi = $('areaKonfirmasi'), btnKirim = $('btnKirim'),
+      btnBatal = $('btnBatal'), btnUlangGPS = $('btnUlangGPS'), areaForm = $('areaForm'),
+      inDeskripsi = $('deskripsi'), hitung = $('hitung'), kotakTiket = $('kotakTiket');
+const tombolTingkat = document.querySelectorAll('.tingkat-btn');
+let tingkatDipilih = null, fileFotoRaw = null, dataLokasi = { latitude: null, longitude: null, akurasi: null };
+
+inDeskripsi.addEventListener('input', () => { hitung.textContent = inDeskripsi.value.length + '/500'; });
+tombolTingkat.forEach(b => b.addEventListener('click', () => {
+    tingkatDipilih = b.dataset.nilai;
+    tombolTingkat.forEach(x => x.classList.toggle('dipilih', x === b));
+}));
+$('btnFoto').addEventListener('click', () => inputKamera.click());
+
+function resetFormLapor() {
+    fileFotoRaw = null;
+    dataLokasi = { latitude: null, longitude: null, akurasi: null };
+    inputKamera.value = '';
+    previewImg.style.display = 'none';
+    areaKonfirmasi.style.display = 'none';
+    btnUlangGPS.style.display = 'none';
+    areaForm.style.display = 'none';
+    inDeskripsi.value = ''; hitung.textContent = '0/500';
+    tingkatDipilih = null;
+    tombolTingkat.forEach(x => x.classList.remove('dipilih'));
+}
+
+inputKamera.addEventListener('change', e => {
+    if (e.target.files && e.target.files[0]) {
+        fileFotoRaw = e.target.files[0];
+        previewImg.src = URL.createObjectURL(fileFotoRaw);
+        previewImg.style.display = 'inline-block';
+        infoStatus.style.display = 'block';
+        areaForm.style.display = 'block';
+        areaKonfirmasi.style.display = 'none';
+        kotakTiket.style.display = 'none';
+        btnUlangGPS.style.display = 'none';
+        ambilGPS();
+    }
+});
+
+function ambilGPS() {
+    if (!navigator.geolocation) {
+        statusTeks.textContent = '❌ Browser perangkat Anda tidak mendukung GPS.';
+        btnUlangGPS.style.display = 'block'; return;
+    }
+    statusTeks.innerHTML = '📸 Foto terekam.<br>⏳ Mencari sinyal GPS akurat...';
+    btnUlangGPS.style.display = 'none';
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            dataLokasi = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, akurasi: pos.coords.accuracy };
+            statusTeks.innerHTML = `✅ <b>GPS Berhasil Dikunci!</b><br>Lat: ${dataLokasi.latitude}<br>Lng: ${dataLokasi.longitude}<br>Akurasi: ±${Math.round(dataLokasi.akurasi)} meter`;
+            areaKonfirmasi.style.display = 'block';
+            btnKirim.disabled = false; btnBatal.disabled = false;
+        },
+        err => {
+            statusTeks.innerHTML = '❌ GPS gagal (' + esc(err.message) + '). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.';
+            btnUlangGPS.style.display = 'block';
+        },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+}
+btnUlangGPS.addEventListener('click', ambilGPS);
+btnBatal.addEventListener('click', () => { resetFormLapor(); statusTeks.textContent = 'Laporan dibatalkan. Silakan ambil foto ulang.'; });
+
+btnKirim.addEventListener('click', async () => {
+    if (!fileFotoRaw || dataLokasi.latitude === null) return;
+    if (!tingkatDipilih) {
+        statusTeks.innerHTML = '⚠️ Pilih dulu <b>tingkat kerusakan</b> (Ringan / Sedang / Parah) sebelum mengirim.';
+        areaForm.scrollIntoView({ behavior: 'smooth', block: 'center' }); return;
+    }
+    btnKirim.disabled = true; btnBatal.disabled = true;
+    try {
+        statusTeks.textContent = '⏳ Mengompres foto...';
+        const fotoKirim = await kompres(fileFotoRaw);
+
+        statusTeks.textContent = '⏳ Mengunggah foto...';
+        const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const { error: eUp } = await db.storage.from('foto_laporan')
+            .upload(namaFile, fotoKirim, { contentType: fotoKirim.type || 'image/jpeg' });
+        if (eUp) throw eUp;
+        const { data: urlData } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
+
+        statusTeks.textContent = '⏳ Menyimpan data laporan...';
+        const kode = buatKode();
+        // user_id terisi otomatis oleh database (default auth.uid())
+        const { error: eIns } = await db.from('laporan_jalan').insert([{
+            latitude: dataLokasi.latitude, longitude: dataLokasi.longitude,
+            foto_url: urlData.publicUrl, deskripsi: inDeskripsi.value.trim(),
+            tingkat: tingkatDipilih, kode
+        }]);
+        if (eIns) throw eIns;
+
+        resetFormLapor();
+        statusTeks.textContent = '🎉 Sukses! Laporan Anda sudah terkirim. Terima kasih!';
+        $('kodeTiket').textContent = kode;
+        kotakTiket.style.display = 'block';
+        kotakTiket.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (err) {
+        console.error(err);
+        statusTeks.innerHTML = '❌ Gagal mengirim: ' + esc(err.message || 'gangguan jaringan');
+        btnKirim.disabled = false; btnBatal.disabled = false;
+    }
+});
+
+$('btnSalin').addEventListener('click', async () => {
+    const kode = $('kodeTiket').textContent;
+    try { await navigator.clipboard.writeText(kode); $('btnSalin').textContent = '✅ Tersalin'; }
+    catch (e) { $('btnSalin').textContent = 'Salin manual: ' + kode; }
+});
+
+/* =====================================================================
+   Mulai aplikasi
+   ===================================================================== */
+(async function mulai() {
+    if (DARI_RECOVERY) { modeReset = true; history.replaceState(null, '', BASE_URL + '#/reset'); }
+    else if (DARI_SIGNUP) { history.replaceState(null, '', BASE_URL + '#/foto-profil'); }   // baru konfirmasi email
+    else if (GALAT_LINK) {
+        history.replaceState(null, '', BASE_URL + '#/login');
+        pesanLoginBerikut = { tipe: 'err', teks: 'Tautan tidak valid atau sudah kedaluwarsa: ' + decodeURIComponent(GALAT_LINK.replace(/\+/g, ' ')) };
+    }
+    await router();
+})();
+</script>
 </body>
 </html>
