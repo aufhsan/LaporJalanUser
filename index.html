@@ -61,23 +61,8 @@
         .tabisi.aktif { display: block; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
         .card .btn { margin: 10px 0; }
-        #preview { max-width: 100%; max-height: 250px; margin-top: 15px; display: none; border-radius: 8px; border: 2px dashed #ddd; }
-        .info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; text-align: left; font-size: 14px; line-height: 1.5; }
-        #areaForm { display: none; margin-top: 15px; text-align: left; }
-        #areaForm label, .lbl { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
-        textarea, #inKode { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; }
-        textarea { resize: vertical; }
-        #hitung { font-size: 12px; color: #777; text-align: right; margin-bottom: 10px; }
-        .tingkat-wrap { display: flex; gap: 8px; margin-bottom: 5px; }
-        .tingkat-btn { flex: 1; padding: 12px 4px; border: 3px solid transparent; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; opacity: 0.55; transition: 0.15s; }
-        .tingkat-btn[data-nilai="ringan"] { background: #ffd43b; }
-        .tingkat-btn[data-nilai="sedang"] { background: #ff922b; color: white; }
-        .tingkat-btn[data-nilai="parah"]  { background: #e03131; color: white; }
-        .tingkat-btn.dipilih { opacity: 1; border-color: #222; transform: scale(1.04); }
-        #areaKonfirmasi { display: none; margin-top: 10px; }
-        #areaKonfirmasi .pertanyaan { font-weight: bold; margin: 10px 0 0; }
-        #kotakTiket { display: none; background: #e6fcf5; border: 2px dashed #20c997; border-radius: 10px; padding: 15px; margin-top: 15px; }
-        #kodeTiket { font-size: 28px; font-weight: bold; letter-spacing: 2px; color: #087f5b; margin: 6px 0; word-break: break-all; }
+        .lbl { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
+        #inKode { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; }
         .baris-cek { display: flex; gap: 8px; text-align: left; margin-top: 8px; }
         .baris-cek input { flex: 1; text-transform: uppercase; }
         #hasilCek { margin-top: 16px; text-align: left; display: none; }
@@ -191,6 +176,76 @@
         .tb-waktu { font-size: 12px; opacity: 0.8; }
         @media (max-width: 1000px) { .kk-grid { grid-template-columns: 1fr; } .kk-terbaru-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 640px) { .kk-main { padding: 14px; } .kk-terbaru-grid { grid-template-columns: 1fr; } #kkMap { height: 340px; } .kk-searchbar { flex-wrap: wrap; } }
+
+        /* ===== Upload Laporan / Konfirmasi / Detail ===== */
+        .up-wrap, .dt-wrap { max-width: 760px; margin: 0 auto; padding: 22px; }
+        .up-head h1 { margin: 0 0 4px; font-size: 26px; color: #0a2463; }
+        .up-head p { margin: 0 0 18px; color: #5c6b8c; font-size: 14.5px; line-height: 1.5; }
+        .up-card { margin-bottom: 16px; text-align: left; }
+        .up-card.salah { box-shadow: 0 0 0 2px #e03131, 0 4px 18px rgba(10,36,99,0.08); }
+        .up-judul { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 16px; color: #0a2463; }
+        .up-no { width: 26px; height: 26px; border-radius: 50%; background: #0a2463; color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .up-foto-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .up-btn-foto { padding: 18px 10px; border: 2px dashed #b9ccf1; background: #f3f6fd; color: #0a2463; border-radius: 14px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; }
+        .up-btn-foto:hover { background: #e4edfc; border-color: #3a6fd8; }
+        .up-preview { position: relative; margin-top: 12px; }
+        .up-preview img { width: 100%; max-height: 340px; object-fit: cover; border-radius: 12px; display: block; background: #dfe9fb; }
+        .up-preview button { position: absolute; top: 10px; right: 10px; background: rgba(10,36,99,0.88); color: #fff; border: none; border-radius: 20px; padding: 7px 13px; cursor: pointer; font-size: 13px; font-family: inherit; }
+        .up-lok-aksi { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+        #upMap { height: 300px; width: 100%; border-radius: 12px; z-index: 1; background: #dfe9fb; }
+        .up-label { display: block; font-weight: 700; font-size: 14px; color: #1d2a44; margin: 14px 0 6px; }
+        .up-input { width: 100%; padding: 12px; border: 1.5px solid #d3def5; border-radius: 10px; font-family: inherit; font-size: 15px; background: #fff; color: #1d2a44; }
+        textarea.up-input { resize: vertical; }
+        .up-input:focus { outline: none; border-color: #0a2463; }
+        .up-hint { font-size: 12.5px; color: #7b88a6; margin-top: 6px; line-height: 1.45; }
+        .up-hint a { color: #3a6fd8; font-weight: 600; text-decoration: none; }
+        .up-err { color: #c92a2a; font-size: 13px; margin-top: 8px; }
+        .up-err:empty { display: none; }
+        .up-hitung { text-align: right; font-size: 12.5px; color: #7b88a6; margin-top: 4px; }
+        .up-kat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .up-kat button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 6px; border: 2px solid #d3def5; background: #fff; color: #1d2a44; border-radius: 14px; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; }
+        .up-kat button .ik { font-size: 26px; line-height: 1; }
+        .up-kat button:hover { border-color: #3a6fd8; }
+        .up-kat button[aria-pressed="true"] { border-color: #0a2463; background: #0a2463; color: #fff; }
+        .up-sev { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .up-sev button { padding: 15px 6px; border: 3px solid transparent; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; font-family: inherit; opacity: 0.55; transition: 0.15s; }
+        .up-sev button[data-v="ringan"] { background: #ffd43b; color: #4a3b00; }
+        .up-sev button[data-v="sedang"] { background: #ff922b; color: #fff; }
+        .up-sev button[data-v="parah"] { background: #e03131; color: #fff; }
+        .up-sev button[aria-pressed="true"] { opacity: 1; border-color: #0a2463; transform: scale(1.03); }
+        .up-konfirmasi { width: 100%; background: #0a2463; color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 800; cursor: pointer; font-family: inherit; box-shadow: 0 6px 18px rgba(10,36,99,0.25); }
+        .up-konfirmasi:hover { filter: brightness(1.12); }
+        .up-konfirmasi:disabled { background: #9fb0d3; cursor: not-allowed; box-shadow: none; filter: none; }
+        .kf-wrap { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 22px; }
+        .kf-card { width: 100%; max-width: 460px; text-align: center; padding: 34px 26px; }
+        .kf-ikon { width: 104px; height: 104px; border-radius: 50%; background: #e7f6ec; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: kf-pop 0.45s ease-out; }
+        .kf-ikon svg { width: 64px; height: 64px; }
+        @keyframes kf-pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+        .kf-card h1 { color: #0a2463; margin: 0 0 8px; font-size: 27px; }
+        .kf-card p { color: #5c6b8c; font-size: 14.5px; line-height: 1.5; margin: 0 0 16px; }
+        .kf-kode { display: inline-block; background: #eef3fc; border: 1.5px dashed #b9ccf1; color: #0a2463; font-family: monospace; font-weight: 800; font-size: 17px; letter-spacing: 1.5px; padding: 9px 16px; border-radius: 10px; margin: 0 0 24px; word-break: break-all; }
+        .kf-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .kf-aksi button { padding: 14px 8px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; border: 2px solid #0a2463; }
+        .kf-aksi .primer { background: #0a2463; color: #fff; }
+        .kf-aksi .sekunder { background: #fff; color: #0a2463; }
+        .dt-card-wrap { text-align: left; }
+        .dt-wrap .kk-card { text-align: left; }
+        .dt-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        .dt-top h1 { margin: 0; font-size: 23px; color: #0a2463; }
+        .dt-status { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 24px; font-weight: 800; font-size: 14.5px; }
+        .dt-status.baru { background: #e7f0ff; color: #0a2463; }
+        .dt-status.diproses { background: #fff3d6; color: #8a5a00; }
+        .dt-status.selesai { background: #dff5e6; color: #1b6b34; }
+        .dt-foto { width: 100%; max-height: 420px; object-fit: cover; border-radius: 14px; margin: 16px 0; background: #dfe9fb; display: block; }
+        .dt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .dt-penuh { grid-column: 1 / -1; }
+        .dt-item .k { font-size: 12px; color: #7b88a6; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .dt-item .v { font-size: 15.5px; color: #1d2a44; font-weight: 600; word-break: break-word; }
+        .dt-item .dt-desk { font-weight: 500; line-height: 1.55; white-space: pre-wrap; }
+        .dt-kep { display: inline-flex; align-items: center; gap: 9px; }
+        .lihat-detail { display: inline-block; margin-top: 6px; font-size: 13.5px; font-weight: 700; color: #0a2463; text-decoration: none; }
+        .lihat-detail:hover { text-decoration: underline; }
+        @media (max-width: 640px) { .up-wrap, .dt-wrap { padding: 14px; } .up-kat { grid-template-columns: repeat(2, 1fr); } .dt-grid { grid-template-columns: 1fr; } .kf-aksi { grid-template-columns: 1fr; } #upMap { height: 260px; } }
     </style>
 </head>
 <body>
@@ -412,45 +467,130 @@
   </main>
 </section>
 
-<!-- ================= UPLOAD LAPORAN (fitur lama, kini lewat navbar) ================= -->
+<!-- ================= 1. UPLOAD LAPORAN ================= -->
 <section class="halaman" id="r-upload">
-  <!-- Buat laporan -->
-  <div class="tabisi aktif" id="tabLapor">
-    <div class="card">
-      <h2 style="margin-top:0">Lapor Jalan Rusak</h2>
-      <p>Ambil foto kerusakannya, lokasi GPS akan otomatis terekam. Anda bisa memeriksa dulu sebelum mengirim.</p>
+  <div class="up-wrap">
+    <div class="up-head">
+      <h1>Upload Laporan</h1>
+      <p>Laporkan masalah di sekitar Anda. Semakin jelas foto, lokasi, dan keterangannya, semakin cepat laporan ditangani.</p>
+    </div>
 
-      <input type="file" accept="image/*" capture="environment" id="pilihKamera" style="display:none;">
-      <button class="btn" id="btnFoto">📸 Ambil Foto Jalan</button>
-      <img id="preview" alt="Preview Foto">
+    <form id="upForm" novalidate>
+      <!-- Foto -->
+      <div class="kk-card up-card">
+        <h3 class="up-judul"><span class="up-no">1</span> Foto</h3>
+        <div class="up-foto-aksi">
+          <button type="button" class="up-btn-foto" id="upBtnKamera">📷 Kamera</button>
+          <button type="button" class="up-btn-foto" id="upBtnGaleri">🖼️ Galeri</button>
+        </div>
+        <input type="file" id="upInKamera" accept="image/*" capture="environment" hidden>
+        <input type="file" id="upInGaleri" accept="image/*" hidden>
+        <div class="up-preview" id="upPreviewBox" hidden>
+          <img id="upPreview" alt="Pratinjau foto laporan">
+          <button type="button" id="upGantiFoto">✕ Ganti foto</button>
+        </div>
+        <div class="up-err" id="errFoto"></div>
+      </div>
 
-      <div id="areaForm">
-        <label for="deskripsi">📝 Deskripsi kerusakan</label>
-        <textarea id="deskripsi" rows="3" maxlength="500" placeholder="Contoh: Lubang besar di tengah jalan, dalam ±20 cm, berbahaya untuk motor"></textarea>
-        <div id="hitung">0/500</div>
-        <label>⚠️ Tingkat kerusakan / bahaya <span style="color:#dc3545">*</span></label>
-        <div class="tingkat-wrap">
-          <button type="button" class="tingkat-btn" data-nilai="ringan">🟡 Ringan</button>
-          <button type="button" class="tingkat-btn" data-nilai="sedang">🟠 Sedang</button>
-          <button type="button" class="tingkat-btn" data-nilai="parah">🔴 Parah</button>
+      <!-- Lokasi -->
+      <div class="kk-card up-card">
+        <h3 class="up-judul"><span class="up-no">2</span> Lokasi</h3>
+        <div class="up-lok-aksi">
+          <button type="button" class="kk-chip" id="upBtnGPS">📍 Gunakan lokasi saya</button>
+          <span class="up-hint" id="upGpsStatus">Ketuk peta atau geser pin untuk menyesuaikan lokasi.</span>
+        </div>
+        <div id="upMap"></div>
+        <div class="up-hint" id="upKoord">Koordinat belum dipilih.</div>
+        <label class="up-label" for="upAlamat">Alamat</label>
+        <input class="up-input" id="upAlamat" type="text" maxlength="300" autocomplete="off" placeholder="Terisi otomatis dari peta, bisa Anda ubah">
+        <div class="up-hint"><span id="upAlamatStatus"></span> <a href="#" id="upAlamatAuto" hidden>↻ Isi ulang dari peta</a></div>
+        <div class="up-err" id="errLokasi"></div>
+      </div>
+
+      <!-- Kategori -->
+      <div class="kk-card up-card">
+        <h3 class="up-judul"><span class="up-no">3</span> Kategori</h3>
+        <div class="up-kat" id="upKategori" role="group" aria-label="Kategori laporan"></div>
+        <div class="up-err" id="errKategori"></div>
+      </div>
+
+      <!-- Keparahan -->
+      <div class="kk-card up-card">
+        <h3 class="up-judul"><span class="up-no">4</span> Keparahan</h3>
+        <div class="up-sev" id="upKeparahan" role="group" aria-label="Tingkat keparahan">
+          <button type="button" data-v="ringan" aria-pressed="false">🟡 Ringan</button>
+          <button type="button" data-v="sedang" aria-pressed="false">🟠 Sedang</button>
+          <button type="button" data-v="parah" aria-pressed="false">🔴 Parah</button>
+        </div>
+        <div class="up-err" id="errKeparahan"></div>
+      </div>
+
+      <!-- Deskripsi -->
+      <div class="kk-card up-card">
+        <h3 class="up-judul"><span class="up-no">5</span> Deskripsi</h3>
+        <textarea class="up-input" id="upDeskripsi" rows="4" maxlength="500" placeholder="Jelaskan masalahnya: apa yang rusak, seberapa besar, apakah membahayakan pengguna jalan…"></textarea>
+        <div class="up-hitung" id="upHitung">0/500</div>
+        <div class="up-err" id="errDeskripsi"></div>
+      </div>
+
+      <div class="up-err" id="errUmum" style="margin-bottom:10px"></div>
+      <button type="submit" class="up-konfirmasi" id="upBtnKonfirmasi">Konfirmasi</button>
+    </form>
+  </div>
+</section>
+
+<!-- ================= 2. KONFIRMASI ================= -->
+<section class="halaman" id="r-konfirmasi">
+  <div class="kf-wrap">
+    <div class="kk-card kf-card">
+      <div id="kfMuat" class="kk-info">⏳ Memeriksa laporan Anda…</div>
+
+      <div id="kfGagal" hidden>
+        <p id="kfGagalTeks" class="kk-info"></p>
+        <button type="button" class="up-konfirmasi" id="kfKeUpload">Ke Halaman Upload</button>
+      </div>
+
+      <div id="kfOk" hidden>
+        <div class="kf-ikon" aria-hidden="true">
+          <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#2f9e44"/><path d="M14 27l8 8 16-17" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h1>Laporan Terkirim</h1>
+        <p>Terima kasih. Laporan Anda sudah kami terima dan akan segera ditindaklanjuti.</p>
+        <div class="kf-kode" id="kfKode">-</div>
+        <div class="kf-aksi">
+          <button type="button" class="sekunder" id="kfBeranda">Beranda</button>
+          <button type="button" class="primer" id="kfDetail">Detail Laporan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3. DETAIL LAPORAN ================= -->
+<section class="halaman" id="r-detail">
+  <div class="dt-wrap">
+    <div class="kk-card">
+      <div id="dtMuat" class="kk-info">⏳ Memuat detail laporan…</div>
+      <div id="dtGagal" class="kk-info" hidden></div>
+
+      <div id="dtIsi" hidden>
+        <div class="dt-top">
+          <h1>Detail Laporan</h1>
+          <span class="dt-status baru" id="dtStatus"></span>
+        </div>
+        <img class="dt-foto" id="dtFoto" alt="Foto laporan">
+        <div class="dt-grid">
+          <div class="dt-item"><div class="k">Kategori</div><div class="v" id="dtKategori">-</div></div>
+          <div class="dt-item"><div class="k">Keparahan</div><div class="v" id="dtKeparahan">-</div></div>
+          <div class="dt-item dt-penuh"><div class="k">Lokasi</div><div class="v" id="dtLokasi">-</div><div class="up-hint" id="dtKoord"></div></div>
+          <div class="dt-item"><div class="k">Jumlah pelapor</div><div class="v" id="dtPelapor">-</div><div class="up-hint">Termasuk Anda. Dihitung dari laporan berkategori sama dalam radius 50 m yang belum selesai.</div></div>
+          <div class="dt-item"><div class="k">Dilaporkan</div><div class="v" id="dtWaktu">-</div><div class="up-hint" id="dtKode"></div></div>
+          <div class="dt-item dt-penuh"><div class="k">Deskripsi</div><div class="v dt-desk" id="dtDeskripsi">-</div></div>
+          <div class="dt-item dt-penuh" id="dtCatatanBox" hidden><div class="catatan"><b>💬 Catatan petugas:</b><br><span id="dtCatatan"></span></div></div>
         </div>
       </div>
 
-      <div id="infoStatus" class="info"><span id="statusTeks">Menunggu kiriman foto...</span></div>
-      <button class="btn btn-warning" id="btnUlangGPS" style="display:none;">🔄 Coba GPS Lagi</button>
-
-      <div id="areaKonfirmasi">
-        <p class="pertanyaan">Periksa foto dan lokasi di atas. Kirim laporan ini?</p>
-        <button class="btn btn-success" id="btnKirim">✅ Ya, Kirim Laporan</button>
-        <button class="btn btn-danger" id="btnBatal">❌ Batal / Foto Ulang</button>
-      </div>
-
-      <div id="kotakTiket">
-        <div>🎫 <b>Kode laporan Anda</b></div>
-        <div id="kodeTiket">-</div>
-        <div style="font-size:13px; color:#555;">Simpan kode ini atau lihat di tab "Laporan Saya".</div>
-        <button class="btn btn-kecil" id="btnSalin" style="margin-top:10px;">📋 Salin Kode</button>
-      </div>
+      <button type="button" class="up-konfirmasi" id="dtKembali" style="margin-top:22px">Kembali</button>
     </div>
   </div>
 </section>
@@ -562,15 +702,24 @@ const RUTE = {
     '/foto-profil': { el: 'r-foto-profil', butuhLogin: true },
     '/dashboard':   { el: 'r-kotakita',    butuhLogin: true, nav: true },
     '/upload':      { el: 'r-upload',      butuhLogin: true, nav: true },
-    '/laporan':     { el: 'r-laporan',     butuhLogin: true, nav: true }
+    '/laporan':     { el: 'r-laporan',     butuhLogin: true, nav: true },
+    '/konfirmasi':  { el: 'r-konfirmasi',  butuhLogin: true, nav: true },   // #/konfirmasi?kode=LJ-XXXXXXXX
+    '/detail':      { el: 'r-detail',      butuhLogin: true, nav: true }    // #/detail?kode=LJ-XXXXXXXX
 };
 
 function go(path) {
     if (location.hash === '#' + path) router(); else location.hash = path;
 }
 
+let rutePar = new URLSearchParams();   // parameter query pada hash, mis. #/detail?kode=LJ-XXXXXXXX
+let jumlahNavigasi = 0;
+
 async function router() {
-    let path = location.hash.replace(/^#/, '');
+    jumlahNavigasi++;
+    const hashAsli = location.hash;
+    const [pathMentah, qs = ''] = hashAsli.replace(/^#/, '').split('?');
+    let path = pathMentah;
+    rutePar = new URLSearchParams(qs);
     const { data: { session } } = await db.auth.getSession();
 
     if (!RUTE[path]) path = session ? '/dashboard' : '/login';
@@ -578,7 +727,8 @@ async function router() {
     if (RUTE[path].butuhLogin && !session) path = '/login';
     if (session && !modeReset && ['/login', '/register', '/lupa'].includes(path)) path = '/dashboard';
 
-    if (location.hash !== '#' + path) history.replaceState(null, '', '#' + path);
+    const hashAkhir = '#' + path + (path === pathMentah && qs ? '?' + qs : '');
+    if (hashAsli !== hashAkhir) history.replaceState(null, '', hashAkhir);
 
     document.querySelectorAll('.halaman').forEach(h => h.classList.toggle('aktif', h.id === RUTE[path].el));
     window.scrollTo(0, 0);
@@ -598,6 +748,9 @@ async function router() {
     if (path === '/foto-profil') await masukFotoProfil(session);
     if (path === '/dashboard') await masukKotaKita();
     if (path === '/laporan') await muatLaporanSaya();
+    if (path === '/upload') await masukUpload();
+    if (path === '/konfirmasi') await masukKonfirmasi();
+    if (path === '/detail') await masukDetail();
 }
 
 window.addEventListener('hashchange', router);
@@ -1038,7 +1191,7 @@ function renderNavbar(session) {
     else b.textContent = inisial(nama);
 }
 function setMenuAktif(path) {
-    const peta = { '/dashboard': 'beranda', '/upload': 'upload', '/laporan': 'laporan' };
+    const peta = { '/dashboard': 'beranda', '/upload': 'upload', '/konfirmasi': 'upload', '/laporan': 'laporan', '/detail': 'laporan' };
     let aktif = peta[path];
     if (path === '/dashboard' && pendingScroll === 'lokasi') aktif = 'lokasi';
     document.querySelectorAll('#kkMenu a').forEach(a => a.classList.toggle('aktif', a.dataset.m === aktif));
@@ -1072,6 +1225,7 @@ $('umFoto').addEventListener('click', () => go('/foto-profil'));
 $('umKeluar').addEventListener('click', async () => {
     hentikanAutoRefresh();
     await db.auth.signOut();
+    upReset();
     profil = null; KK.laporan = []; KK.dimuat = false;
     KK.anchor = null; KK.kota = null; KK.kotaDipulihkan = false;
     if (KK.map && KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; }
@@ -1543,7 +1697,7 @@ async function muatLaporanSaya() {
             .eq('user_id', session.user.id)
             .order('waktu', { ascending: false }).limit(50);
         if (error) throw error;
-        if (!data.length) { box.innerHTML = '<p style="color:#777">Belum ada laporan. Buat laporan pertama Anda di tab "Buat Laporan".</p>'; return; }
+        if (!data.length) { box.innerHTML = '<p style="color:#777">Belum ada laporan. Buat laporan pertama Anda lewat menu Upload.</p>'; return; }
         box.innerHTML = data.map(r => {
             const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
             const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
@@ -1556,6 +1710,7 @@ async function muatLaporanSaya() {
                     <div class="meta">${esc(new Date(r.waktu).toLocaleString('id-ID'))}</div>
                     ${r.deskripsi ? `<div style="font-size:14px">${esc(r.deskripsi)}</div>` : ''}
                     ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}
+                    ${r.kode ? `<a class="lihat-detail" href="#/detail?kode=${encodeURIComponent(r.kode)}">Lihat detail ›</a>` : ''}
                 </div></div>`;
         }).join('');
     } catch (err) {
@@ -1592,7 +1747,9 @@ async function cekStatus() {
 $('btnCek').addEventListener('click', cekStatus);
 $('inKode').addEventListener('keydown', e => { if (e.key === 'Enter') cekStatus(); });
 
-/* ---------- Buat laporan (fitur lama, kini terikat akun) ---------- */
+/* =====================================================================
+   LAPORAN: utilitas, Upload Laporan, Konfirmasi, Detail
+   ===================================================================== */
 function buatKode() {
     const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const acak = new Uint32Array(8);
@@ -1611,115 +1768,338 @@ async function kompres(file, maxSisi = 1280, kualitas = 0.8) {
     } catch (e) { return file; }
 }
 
-const inputKamera = $('pilihKamera'), previewImg = $('preview'), infoStatus = $('infoStatus'),
-      statusTeks = $('statusTeks'), areaKonfirmasi = $('areaKonfirmasi'), btnKirim = $('btnKirim'),
-      btnBatal = $('btnBatal'), btnUlangGPS = $('btnUlangGPS'), areaForm = $('areaForm'),
-      inDeskripsi = $('deskripsi'), hitung = $('hitung'), kotakTiket = $('kotakTiket');
-const tombolTingkat = document.querySelectorAll('.tingkat-btn');
-let tingkatDipilih = null, fileFotoRaw = null, dataLokasi = { latitude: null, longitude: null, akurasi: null };
+const KATEGORI = [
+    { nama: 'Jalan Rusak', ikon: '🛣️' }, { nama: 'Sampah', ikon: '🗑️' }, { nama: 'Banjir', ikon: '🌊' },
+    { nama: 'Rambu', ikon: '🚸' }, { nama: 'Trotoar', ikon: '🚶' }, { nama: 'Lainnya', ikon: '📌' }
+];
+const KEPARAHAN = {
+    ringan: { label: 'Ringan', warna: '#f2b705' },
+    sedang: { label: 'Sedang', warna: '#ff922b' },
+    parah:  { label: 'Parah',  warna: '#e03131' }
+};
+const BATAS_FOTO = 15 * 1024 * 1024;
 
-inDeskripsi.addEventListener('input', () => { hitung.textContent = inDeskripsi.value.length + '/500'; });
-tombolTingkat.forEach(b => b.addEventListener('click', () => {
-    tingkatDipilih = b.dataset.nilai;
-    tombolTingkat.forEach(x => x.classList.toggle('dipilih', x === b));
-}));
-$('btnFoto').addEventListener('click', () => inputKamera.click());
+/* ---------- Upload Laporan ---------- */
+const UP = { map: null, marker: null, foto: null, fotoUrl: null, lat: null, lon: null,
+             kategori: null, tingkat: null, alamatManual: false, kirim: false, revTimer: null, revAbort: null };
 
-function resetFormLapor() {
-    fileFotoRaw = null;
-    dataLokasi = { latitude: null, longitude: null, akurasi: null };
-    inputKamera.value = '';
-    previewImg.style.display = 'none';
-    areaKonfirmasi.style.display = 'none';
-    btnUlangGPS.style.display = 'none';
-    areaForm.style.display = 'none';
-    inDeskripsi.value = ''; hitung.textContent = '0/500';
-    tingkatDipilih = null;
-    tombolTingkat.forEach(x => x.classList.remove('dipilih'));
+(function bangunKategori() {
+    $('upKategori').innerHTML = KATEGORI.map(k =>
+        `<button type="button" data-k="${esc(k.nama)}" aria-pressed="false"><span class="ik">${k.ikon}</span>${esc(k.nama)}</button>`).join('');
+})();
+
+function upErr(id, pesan) {
+    const el = $(id);
+    el.textContent = pesan || '';
+    const kartu = el.closest('.up-card');
+    if (kartu) kartu.classList.toggle('salah', !!pesan);
 }
 
-inputKamera.addEventListener('change', e => {
-    if (e.target.files && e.target.files[0]) {
-        fileFotoRaw = e.target.files[0];
-        previewImg.src = URL.createObjectURL(fileFotoRaw);
-        previewImg.style.display = 'inline-block';
-        infoStatus.style.display = 'block';
-        areaForm.style.display = 'block';
-        areaKonfirmasi.style.display = 'none';
-        kotakTiket.style.display = 'none';
-        btnUlangGPS.style.display = 'none';
-        ambilGPS();
-    }
-});
+function upIkon() {
+    const warna = UP.tingkat ? KEPARAHAN[UP.tingkat].warna : '#0a2463';
+    return L.divIcon({ className: '', html: `<div class="pin" style="background:${warna}"></div>`, iconSize: [26, 26], iconAnchor: [13, 26] });
+}
 
-function ambilGPS() {
-    if (!navigator.geolocation) {
-        statusTeks.textContent = '❌ Browser perangkat Anda tidak mendukung GPS.';
-        btnUlangGPS.style.display = 'block'; return;
+function upInitPeta() {
+    if (UP.map) { setTimeout(() => UP.map.invalidateSize(), 150); return; }
+    if (typeof L === 'undefined') {
+        $('upMap').innerHTML = '<div class="kk-info">Peta tidak dapat dimuat. Gunakan tombol "Gunakan lokasi saya" dan isi alamat secara manual.</div>';
+        return;
     }
-    statusTeks.innerHTML = '📸 Foto terekam.<br>⏳ Mencari sinyal GPS akurat...';
-    btnUlangGPS.style.display = 'none';
+    const a = KK.anchor;
+    UP.map = L.map('upMap').setView(a ? [a.lat, a.lon] : [-2.5489, 118.0149], a ? 14 : 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(UP.map);
+    UP.map.on('click', e => upSetLokasi(e.latlng.lat, e.latlng.lng, false));
+    setTimeout(() => UP.map.invalidateSize(), 150);
+    if (UP.lat !== null) upSetLokasi(UP.lat, UP.lon, true);
+}
+
+function upSetLokasi(lat, lon, pindah) {
+    UP.lat = lat; UP.lon = lon;
+    $('upKoord').textContent = `Koordinat: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    upErr('errLokasi', '');
+    if (UP.map && typeof L !== 'undefined') {
+        if (!UP.marker) {
+            UP.marker = L.marker([lat, lon], { draggable: true, icon: upIkon() }).addTo(UP.map);
+            UP.marker.on('dragend', () => { const p = UP.marker.getLatLng(); upSetLokasi(p.lat, p.lng, false); });
+        } else UP.marker.setLatLng([lat, lon]);
+        if (pindah) UP.map.setView([lat, lon], Math.max(UP.map.getZoom(), 17));
+    }
+    upJadwalAlamat();
+}
+
+function upAmbilGPS() {
+    const st = $('upGpsStatus'), btn = $('upBtnGPS');
+    if (!navigator.geolocation) { st.textContent = 'Browser tidak mendukung GPS. Ketuk peta untuk memilih lokasi.'; return; }
+    st.textContent = '⏳ Mencari lokasi Anda…'; btn.disabled = true;
     navigator.geolocation.getCurrentPosition(
         pos => {
-            dataLokasi = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, akurasi: pos.coords.accuracy };
-            statusTeks.innerHTML = `✅ <b>GPS Berhasil Dikunci!</b><br>Lat: ${dataLokasi.latitude}<br>Lng: ${dataLokasi.longitude}<br>Akurasi: ±${Math.round(dataLokasi.akurasi)} meter`;
-            areaKonfirmasi.style.display = 'block';
-            btnKirim.disabled = false; btnBatal.disabled = false;
+            upSetLokasi(pos.coords.latitude, pos.coords.longitude, true);
+            st.textContent = `✅ Lokasi terkunci (akurasi ±${Math.round(pos.coords.accuracy)} m). Geser pin bila kurang tepat.`;
+            btn.disabled = false;
         },
         err => {
-            statusTeks.innerHTML = '❌ GPS gagal (' + esc(err.message) + '). Aktifkan layanan lokasi & izinkan akses lokasi untuk browser, lalu coba lagi.';
-            btnUlangGPS.style.display = 'block';
+            st.textContent = (err.code === 1 ? 'Izin lokasi ditolak.' : 'GPS gagal.') + ' Ketuk peta untuk memilih lokasi secara manual.';
+            btn.disabled = false;
         },
         { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
 }
-btnUlangGPS.addEventListener('click', ambilGPS);
-btnBatal.addEventListener('click', () => { resetFormLapor(); statusTeks.textContent = 'Laporan dibatalkan. Silakan ambil foto ulang.'; });
 
-btnKirim.addEventListener('click', async () => {
-    if (!fileFotoRaw || dataLokasi.latitude === null) return;
-    if (!tingkatDipilih) {
-        statusTeks.innerHTML = '⚠️ Pilih dulu <b>tingkat kerusakan</b> (Ringan / Sedang / Parah) sebelum mengirim.';
-        areaForm.scrollIntoView({ behavior: 'smooth', block: 'center' }); return;
-    }
-    btnKirim.disabled = true; btnBatal.disabled = true;
+// Alamat otomatis dari peta (Nominatim reverse). Berhenti menimpa setelah user mengetik alamat sendiri.
+function upJadwalAlamat() {
+    clearTimeout(UP.revTimer);
+    if (UP.alamatManual) return;
+    $('upAlamatStatus').textContent = '⏳ Mencari alamat…';
+    UP.revTimer = setTimeout(upCariAlamat, 700);
+}
+async function upCariAlamat() {
+    if (UP.lat === null) return;
+    if (UP.revAbort) UP.revAbort.abort();
+    const ac = UP.revAbort = new AbortController();
+    const lat = UP.lat, lon = UP.lon, st = $('upAlamatStatus');
+    st.textContent = '⏳ Mencari alamat…';
     try {
-        statusTeks.textContent = '⏳ Mengompres foto...';
-        const fotoKirim = await kompres(fileFotoRaw);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=id&lat=${lat}&lon=${lon}`, { signal: ac.signal });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const j = await res.json(), a = j.address || {};
+        const bagian = [a.road || a.pedestrian || a.footway || a.path, a.suburb || a.village || a.neighbourhood, a.city_district, a.city || a.town || a.county, a.state];
+        const teks = [...new Set(bagian.filter(Boolean))].join(', ') || j.display_name || '';
+        if (UP.lat !== lat || UP.lon !== lon || UP.alamatManual) return;
+        if (!teks) throw new Error('alamat kosong');
+        $('upAlamat').value = teks.slice(0, 300);
+        upErr('errLokasi', '');
+        st.textContent = '✓ Alamat terisi otomatis dari peta (boleh Anda ubah).';
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        st.textContent = 'Alamat otomatis tidak tersedia. Silakan ketik alamat secara manual.';
+    }
+}
 
-        statusTeks.textContent = '⏳ Mengunggah foto...';
+function upSetFoto(file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { upErr('errFoto', 'File harus berupa gambar (JPG, PNG, dll).'); return; }
+    if (file.size > BATAS_FOTO) { upErr('errFoto', 'Ukuran foto terlalu besar (maksimal 15 MB).'); return; }
+    if (UP.fotoUrl) URL.revokeObjectURL(UP.fotoUrl);
+    UP.foto = file;
+    UP.fotoUrl = URL.createObjectURL(file);
+    $('upPreview').src = UP.fotoUrl;
+    $('upPreviewBox').hidden = false;
+    upErr('errFoto', '');
+    if (UP.lat === null) upAmbilGPS();      // foto baru diambil → langsung cari lokasi
+}
+function upHapusFoto() {
+    if (UP.fotoUrl) URL.revokeObjectURL(UP.fotoUrl);
+    UP.foto = null; UP.fotoUrl = null;
+    $('upPreview').removeAttribute('src'); $('upPreviewBox').hidden = true;
+    $('upInKamera').value = ''; $('upInGaleri').value = '';
+}
+
+function upPilihKategori(nama) {
+    UP.kategori = nama;
+    $('upKategori').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === nama)));
+    upErr('errKategori', '');
+}
+function upPilihKeparahan(v) {
+    UP.tingkat = v;
+    $('upKeparahan').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    upErr('errKeparahan', '');
+    if (UP.marker && typeof L !== 'undefined') UP.marker.setIcon(upIkon());
+}
+
+function upReset() {
+    upHapusFoto();
+    clearTimeout(UP.revTimer); if (UP.revAbort) UP.revAbort.abort();
+    UP.lat = UP.lon = null; UP.kategori = null; UP.tingkat = null; UP.alamatManual = false;
+    if (UP.map && UP.marker) { UP.map.removeLayer(UP.marker); }
+    UP.marker = null;
+    $('upKoord').textContent = 'Koordinat belum dipilih.';
+    $('upAlamat').value = ''; $('upAlamatStatus').textContent = ''; $('upAlamatAuto').hidden = true;
+    $('upGpsStatus').textContent = 'Ketuk peta atau geser pin untuk menyesuaikan lokasi.';
+    $('upDeskripsi').value = ''; $('upHitung').textContent = '0/500';
+    $('upKategori').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    $('upKeparahan').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    ['errFoto', 'errLokasi', 'errKategori', 'errKeparahan', 'errDeskripsi', 'errUmum'].forEach(id => upErr(id, ''));
+}
+
+function upValidasi() {
+    let pertama = null;
+    const salah = (id, pesan) => { upErr(id, pesan); if (!pertama) pertama = $(id); };
+    ['errFoto', 'errLokasi', 'errKategori', 'errKeparahan', 'errDeskripsi', 'errUmum'].forEach(id => upErr(id, ''));
+
+    if (!UP.foto) salah('errFoto', 'Foto wajib diisi: ambil dari kamera atau pilih dari galeri.');
+    if (UP.lat === null || UP.lon === null || !isFinite(UP.lat) || !isFinite(UP.lon)) salah('errLokasi', 'Tentukan lokasi dengan tombol GPS atau ketuk peta.');
+    else {
+        const al = $('upAlamat').value.trim().replace(/\s+/g, ' ');
+        if (al.length < 5) salah('errLokasi', 'Alamat wajib diisi (minimal 5 karakter).');
+        else if (al.length > 300) salah('errLokasi', 'Alamat maksimal 300 karakter.');
+    }
+    if (!KATEGORI.some(k => k.nama === UP.kategori)) salah('errKategori', 'Pilih salah satu kategori.');
+    if (!KEPARAHAN[UP.tingkat]) salah('errKeparahan', 'Pilih tingkat keparahan.');
+    const d = $('upDeskripsi').value.trim();
+    if (d.length < 10) salah('errDeskripsi', 'Deskripsi minimal 10 karakter.');
+    else if (d.length > 500) salah('errDeskripsi', 'Deskripsi maksimal 500 karakter.');
+
+    if (pertama) pertama.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return !pertama;
+}
+
+function petaGalatLaporan(err) {
+    const m = String((err && err.message) || err || '').toLowerCase();
+    if ((m.includes('kategori') || m.includes('alamat')) && (m.includes('column') || m.includes('schema cache'))) return 'Database belum diperbarui. Jalankan setup-upload-detail.sql di Supabase SQL Editor.';
+    if (m.includes('row-level security') || m.includes('permission denied')) return 'Akun Anda tidak diizinkan mengirim laporan (kebijakan database). Hubungi admin.';
+    if (m.includes('violates check constraint')) return 'Data laporan ditolak database. Periksa kategori, alamat, dan deskripsi.';
+    if (m.includes('failed to fetch') || m.includes('network')) return 'Koneksi bermasalah. Periksa internet Anda lalu coba lagi.';
+    return 'Gagal mengirim laporan: ' + ((err && err.message) || 'terjadi kesalahan.');
+}
+
+async function upKonfirmasi(e) {
+    e.preventDefault();
+    if (UP.kirim) return;
+    if (!upValidasi()) return;
+    UP.kirim = true;
+    const btn = $('upBtnKonfirmasi');
+    btn.disabled = true; btn.textContent = 'Mengirim…';
+    try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) { go('/login'); return; }
+
+        const foto = await kompres(UP.foto);
         const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-        const { error: eUp } = await db.storage.from('foto_laporan')
-            .upload(namaFile, fotoKirim, { contentType: fotoKirim.type || 'image/jpeg' });
+        const { error: eUp } = await db.storage.from('foto_laporan').upload(namaFile, foto, { contentType: foto.type || 'image/jpeg' });
         if (eUp) throw eUp;
-        const { data: urlData } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
+        const { data: u } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
 
-        statusTeks.textContent = '⏳ Menyimpan data laporan...';
-        const kode = buatKode();
-        // user_id terisi otomatis oleh database (default auth.uid())
-        const { error: eIns } = await db.from('laporan_jalan').insert([{
-            latitude: dataLokasi.latitude, longitude: dataLokasi.longitude,
-            foto_url: urlData.publicUrl, deskripsi: inDeskripsi.value.trim(),
-            tingkat: tingkatDipilih, kode
-        }]);
+        // user_id terisi otomatis oleh database (default auth.uid()); status default 'baru'
+        const baris = {
+            latitude: UP.lat, longitude: UP.lon, foto_url: u.publicUrl,
+            alamat: $('upAlamat').value.trim().replace(/\s+/g, ' '),
+            kategori: UP.kategori, tingkat: UP.tingkat,
+            deskripsi: $('upDeskripsi').value.trim()
+        };
+        let kode = null, eIns = null;
+        for (let i = 0; i < 3; i++) {                       // ulangi bila kode kebetulan bentrok (unique)
+            kode = buatKode();
+            ({ error: eIns } = await db.from('laporan_jalan').insert([{ ...baris, kode }]));
+            if (!eIns || eIns.code !== '23505') break;
+        }
         if (eIns) throw eIns;
 
-        resetFormLapor();
-        statusTeks.textContent = '🎉 Sukses! Laporan Anda sudah terkirim. Terima kasih!';
-        $('kodeTiket').textContent = kode;
-        kotakTiket.style.display = 'block';
-        kotakTiket.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        upReset();
+        go(`/konfirmasi?kode=${encodeURIComponent(kode)}`);
     } catch (err) {
         console.error(err);
-        statusTeks.innerHTML = '❌ Gagal mengirim: ' + esc(err.message || 'gangguan jaringan');
-        btnKirim.disabled = false; btnBatal.disabled = false;
+        upErr('errUmum', petaGalatLaporan(err));
+    } finally {
+        UP.kirim = false; btn.disabled = false; btn.textContent = 'Konfirmasi';
     }
-});
+}
 
-$('btnSalin').addEventListener('click', async () => {
-    const kode = $('kodeTiket').textContent;
-    try { await navigator.clipboard.writeText(kode); $('btnSalin').textContent = '✅ Tersalin'; }
-    catch (e) { $('btnSalin').textContent = 'Salin manual: ' + kode; }
+$('upBtnKamera').addEventListener('click', () => $('upInKamera').click());
+$('upBtnGaleri').addEventListener('click', () => $('upInGaleri').click());
+$('upInKamera').addEventListener('change', e => upSetFoto(e.target.files && e.target.files[0]));
+$('upInGaleri').addEventListener('change', e => upSetFoto(e.target.files && e.target.files[0]));
+$('upGantiFoto').addEventListener('click', upHapusFoto);
+$('upBtnGPS').addEventListener('click', upAmbilGPS);
+$('upKategori').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (b) upPilihKategori(b.dataset.k); });
+$('upKeparahan').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (b) upPilihKeparahan(b.dataset.v); });
+$('upDeskripsi').addEventListener('input', () => { $('upHitung').textContent = $('upDeskripsi').value.length + '/500'; upErr('errDeskripsi', ''); });
+$('upAlamat').addEventListener('input', () => { UP.alamatManual = true; $('upAlamatAuto').hidden = false; $('upAlamatStatus').textContent = ''; upErr('errLokasi', ''); });
+$('upAlamatAuto').addEventListener('click', e => { e.preventDefault(); UP.alamatManual = false; $('upAlamatAuto').hidden = true; if (UP.lat !== null) upCariAlamat(); });
+$('upForm').addEventListener('submit', upKonfirmasi);
+
+async function masukUpload() { upInitPeta(); }
+
+/* ---------- Data detail (RPC detail_laporan) ---------- */
+function kodeDariRute() {
+    const k = (rutePar.get('kode') || '').trim().toUpperCase();
+    return /^[A-Z0-9-]{4,24}$/.test(k) ? k : null;
+}
+async function ambilDetail(kode) {
+    const { data, error } = await db.rpc('detail_laporan', { p_kode: kode });
+    if (error) throw error;
+    return (data && data[0]) || null;
+}
+function pesanGalatDetail(err) {
+    const m = String((err && err.message) || '').toLowerCase();
+    if (err && (err.code === 'PGRST202' || m.includes('could not find the function'))) return 'Fungsi database detail_laporan belum dibuat. Jalankan setup-upload-detail.sql di Supabase SQL Editor.';
+    return 'Gagal memuat laporan: ' + ((err && err.message) || 'periksa koneksi internet.');
+}
+
+/* ---------- Konfirmasi ---------- */
+async function masukKonfirmasi() {
+    const muat = $('kfMuat'), ok = $('kfOk'), gagal = $('kfGagal');
+    muat.hidden = false; ok.hidden = true; gagal.hidden = true;
+    const kode = kodeDariRute();
+    const tampilGagal = teks => { muat.hidden = true; ok.hidden = true; gagal.hidden = false; $('kfGagalTeks').textContent = teks; };
+    if (!kode) { tampilGagal('Kode laporan tidak valid.'); return; }
+    try {
+        const d = await ambilDetail(kode);
+        if (!d) { tampilGagal('Laporan tidak ditemukan di akun Anda, jadi belum bisa dikonfirmasi.'); return; }
+        $('kfKode').textContent = d.kode;
+        $('kfDetail').dataset.kode = d.kode;
+        muat.hidden = true; gagal.hidden = true; ok.hidden = false;
+    } catch (err) { console.error(err); tampilGagal(pesanGalatDetail(err)); }
+}
+$('kfBeranda').addEventListener('click', () => go('/dashboard'));
+$('kfDetail').addEventListener('click', () => { const k = $('kfDetail').dataset.kode; if (k) go(`/detail?kode=${encodeURIComponent(k)}`); });
+$('kfKeUpload').addEventListener('click', () => go('/upload'));
+
+/* ---------- Detail ---------- */
+const STATUS_DETAIL = { baru: 'Akan Segera Ditangani', diproses: 'Sedang Ditangani', selesai: 'Selesai Ditangani' };
+
+async function masukDetail() {
+    const muat = $('dtMuat'), isi = $('dtIsi'), gagal = $('dtGagal');
+    muat.hidden = false; isi.hidden = true; gagal.hidden = true;
+    const tampilGagal = teks => { muat.hidden = true; isi.hidden = true; gagal.hidden = false; gagal.textContent = teks; };
+    const kode = kodeDariRute();
+    if (!kode) { tampilGagal('Kode laporan tidak valid.'); return; }
+    try {
+        const d = await ambilDetail(kode);
+        if (!d) { tampilGagal('Laporan tidak ditemukan. Hanya laporan milik akun Anda yang bisa dibuka.'); return; }
+        renderDetail(d);
+        muat.hidden = true; gagal.hidden = true; isi.hidden = false;
+    } catch (err) { console.error(err); tampilGagal(pesanGalatDetail(err)); }
+}
+
+function renderDetail(d) {
+    const st = STATUS_DETAIL[d.status] ? d.status : 'baru';
+    const elSt = $('dtStatus');
+    elSt.textContent = STATUS_DETAIL[st];
+    elSt.className = 'dt-status ' + st;
+
+    const foto = $('dtFoto');
+    foto.src = d.foto_url || '';
+    foto.hidden = !d.foto_url;
+
+    $('dtKategori').textContent = d.kategori || 'Belum dikategorikan';
+
+    const kep = KEPARAHAN[d.tingkat];
+    $('dtKeparahan').innerHTML = kep
+        ? `<span class="dt-kep"><span class="dot ${esc(d.tingkat)}"></span>${esc(kep.label)}</span>`
+        : '-';
+
+    const lat = Number(d.latitude), lon = Number(d.longitude);
+    const lok = $('dtLokasi');
+    if (d.alamat) { lok.textContent = d.alamat; }
+    else {   // laporan lama tanpa alamat: tampilkan nama jalan hasil reverse geocoding
+        const r = { latitude: lat, longitude: lon };
+        lok.innerHTML = `<span data-rev="${esc(kunciRev(r))}">${esc(namaLokasi(r))}</span>`;
+        mintaReverse(r);
+    }
+    $('dtKoord').innerHTML = `${lat.toFixed(6)}, ${lon.toFixed(6)} · <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener">Buka di peta</a>`;
+
+    const n = Number(d.jumlah_pelapor) || 1;
+    $('dtPelapor').textContent = `${n.toLocaleString('id-ID')} pelapor`;
+    $('dtWaktu').textContent = new Date(d.waktu).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) + ` (${waktuRelatif(d.waktu)})`;
+    $('dtKode').textContent = 'Kode: ' + d.kode;
+    $('dtDeskripsi').textContent = d.deskripsi || '-';
+    $('dtCatatanBox').hidden = !d.catatan_admin;
+    $('dtCatatan').textContent = d.catatan_admin || '';
+}
+
+$('dtKembali').addEventListener('click', () => {
+    if (jumlahNavigasi > 1 && history.length > 1) history.back(); else go('/laporan');
 });
 
 /* =====================================================================
