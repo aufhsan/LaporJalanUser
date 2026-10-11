@@ -474,6 +474,7 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 /* =====================================================================
    Konfigurasi & Supabase
@@ -1080,7 +1081,64 @@ $('umKeluar').addEventListener('click', async () => {
 });
 
 /* ---------- Dropdown kota + fuzzy search ---------- */
-const API_WILAYAH = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+// Sumber data wilayah = API v2 emsifa. JANGAN pakai API lama (emsifa.github.io/api-wilayah-indonesia/api/...):
+// URL itu dialihkan (redirect) ke http://www.emsifa.com (tanpa HTTPS) sehingga diblokir browser
+// (mixed content) dan muncul sebagai "TypeError: Failed to fetch".
+const SUMBER_WILAYAH = [
+    { nama: 'emsifa.com (resmi)', base: 'https://www.emsifa.com/api-wilayah-indonesia/v2' },
+    { nama: 'mirror GitHub',      base: 'https://raw.githubusercontent.com/emsifa/api-wilayah-indonesia/gh-pages/v2' }
+];
+// Cadangan terakhir bila SEMUA sumber gagal: 98 kota dari snapshot API v2 (11 Okt 2026) — [nama, provinsi, lat, lng]
+const KOTA_CADANGAN = [
+    ["Kota Banda Aceh","Aceh",5.55,95.3178], ["Kota Sabang","Aceh",5.8927,95.3211], ["Kota Lhokseumawe","Aceh",5.1794,97.1489], ["Kota Langsa","Aceh",4.4695,97.9664], ["Kota Subulussalam","Aceh",2.6708,97.993],
+    ["Kota Medan","Sumatera Utara",3.5902,98.675], ["Kota Pematangsiantar","Sumatera Utara",2.9565,99.0618], ["Kota Sibolga","Sumatera Utara",1.746,98.7756], ["Kota Tanjungbalai","Sumatera Utara",2.9478,99.7667], ["Kota Binjai","Sumatera Utara",3.603,98.4832], ["Kota Tebing Tinggi","Sumatera Utara",3.3276,99.1663], ["Kota Padangsidimpuan","Sumatera Utara",1.3776,99.2714], ["Kota Gunungsitoli","Sumatera Utara",1.2826,97.6135],
+    ["Kota Padang","Sumatera Barat",-0.8759,100.3873], ["Kota Solok","Sumatera Barat",-0.7995,100.6528], ["Kota Sawahlunto","Sumatera Barat",-0.675,100.7675], ["Kota Padang Panjang","Sumatera Barat",-0.4621,100.3904], ["Kota Bukittinggi","Sumatera Barat",-0.2855,100.3678], ["Kota Payakumbuh","Sumatera Barat",-0.2225,100.632], ["Kota Pariaman","Sumatera Barat",-0.629,100.1377],
+    ["Kota Pekanbaru","Riau",0.5134,101.447], ["Kota Dumai","Riau",1.6054,101.3917],
+    ["Kota Jambi","Jambi",-1.6305,103.6073], ["Kota Sungai Penuh","Jambi",-2.0709,101.3961],
+    ["Kota Palembang","Sumatera Selatan",-2.991,104.7568], ["Kota Pagar Alam","Sumatera Selatan",-4.0393,103.197], ["Kota Lubuk Linggau","Sumatera Selatan",-3.3258,102.8254], ["Kota Prabumulih","Sumatera Selatan",-3.3689,104.3084],
+    ["Kota Bengkulu","Bengkulu",-3.7928,102.2608],
+    ["Kota Bandar Lampung","Lampung",-5.4296,105.2626], ["Kota Metro","Lampung",-5.1137,105.3069],
+    ["Kota Pangkal Pinang","Kepulauan Bangka Belitung",-2.141,106.1159],
+    ["Kota Batam","Kepulauan Riau",1.1287,104.0553], ["Kota Tanjung Pinang","Kepulauan Riau",0.9653,104.441],
+    ["Kota Administrasi Jakarta Pusat","Daerah Khusus Ibukota Jakarta",-6.1729,106.8187], ["Kota Administrasi Jakarta Utara","Daerah Khusus Ibukota Jakarta",-6.12,106.8925], ["Kota Administrasi Jakarta Barat","Daerah Khusus Ibukota Jakarta",-6.1843,106.7366], ["Kota Administrasi Jakarta Selatan","Daerah Khusus Ibukota Jakarta",-6.2478,106.8076], ["Kota Administrasi Jakarta Timur","Daerah Khusus Ibukota Jakarta",-6.2137,106.944],
+    ["Kota Bogor","Jawa Barat",-6.5951,106.7941], ["Kota Sukabumi","Jawa Barat",-6.9176,106.9319], ["Kota Bandung","Jawa Barat",-6.9107,107.6099], ["Kota Cirebon","Jawa Barat",-6.7067,108.5582], ["Kota Bekasi","Jawa Barat",-6.236,106.9942], ["Kota Depok","Jawa Barat",-6.3942,106.8227], ["Kota Cimahi","Jawa Barat",-6.8708,107.5552], ["Kota Tasikmalaya","Jawa Barat",-7.3161,108.197], ["Kota Banjar","Jawa Barat",-7.3622,108.5596],
+    ["Kota Magelang","Jawa Tengah",-7.5037,110.2215], ["Kota Surakarta","Jawa Tengah",-7.5693,110.8295], ["Kota Salatiga","Jawa Tengah",-7.3304,110.5008], ["Kota Semarang","Jawa Tengah",-6.9817,110.4122], ["Kota Pekalongan","Jawa Tengah",-6.8969,109.6621], ["Kota Tegal","Jawa Tengah",-6.8704,109.1374],
+    ["Kota Yogyakarta","Daerah Istimewa Yogyakarta",-7.7999,110.3914],
+    ["Kota Kediri","Jawa Timur",-7.8122,112.0143], ["Kota Blitar","Jawa Timur",-8.0992,112.1646], ["Kota Malang","Jawa Timur",-7.9778,112.6338], ["Kota Probolinggo","Jawa Timur",-7.7537,113.2142], ["Kota Pasuruan","Jawa Timur",-7.6474,112.9086], ["Kota Mojokerto","Jawa Timur",-7.4628,112.4334], ["Kota Madiun","Jawa Timur",-7.6244,111.5206], ["Kota Surabaya","Jawa Timur",-7.2589,112.747], ["Kota Batu","Jawa Timur",-7.8625,112.5134],
+    ["Kota Tangerang","Banten",-6.1644,106.6411], ["Kota Cilegon","Banten",-6.0098,106.0421], ["Kota Serang","Banten",-6.1197,106.1735], ["Kota Tangerang Selatan","Banten",-6.3216,106.7077],
+    ["Kota Denpasar","Bali",-8.6545,115.2165],
+    ["Kota Mataram","Nusa Tenggara Barat",-8.5827,116.1081], ["Kota Bima","Nusa Tenggara Barat",-8.4617,118.7487],
+    ["Kota Kupang","Nusa Tenggara Timur",-10.1539,123.6194],
+    ["Kota Pontianak","Kalimantan Barat",-0.0221,109.3381], ["Kota Singkawang","Kalimantan Barat",0.9048,108.9774],
+    ["Kota Palangkaraya","Kalimantan Tengah",-2.174,113.8803],
+    ["Kota Banjarmasin","Kalimantan Selatan",-3.3275,114.589], ["Kota Banjarbaru","Kalimantan Selatan",-3.4386,114.8311],
+    ["Kota Balikpapan","Kalimantan Timur",-1.2763,116.8278], ["Kota Samarinda","Kalimantan Timur",-0.4914,117.146], ["Kota Bontang","Kalimantan Timur",0.0695,117.4442],
+    ["Kota Tarakan","Kalimantan Utara",3.3137,117.6049],
+    ["Kota Manado","Sulawesi Utara",1.4846,124.8491], ["Kota Bitung","Sulawesi Utara",1.4454,125.182], ["Kota Tomohon","Sulawesi Utara",1.3145,124.8274], ["Kota Kotamobagu","Sulawesi Utara",0.7435,124.3127],
+    ["Kota Palu","Sulawesi Tengah",-0.9,119.891],
+    ["Kota Makassar","Sulawesi Selatan",-5.1332,119.4078], ["Kota Parepare","Sulawesi Selatan",-4.0278,119.6333], ["Kota Palopo","Sulawesi Selatan",-3.0084,120.2016],
+    ["Kota Kendari","Sulawesi Tenggara",-3.9729,122.5117], ["Kota Bau Bau","Sulawesi Tenggara",-5.4851,122.5848],
+    ["Kota Gorontalo","Gorontalo",0.5319,123.0595],
+    ["Kota Ambon","Maluku",-3.6943,128.1813], ["Kota Tual","Maluku",-5.6347,132.7517],
+    ["Kota Ternate","Maluku Utara",0.7858,127.3878], ["Kota Tidore Kepulauan","Maluku Utara",0.6716,127.4467],
+    ["Kota Jayapura","Papua",-2.5626,140.6926],
+    ["Kota Sorong","Papua Barat Daya",-0.8811,131.2876],
+];
+
+// fetch JSON dengan batas waktu + pesan error yang jelas
+async function ambilJson(url, ms = 8000) {
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort(), ms);
+    try {
+        const res = await fetch(url, { signal: ac.signal });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+    } catch (e) {
+        if (e.name === 'AbortError') throw new Error('waktu habis (' + ms / 1000 + ' dtk)');
+        if (e instanceof TypeError) throw new Error('tidak dapat dijangkau (jaringan/CORS/diblokir browser)');
+        throw e;
+    } finally { clearTimeout(t); }
+}
 
 function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
 function kapital(s) { return String(s).toLowerCase().replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Dki|Di|Ntb|Ntt)\b/g, x => x.toUpperCase()); }
@@ -1102,11 +1160,11 @@ function subseq(t, s) {
     for (const c of s) { if (c === t[i]) i++; if (i === t.length) return true; }
     return false;
 }
-function bentukItemKota(nama, prov) {
+function bentukItemKota(nama, prov, lat, lng) {
     const n = kapital(nama);
-    const inti = n.replace(/^(Kota Adm\.?|Kabupaten Adm\.?|Kota|Kabupaten|Kab\.)\s+/i, '');
+    const inti = n.replace(/^(Kota Adm(?:inistrasi)?\.?|Kabupaten Adm(?:inistrasi)?\.?|Kota|Kabupaten|Kab\.)\s+/i, '');
     return { nama: n, inti, prov: kapital(prov), jenis: /^kota/i.test(n) ? 'Kota' : 'Kabupaten',
-             n: norm(n), i: norm(inti), p: norm(prov), kata: norm(inti).split(' ') };
+             n: norm(n), i: norm(inti), p: norm(prov), kata: norm(inti).split(' '), lat, lng };
 }
 function skorToken(t, it) {
     if (it.i === t) return 1000;
@@ -1139,26 +1197,34 @@ function cariFuzzy(q, daftar, maks = 60) {
 }
 
 async function muatDaftarKota() {
-    if (KK.daftarKota) return KK.daftarKota;
+    if (KK.daftarKota && !KK.daftarOffline) return KK.daftarKota;
     if (KK.daftarPromise) return KK.daftarPromise;
     KK.daftarPromise = (async () => {
         try {
+            try { localStorage.removeItem('kk_kota_list_v1'); } catch (e) { /* cache lama (API v1) dibuang */ }
             let mentah = null;
-            const cache = bacaLS('kk_kota_list_v1');
-            if (cache && Date.now() - cache.t < 30 * 864e5 && Array.isArray(cache.data) && cache.data.length > 100) mentah = cache.data;
-            if (!mentah) {
-                const rp = await fetch(`${API_WILAYAH}/provinces.json`);
-                if (!rp.ok) throw new Error('HTTP ' + rp.status);
-                const provs = await rp.json();
-                const per = await Promise.all(provs.map(async p => {
-                    const r = await fetch(`${API_WILAYAH}/regencies/${p.id}.json`);
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    return (await r.json()).map(x => ({ n: x.name, p: p.name }));
-                }));
-                mentah = per.flat();
-                simpanLS('kk_kota_list_v1', { t: Date.now(), data: mentah });
+            const cache = bacaLS('kk_kota_list_v2');
+            if (cache && Date.now() - cache.t < 30 * 864e5 && Array.isArray(cache.data) && cache.data.length > 400) mentah = cache.data;
+            const galat = [];
+            for (const sb of (mentah ? [] : SUMBER_WILAYAH)) {
+                try {
+                    const provs = (await ambilJson(`${sb.base}/provinces.json`)).data;
+                    if (!Array.isArray(provs) || !provs.length) throw new Error('format data provinsi tidak dikenali');
+                    const per = await Promise.all(provs.map(async p => {
+                        const j = await ambilJson(`${sb.base}/regencies/${p.id}.json`);
+                        return (j.data || []).map(x => ({ n: x.name, p: p.name, lat: x.lat, lng: x.lng }));
+                    }));
+                    const hasil = per.flat();
+                    if (hasil.length < 400) throw new Error('data tidak lengkap (' + hasil.length + ' kab/kota)');
+                    mentah = hasil;
+                    simpanLS('kk_kota_list_v2', { t: Date.now(), data: mentah });
+                    break;
+                } catch (e) { galat.push(`${sb.nama}: ${e.message}`); console.warn('Daftar kota gagal dari', sb.nama, e); }
             }
-            KK.daftarKota = mentah.map(x => bentukItemKota(x.n, x.p))
+            KK.daftarOffline = !mentah;
+            KK.galatDaftar = galat.join(' · ');
+            if (!mentah) mentah = KOTA_CADANGAN.map(([n, p, lat, lng]) => ({ n, p, lat, lng }));
+            KK.daftarKota = mentah.map(x => bentukItemKota(x.n, x.p, x.lat, x.lng))
                 .sort((a, b) => (a.jenis === b.jenis ? a.nama.localeCompare(b.nama, 'id') : a.jenis === 'Kota' ? -1 : 1));
             return KK.daftarKota;
         } finally { KK.daftarPromise = null; }
@@ -1172,8 +1238,10 @@ function renderDaftarKota() {
     if (!KK.daftarKota) return;
     kotaTampil = cariFuzzy($('kotaCari').value, KK.daftarKota);
     kotaIdx = kotaTampil.length ? 0 : -1;
-    if (!kotaTampil.length) { box.innerHTML = '<div class="kk-info">Kota tidak ditemukan. Coba ejaan lain.</div>'; return; }
-    box.innerHTML = kotaTampil.map((it, i) =>
+    const catatan = KK.daftarOffline
+        ? `<div class="kk-info">⚠️ Daftar lengkap tidak bisa dimuat (${esc(KK.galatDaftar)}). Menampilkan ${KK.daftarKota.length} kota dari data cadangan. <a href="#" id="kotaUlang">Coba muat daftar lengkap</a></div>` : '';
+    if (!kotaTampil.length) { box.innerHTML = catatan + '<div class="kk-info">Kota tidak ditemukan. Coba ejaan lain.</div>'; return; }
+    box.innerHTML = catatan + kotaTampil.map((it, i) =>
         `<button type="button" class="kota-item${i === 0 ? ' fokus' : ''}" data-i="${i}" role="option"><span>${esc(it.nama)}</span><small>${esc(it.prov)}</small></button>`).join('');
 }
 async function bukaDropdownKota() {
@@ -1204,7 +1272,7 @@ $('kotaCari').addEventListener('keydown', e => {
     } else if (e.key === 'Enter') { e.preventDefault(); pilihKota(kotaTampil[kotaIdx]); }
 });
 $('kotaList').addEventListener('click', e => {
-    if (e.target.id === 'kotaUlang') { e.preventDefault(); bukaDropdownKota(); return; }
+    if (e.target.id === 'kotaUlang') { e.preventDefault(); KK.daftarKota = null; bukaDropdownKota(); return; }
     const b = e.target.closest('.kota-item');
     if (b) pilihKota(kotaTampil[+b.dataset.i]);
 });
@@ -1214,7 +1282,7 @@ async function geokodeKota(item) {
     const kunci = item.nama + '|' + item.prov;
     const cache = bacaLS('kk_geo_v1') || {};
     if (cache[kunci]) return cache[kunci];
-    const bersih = item.nama.replace(/\bAdm\.?\s*/i, '');
+    const bersih = item.nama.replace(/\bAdm(?:inistrasi)?\.?\s*/i, '');
     const kandidat = [[bersih, item.prov, 'Indonesia'], [item.inti, item.prov, 'Indonesia']].map(a => a.filter(Boolean).join(', '));
     for (let i = 0; i < kandidat.length; i++) {
         if (i > 0) await tunggu(1100);
@@ -1238,7 +1306,10 @@ async function pilihKota(item, simpan = true) {
     $('kotaLabel').textContent = item.nama;
     setStatusPeta('⏳ Memuat lokasi ' + item.nama + '…');
     try {
-        const g = await geokodeKota(item);
+        const g = await geokodeKota(item).catch(e => {
+            if (item.lat != null && item.lng != null) return { lat: item.lat, lon: item.lng, bbox: [] };   // cadangan: titik pusat dari API wilayah
+            throw e;
+        });
         KK.kota = { ...item, ...g };
         if (simpan) simpanLS('kk_kota_pilihan', { nama: item.nama, inti: item.inti, prov: item.prov, jenis: item.jenis, g });
         terapkanKota(g, item.nama);
