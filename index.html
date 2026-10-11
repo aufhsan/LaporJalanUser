@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lapor Jalan Rusak</title>
+    <title>KotaKita - Lapor Jalan</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
@@ -55,18 +56,7 @@
         .avatar-badge svg { width: 22px; height: 22px; fill: white; }
         #pesanFoto { margin-top: 14px; font-size: 14px; min-height: 20px; }
 
-        /* ===== Dashboard ===== */
-        .dash-head { background: #6f42c1; color: white; padding: 12px 16px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .dash-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 700px; margin: 0 auto 10px; }
-        .profil-mini { display: flex; align-items: center; gap: 10px; min-width: 0; }
-        .mini-avatar { width: 42px; height: 42px; border-radius: 50%; background: white; object-fit: cover; flex-shrink: 0; }
-        .profil-mini div { min-width: 0; }
-        #dashNama { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #dashUser { font-size: 12px; opacity: 0.85; }
-        .btn-keluar { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        .tabs { display: flex; gap: 6px; justify-content: center; }
-        .tab { background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 18px; font-size: 15px; border-radius: 8px 8px 0 0; cursor: pointer; }
-        .tab.aktif { background: #f4f6f9; color: #6f42c1; font-weight: bold; }
+        /* ===== Halaman dalam (Upload / Laporan) ===== */
         .tabisi { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
         .tabisi.aktif { display: block; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
@@ -102,9 +92,142 @@
         .item-laporan .meta { font-size: 13px; color: #777; margin: 4px 0; }
         .item-laporan .kode { font-family: monospace; font-weight: bold; }
         .garis { border: none; border-top: 1px solid #eee; margin: 22px 0; }
+
+        [hidden] { display: none !important; }
+
+        /* ===== KotaKita: tema, navbar ===== */
+        body.tema-kk { background: #e6eefb; color: #1d2a44; }
+        body.tema-kk .card { border-radius: 16px; box-shadow: 0 4px 18px rgba(10,36,99,0.08); }
+        body.tema-kk .btn:not(.btn-success):not(.btn-danger):not(.btn-warning) { background: #0a2463; }
+        .kk-nav { position: sticky; top: 0; z-index: 1000; background: #fff; box-shadow: 0 2px 14px rgba(10,36,99,0.10); display: none; align-items: center; gap: 14px; padding: 10px 22px; flex-wrap: wrap; }
+        .kk-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #0a2463; font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
+        .kk-logo svg { width: 28px; height: 28px; fill: #0a2463; }
+        .kk-logo b { color: #3a6fd8; }
+        .kk-kota { position: relative; }
+        .kk-kota-btn { display: flex; align-items: center; gap: 6px; background: #eef3fc; border: 1.5px solid #d3def5; color: #0a2463; font-weight: 600; font-size: 14px; padding: 9px 14px; border-radius: 22px; cursor: pointer; max-width: 230px; }
+        .kk-kota-btn #kotaLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .kk-dropdown { position: absolute; top: calc(100% + 8px); background: #fff; border-radius: 14px; box-shadow: 0 10px 34px rgba(10,36,99,0.20); border: 1px solid #e3eaf8; z-index: 1100; }
+        #kotaPanel { left: 0; width: 320px; max-width: 86vw; padding: 10px; }
+        #kotaCari { width: 100%; padding: 10px 12px; border: 1.5px solid #d3def5; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 8px; }
+        #kotaCari:focus, #kkCari:focus { outline: none; border-color: #0a2463; }
+        #kotaList { max-height: 300px; overflow-y: auto; }
+        .kota-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; color: #1d2a44; font-family: inherit; }
+        .kota-item:hover, .kota-item.fokus { background: #eef3fc; }
+        .kota-item small { color: #7b88a6; font-size: 12px; white-space: nowrap; }
+        .kk-info { color: #6b7898; font-size: 13.5px; padding: 12px 6px; line-height: 1.5; }
+        .kk-menu { display: flex; gap: 4px; margin: 0 auto; }
+        .kk-menu a { text-decoration: none; color: #4a5b7c; font-weight: 600; font-size: 15px; padding: 9px 16px; border-radius: 20px; }
+        .kk-menu a:hover { background: #eef3fc; color: #0a2463; }
+        .kk-menu a.aktif { background: #0a2463; color: #fff; }
+        .kk-avatar-wrap { position: relative; }
+        .kk-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid #d3def5; background: #0a2463; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; overflow: hidden; padding: 0; display: flex; align-items: center; justify-content: center; }
+        .kk-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        #avatarMenu { right: 0; width: 230px; padding: 8px; }
+        #avatarMenu .who { padding: 8px 10px 10px; border-bottom: 1px solid #eef1f8; margin-bottom: 6px; display: flex; flex-direction: column; }
+        #avatarMenu .who span { color: #7b88a6; font-size: 13px; }
+        #avatarMenu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-family: inherit; color: #1d2a44; }
+        #avatarMenu button:hover { background: #eef3fc; }
+        @media (max-width: 760px) {
+            .kk-nav { padding: 10px 14px; gap: 10px; }
+            .kk-kota { order: 2; margin-left: auto; }
+            .kk-avatar-wrap { order: 3; }
+            .kk-menu { order: 4; width: 100%; justify-content: space-between; margin: 0; }
+            .kk-menu a { padding: 8px 10px; font-size: 14px; flex: 1; text-align: center; }
+        }
+
+        /* ===== KotaKita: konten ===== */
+        .kk-main { max-width: 1240px; margin: 0 auto; padding: 22px; }
+        .kk-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 22px; align-items: stretch; }
+        .kk-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 18px rgba(10,36,99,0.08); padding: 18px; }
+        .kk-mapcard { display: flex; flex-direction: column; min-width: 0; }
+        .kk-searchbar { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .kk-search { position: relative; flex: 1; display: flex; align-items: center; background: #f3f6fd; border: 1.5px solid #d3def5; border-radius: 12px; padding: 0 10px; }
+        .kk-search:focus-within { border-color: #0a2463; background: #fff; }
+        #kkCari { flex: 1; border: none; background: transparent; padding: 12px 6px; font-size: 15px; font-family: inherit; min-width: 0; }
+        #kkCari:focus { outline: none; }
+        #kkCariHapus { border: none; background: none; color: #7b88a6; cursor: pointer; font-size: 15px; padding: 4px 6px; }
+        .kk-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(10,36,99,0.20); border: 1px solid #e3eaf8; z-index: 900; max-height: 300px; overflow-y: auto; padding: 6px; }
+        .kk-suggest .sg { display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-family: inherit; }
+        .kk-suggest .sg:hover, .kk-suggest .sg.fokus { background: #eef3fc; }
+        .kk-suggest .sg b { display: block; font-size: 14px; color: #1d2a44; }
+        .kk-suggest .sg span { font-size: 12px; color: #7b88a6; }
+        .kk-chip { background: #eef3fc; color: #0a2463; border: 1.5px solid #d3def5; padding: 11px 14px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+        .kk-chip:hover { background: #dfe9fb; }
+        .kk-note { font-size: 13px; color: #b45309; min-height: 0; margin-bottom: 6px; }
+        .kk-note:empty { display: none; }
+        #kkMap { height: 470px; width: 100%; border-radius: 12px; z-index: 1; }
+        .kk-legenda { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #4a5b7c; margin-top: 10px; }
+        .kk-legenda i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+        .pin { width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.5); position: relative; }
+        .pin::after { content: ''; position: absolute; width: 8px; height: 8px; background: white; border-radius: 50%; top: 6px; left: 6px; }
+        .pin.anchor { background: #0a2463; border-radius: 50%; transform: none; width: 18px; height: 18px; }
+        .pin.anchor::after { display: none; }
+        .kk-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+        .kk-head h2 { margin: 0; font-size: 19px; color: #0a2463; }
+        .kk-head .sub { font-size: 12.5px; color: #7b88a6; margin-top: 3px; }
+        #btnRefresh { border: 1.5px solid #d3def5; background: #eef3fc; color: #0a2463; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 17px; }
+        .isu-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff; border: 1px solid #e8eef9; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; font-family: inherit; transition: 0.15s; }
+        .isu-item:hover { border-color: #b9ccf1; box-shadow: 0 3px 12px rgba(10,36,99,0.10); transform: translateY(-1px); }
+        .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(0,0,0,0.06); }
+        .dot.ringan { background: #f2b705; box-shadow: 0 0 0 4px rgba(242,183,5,0.20); }
+        .dot.sedang { background: #ff922b; box-shadow: 0 0 0 4px rgba(255,146,43,0.22); }
+        .dot.parah  { background: #e03131; box-shadow: 0 0 0 4px rgba(224,49,49,0.20); }
+        .dot.none   { background: #adb5bd; }
+        .isu-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+        .isu-judul { font-weight: 700; font-size: 14.5px; color: #1d2a44; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .isu-lok { font-size: 12.5px; color: #5c6b8c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .isu-waktu { font-size: 12px; color: #8a96b2; }
+        .isu-panah { color: #0a2463; font-size: 24px; line-height: 1; }
+        .kk-terbaru { margin-top: 26px; }
+        .kk-terbaru-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .tb-card { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 3; background: #0a2463; box-shadow: 0 4px 18px rgba(10,36,99,0.14); cursor: pointer; transition: 0.2s; }
+        .tb-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(10,36,99,0.22); }
+        .tb-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .tb-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(4,12,38,0.92) 0%, rgba(4,12,38,0.55) 42%, rgba(4,12,38,0.05) 78%); }
+        .tb-badge { position: absolute; top: 12px; left: 12px; }
+        .tb-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; color: #fff; }
+        .tb-lok { font-weight: 700; font-size: 15px; margin-bottom: 5px; }
+        .tb-desk { font-size: 13.5px; line-height: 1.4; opacity: 0.92; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
+        .tb-waktu { font-size: 12px; opacity: 0.8; }
+        @media (max-width: 1000px) { .kk-grid { grid-template-columns: 1fr; } .kk-terbaru-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .kk-main { padding: 14px; } .kk-terbaru-grid { grid-template-columns: 1fr; } #kkMap { height: 340px; } .kk-searchbar { flex-wrap: wrap; } }
     </style>
 </head>
 <body>
+
+<!-- ================= NAVBAR KOTAKITA (halaman user setelah login) ================= -->
+<header id="navbar" class="kk-nav">
+  <a class="kk-logo" href="#/dashboard" aria-label="KotaKita">
+    <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+    <span>Kota<b>Kita</b></span>
+  </a>
+
+  <div class="kk-kota" id="kkKotaWrap">
+    <button type="button" id="kotaBtn" class="kk-kota-btn" aria-haspopup="listbox" aria-expanded="false">
+      <span>📍</span><span id="kotaLabel">Pilih kota</span><span>▾</span>
+    </button>
+    <div class="kk-dropdown" id="kotaPanel" hidden>
+      <input type="text" id="kotaCari" placeholder="Cari kota, mis. bandung / bdg / surabya" autocomplete="off" spellcheck="false">
+      <div id="kotaList" role="listbox"></div>
+    </div>
+  </div>
+
+  <nav class="kk-menu" id="kkMenu">
+    <a href="#/dashboard" data-m="beranda">Beranda</a>
+    <a href="#/dashboard" data-m="lokasi">Lokasi</a>
+    <a href="#/upload" data-m="upload">Upload</a>
+    <a href="#/laporan" data-m="laporan">Laporan</a>
+  </nav>
+
+  <div class="kk-avatar-wrap">
+    <button type="button" class="kk-avatar" id="avatarBtn" aria-haspopup="menu" aria-label="Menu akun">?</button>
+    <div class="kk-dropdown" id="avatarMenu" hidden>
+      <div class="who"><b id="umNama">-</b><span id="umUser"></span></div>
+      <button type="button" id="umFoto">📷 Ubah foto profil</button>
+      <button type="button" id="umKeluar">🚪 Keluar</button>
+    </div>
+  </div>
+</header>
 
 <!-- ================= 1. REGISTER ================= -->
 <section class="halaman" id="r-register">
@@ -249,25 +372,48 @@
   </div></div>
 </section>
 
-<!-- ================= DASHBOARD USER ================= -->
-<section class="halaman" id="r-dashboard">
-  <div class="dash-head">
-    <div class="dash-top">
-      <div class="profil-mini">
-        <img class="mini-avatar" id="dashAvatar" alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10' fill='white'/></svg>">
-        <div><div id="dashNama">-</div><div id="dashUser"></div></div>
+<!-- ================= DASHBOARD KOTAKITA ================= -->
+<section class="halaman" id="r-kotakita">
+  <main class="kk-main">
+    <div class="kk-grid">
+      <div class="kk-card kk-mapcard" id="kkMapCard">
+        <div class="kk-searchbar">
+          <div class="kk-search">
+            <span>🔎</span>
+            <input id="kkCari" type="text" placeholder="Cari nama jalan..." autocomplete="off" spellcheck="false" aria-label="Cari jalan">
+            <button type="button" id="kkCariHapus" hidden aria-label="Hapus">✕</button>
+            <div class="kk-suggest" id="kkSuggest" hidden></div>
+          </div>
+          <button type="button" class="kk-chip" id="btnLokasiSaya">🎯 Lokasi saya</button>
+        </div>
+        <div class="kk-note" id="kkStatusPeta"></div>
+        <div id="kkMap"></div>
+        <div class="kk-legenda">
+          <span><i style="background:#f2b705"></i>Ringan</span>
+          <span><i style="background:#ff922b"></i>Sedang</span>
+          <span><i style="background:#e03131"></i>Parah</span>
+          <span style="opacity:.7">• Pin pudar = sudah selesai</span>
+        </div>
       </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-keluar" id="btnFotoUbah">📷 Foto</button>
-        <button class="btn-keluar" id="btnKeluar">Keluar</button>
-      </div>
-    </div>
-    <div class="tabs">
-      <button class="tab aktif" data-tab="tabLapor">📸 Buat Laporan</button>
-      <button class="tab" data-tab="tabSaya">📋 Laporan Saya</button>
-    </div>
-  </div>
 
+      <aside class="kk-card">
+        <div class="kk-head">
+          <div><h2>Isu Terdekat</h2><div class="sub" id="isuSub"></div></div>
+          <button type="button" id="btnRefresh" title="Muat ulang laporan" aria-label="Muat ulang">↻</button>
+        </div>
+        <div id="isuList"></div>
+      </aside>
+    </div>
+
+    <section class="kk-terbaru">
+      <div class="kk-head"><h2>Laporan Terbaru</h2></div>
+      <div class="kk-terbaru-grid" id="terbaruGrid"></div>
+    </section>
+  </main>
+</section>
+
+<!-- ================= UPLOAD LAPORAN (fitur lama, kini lewat navbar) ================= -->
+<section class="halaman" id="r-upload">
   <!-- Buat laporan -->
   <div class="tabisi aktif" id="tabLapor">
     <div class="card">
@@ -307,9 +453,12 @@
       </div>
     </div>
   </div>
+</section>
 
+<!-- ================= LAPORAN SAYA (fitur lama, kini lewat navbar) ================= -->
+<section class="halaman" id="r-laporan">
   <!-- Laporan saya -->
-  <div class="tabisi" id="tabSaya">
+  <div class="tabisi aktif" id="tabSaya">
     <div class="card" style="text-align:left;">
       <h3 style="margin-top:0">Laporan Saya</h3>
       <div id="daftarSaya">Memuat...</div>
@@ -410,7 +559,9 @@ const RUTE = {
     '/lupa':        { el: 'r-lupa' },
     '/reset':       { el: 'r-reset' },
     '/foto-profil': { el: 'r-foto-profil', butuhLogin: true },
-    '/dashboard':   { el: 'r-dashboard',   butuhLogin: true }
+    '/dashboard':   { el: 'r-kotakita',    butuhLogin: true, nav: true },
+    '/upload':      { el: 'r-upload',      butuhLogin: true, nav: true },
+    '/laporan':     { el: 'r-laporan',     butuhLogin: true, nav: true }
 };
 
 function go(path) {
@@ -431,12 +582,21 @@ async function router() {
     document.querySelectorAll('.halaman').forEach(h => h.classList.toggle('aktif', h.id === RUTE[path].el));
     window.scrollTo(0, 0);
 
+    // Navbar KotaKita hanya tampil di halaman setelah login
+    const navAktif = !!RUTE[path].nav;
+    $('navbar').style.display = navAktif ? 'flex' : 'none';
+    document.body.classList.toggle('tema-kk', navAktif);
+    tutupSemuaDropdown();
+    if (path !== '/dashboard') hentikanAutoRefresh();
+    if (navAktif) { await muatProfil(session); renderNavbar(session); setMenuAktif(path); }
+
     if (path === '/login' && pesanLoginBerikut) {
         notice('notLogin', pesanLoginBerikut.teks, pesanLoginBerikut.tipe);
         pesanLoginBerikut = null;
     }
     if (path === '/foto-profil') await masukFotoProfil(session);
-    if (path === '/dashboard') await masukDashboard(session);
+    if (path === '/dashboard') await masukKotaKita();
+    if (path === '/laporan') await muatLaporanSaya();
 }
 
 window.addEventListener('hashchange', router);
@@ -783,25 +943,520 @@ $('btnMulai').addEventListener('click', async () => {
 });
 
 /* =====================================================================
-   DASHBOARD USER
+   DASHBOARD KOTAKITA
    ===================================================================== */
-async function masukDashboard(session) {
-    await muatProfil(session);
-    $('dashNama').textContent = (profil && profil.nama) || session.user.email || 'Pengguna';
-    $('dashUser').textContent = profil ? '@' + profil.username : '';
-    if (profil && profil.foto_url) $('dashAvatar').src = profil.foto_url;
-    pilihTab('tabLapor');
+const KK = {
+    map: null, layer: null, markerAnchor: null,
+    laporan: [], dimuat: false, errLaporan: null,
+    kota: null, anchor: null, kotaDipulihkan: false,
+    daftarKota: null, daftarPromise: null, timer: null
+};
+const WARNA_T = { ringan: '#f2b705', sedang: '#ff922b', parah: '#e03131' };
+let pendingScroll = null;
+
+const tunggu = ms => new Promise(r => setTimeout(r, ms));
+function bacaLS(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+function simpanLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* abaikan */ } }
+
+/* ---------- Util: jarak, waktu, judul ---------- */
+function jarakKm(a, r) {
+    const R = 6371, rad = x => x * Math.PI / 180;
+    const dLat = rad(r.latitude - a.lat), dLon = rad(r.longitude - a.lon);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(r.latitude)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+}
+function fmtJarak(km) { return km < 1 ? Math.round(km * 1000) + ' m' : km.toLocaleString('id-ID', { maximumFractionDigits: 1 }) + ' km'; }
+
+const RTF = new Intl.RelativeTimeFormat('id', { numeric: 'auto' });
+function waktuRelatif(iso) {
+    const t = new Date(iso).getTime();
+    if (isNaN(t)) return '-';
+    const d = Math.round((t - Date.now()) / 1000), a = Math.abs(d);
+    if (a < 45) return 'baru saja';
+    if (a < 3600) return RTF.format(Math.round(d / 60), 'minute');
+    if (a < 86400) return RTF.format(Math.round(d / 3600), 'hour');
+    if (a < 2592000) return RTF.format(Math.round(d / 86400), 'day');
+    if (a < 31536000) return RTF.format(Math.round(d / 2592000), 'month');
+    return RTF.format(Math.round(d / 31536000), 'year');
+}
+// Tabel laporan tidak punya kolom judul: judul = kalimat pertama deskripsi
+function judulLaporan(r) {
+    const d = (r.deskripsi || '').replace(/\s+/g, ' ').trim();
+    if (d) { const k = d.split(/[.!?]\s/)[0]; return k.length > 64 ? k.slice(0, 61).trimEnd() + '…' : k; }
+    return 'Jalan rusak' + (r.tingkat ? ` (${r.tingkat})` : '');
+}
+const tingkatOk = r => ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
+
+/* ---------- Reverse geocoding (nama jalan) dengan antrean + cache ---------- */
+let revCache = bacaLS('kk_rev_v1') || {};
+const revAntri = [];
+let revJalan = false;
+const kunciRev = r => r.latitude.toFixed(4) + ',' + r.longitude.toFixed(4);
+function namaLokasi(r) { return revCache[kunciRev(r)] || `${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}`; }
+function mintaReverse(r) {
+    const k = kunciRev(r);
+    if (revCache[k] || revAntri.some(x => x.k === k)) return;
+    revAntri.push({ k, r });
+    jalankanReverse();
+}
+async function jalankanReverse() {
+    if (revJalan) return;
+    revJalan = true;
+    while (revAntri.length) {
+        const { k, r } = revAntri.shift();
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=id&lat=${r.latitude}&lon=${r.longitude}`);
+            if (res.ok) {
+                const j = await res.json();
+                const a = j.address || {};
+                const jalan = a.road || a.pedestrian || a.footway || a.neighbourhood;
+                const area = a.suburb || a.village || a.city_district || a.town || a.city || a.county;
+                const nama = [jalan, area].filter(Boolean).join(', ') || (j.display_name || '').split(',').slice(0, 2).join(',').trim();
+                if (nama) {
+                    revCache[k] = nama;
+                    const keys = Object.keys(revCache);
+                    if (keys.length > 300) delete revCache[keys[0]];
+                    simpanLS('kk_rev_v1', revCache);
+                    document.querySelectorAll(`[data-rev="${k}"]`).forEach(el => { el.textContent = nama; });
+                }
+            }
+        } catch (e) { /* biarkan tampil koordinat */ }
+        await tunggu(1100);   // batas Nominatim: 1 permintaan/detik
+    }
+    revJalan = false;
 }
 
-$('btnKeluar').addEventListener('click', async () => { await db.auth.signOut(); profil = null; go('/login'); });
-$('btnFotoUbah').addEventListener('click', () => go('/foto-profil'));
-
-function pilihTab(id) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('aktif', t.dataset.tab === id));
-    document.querySelectorAll('.tabisi').forEach(p => p.classList.toggle('aktif', p.id === id));
-    if (id === 'tabSaya') muatLaporanSaya();
+/* ---------- Navbar ---------- */
+function inisial(nama) { return (nama || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase(); }
+function renderNavbar(session) {
+    const nama = (profil && profil.nama) || session.user.email || 'Pengguna';
+    $('umNama').textContent = nama;
+    $('umUser').textContent = profil ? '@' + profil.username : '';
+    const b = $('avatarBtn');
+    if (profil && profil.foto_url) b.innerHTML = `<img src="${esc(profil.foto_url)}" alt="">`;
+    else b.textContent = inisial(nama);
 }
-document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => pilihTab(t.dataset.tab)));
+function setMenuAktif(path) {
+    const peta = { '/dashboard': 'beranda', '/upload': 'upload', '/laporan': 'laporan' };
+    let aktif = peta[path];
+    if (path === '/dashboard' && pendingScroll === 'lokasi') aktif = 'lokasi';
+    document.querySelectorAll('#kkMenu a').forEach(a => a.classList.toggle('aktif', a.dataset.m === aktif));
+}
+$('kkMenu').addEventListener('click', e => {
+    const a = e.target.closest('a');
+    if (!a || !['beranda', 'lokasi'].includes(a.dataset.m)) return;
+    e.preventDefault();
+    const sudahDiBeranda = location.hash === '#/dashboard';
+    pendingScroll = a.dataset.m;
+    if (sudahDiBeranda) { setMenuAktif('/dashboard'); lakukanScroll(); } else go('/dashboard');
+});
+function lakukanScroll() {
+    if (pendingScroll === 'lokasi') { $('kkMapCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => $('kkCari').focus({ preventScroll: true }), 400); }
+    else if (pendingScroll === 'beranda') window.scrollTo({ top: 0, behavior: 'smooth' });
+    pendingScroll = null;
+}
+
+function tutupSemuaDropdown() {
+    $('kotaPanel').hidden = true; $('kotaBtn').setAttribute('aria-expanded', 'false');
+    $('avatarMenu').hidden = true;
+    $('kkSuggest').hidden = true;
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('#kkKotaWrap')) { $('kotaPanel').hidden = true; $('kotaBtn').setAttribute('aria-expanded', 'false'); }
+    if (!e.target.closest('.kk-avatar-wrap')) $('avatarMenu').hidden = true;
+    if (!e.target.closest('.kk-search')) $('kkSuggest').hidden = true;
+});
+$('avatarBtn').addEventListener('click', () => { $('avatarMenu').hidden = !$('avatarMenu').hidden; });
+$('umFoto').addEventListener('click', () => go('/foto-profil'));
+$('umKeluar').addEventListener('click', async () => {
+    hentikanAutoRefresh();
+    await db.auth.signOut();
+    profil = null; KK.laporan = []; KK.dimuat = false;
+    KK.anchor = null; KK.kota = null; KK.kotaDipulihkan = false;
+    if (KK.map && KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; }
+    try { localStorage.removeItem('kk_kota_pilihan'); } catch (e) { /* abaikan */ }
+    $('kotaLabel').textContent = 'Pilih kota'; $('kkCari').value = ''; $('kkCariHapus').hidden = true;
+    go('/login');
+});
+
+/* ---------- Dropdown kota + fuzzy search ---------- */
+const API_WILAYAH = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+
+function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function kapital(s) { return String(s).toLowerCase().replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Dki|Di|Ntb|Ntt)\b/g, x => x.toUpperCase()); }
+function lev(a, b) {
+    if (a === b) return 0;
+    const m = a.length, n = b.length;
+    if (!m) return n; if (!n) return m;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+        const cur = [i];
+        for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prev = cur;
+    }
+    return prev[n];
+}
+function subseq(t, s) {
+    if (t[0] !== s[0]) return false;
+    let i = 0;
+    for (const c of s) { if (c === t[i]) i++; if (i === t.length) return true; }
+    return false;
+}
+function bentukItemKota(nama, prov) {
+    const n = kapital(nama);
+    const inti = n.replace(/^(Kota Adm\.?|Kabupaten Adm\.?|Kota|Kabupaten|Kab\.)\s+/i, '');
+    return { nama: n, inti, prov: kapital(prov), jenis: /^kota/i.test(n) ? 'Kota' : 'Kabupaten',
+             n: norm(n), i: norm(inti), p: norm(prov), kata: norm(inti).split(' ') };
+}
+function skorToken(t, it) {
+    if (it.i === t) return 1000;
+    if (it.n === t) return 990;
+    if (it.i.startsWith(t)) return 900 - it.i.length;
+    if (it.kata.some(w => w.startsWith(t))) return 800 - it.i.length;
+    if (it.n.includes(t)) return 700 - it.i.length;
+    if (t.length >= 4) {                       // toleransi salah ketik
+        const maks = t.length <= 5 ? 1 : 2;
+        let best = 9;
+        for (const w of it.kata) best = Math.min(best, lev(t, w), lev(t, w.slice(0, t.length)));
+        if (best <= maks) return 600 - best * 100 - it.i.length;
+    }
+    if (t.length >= 2 && subseq(t, it.i.replace(/ /g, ''))) return 450 - it.i.length;   // singkatan: bdg, jkt
+    if (t.length >= 3 && it.p.includes(t)) return 300;                                    // cocok nama provinsi
+    return 0;
+}
+function cariFuzzy(q, daftar, maks = 60) {
+    const nq = norm(q);
+    if (!nq) return daftar.slice(0, maks);
+    const toks = nq.split(' ');
+    const hasil = [];
+    for (const it of daftar) {
+        let tot = 0, ok = true;
+        for (const t of toks) { const sk = skorToken(t, it); if (!sk) { ok = false; break; } tot += sk; }
+        if (ok) hasil.push({ it, s: tot / toks.length + (it.jenis === 'Kota' ? 5 : 0) });
+    }
+    hasil.sort((a, b) => b.s - a.s || a.it.nama.localeCompare(b.it.nama, 'id'));
+    return hasil.slice(0, maks).map(x => x.it);
+}
+
+async function muatDaftarKota() {
+    if (KK.daftarKota) return KK.daftarKota;
+    if (KK.daftarPromise) return KK.daftarPromise;
+    KK.daftarPromise = (async () => {
+        try {
+            let mentah = null;
+            const cache = bacaLS('kk_kota_list_v1');
+            if (cache && Date.now() - cache.t < 30 * 864e5 && Array.isArray(cache.data) && cache.data.length > 100) mentah = cache.data;
+            if (!mentah) {
+                const rp = await fetch(`${API_WILAYAH}/provinces.json`);
+                if (!rp.ok) throw new Error('HTTP ' + rp.status);
+                const provs = await rp.json();
+                const per = await Promise.all(provs.map(async p => {
+                    const r = await fetch(`${API_WILAYAH}/regencies/${p.id}.json`);
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return (await r.json()).map(x => ({ n: x.name, p: p.name }));
+                }));
+                mentah = per.flat();
+                simpanLS('kk_kota_list_v1', { t: Date.now(), data: mentah });
+            }
+            KK.daftarKota = mentah.map(x => bentukItemKota(x.n, x.p))
+                .sort((a, b) => (a.jenis === b.jenis ? a.nama.localeCompare(b.nama, 'id') : a.jenis === 'Kota' ? -1 : 1));
+            return KK.daftarKota;
+        } finally { KK.daftarPromise = null; }
+    })();
+    return KK.daftarPromise;
+}
+
+let kotaTampil = [], kotaIdx = -1;
+function renderDaftarKota() {
+    const box = $('kotaList');
+    if (!KK.daftarKota) return;
+    kotaTampil = cariFuzzy($('kotaCari').value, KK.daftarKota);
+    kotaIdx = kotaTampil.length ? 0 : -1;
+    if (!kotaTampil.length) { box.innerHTML = '<div class="kk-info">Kota tidak ditemukan. Coba ejaan lain.</div>'; return; }
+    box.innerHTML = kotaTampil.map((it, i) =>
+        `<button type="button" class="kota-item${i === 0 ? ' fokus' : ''}" data-i="${i}" role="option"><span>${esc(it.nama)}</span><small>${esc(it.prov)}</small></button>`).join('');
+}
+async function bukaDropdownKota() {
+    $('avatarMenu').hidden = true;
+    $('kotaPanel').hidden = false;
+    $('kotaBtn').setAttribute('aria-expanded', 'true');
+    $('kotaCari').value = '';
+    $('kotaCari').focus();
+    const box = $('kotaList');
+    if (!KK.daftarKota) {
+        box.innerHTML = '<div class="kk-info">⏳ Memuat daftar kota Indonesia…</div>';
+        try { await muatDaftarKota(); }
+        catch (e) { box.innerHTML = `<div class="kk-info">❌ Gagal memuat daftar kota (${esc(e.message)}). <a href="#" id="kotaUlang">Coba lagi</a></div>`; return; }
+    }
+    renderDaftarKota();
+}
+$('kotaBtn').addEventListener('click', () => { $('kotaPanel').hidden ? bukaDropdownKota() : tutupSemuaDropdown(); });
+$('kotaCari').addEventListener('input', renderDaftarKota);
+$('kotaCari').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { tutupSemuaDropdown(); return; }
+    if (!kotaTampil.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        kotaIdx = (kotaIdx + (e.key === 'ArrowDown' ? 1 : -1) + kotaTampil.length) % kotaTampil.length;
+        const els = $('kotaList').querySelectorAll('.kota-item');
+        els.forEach((el, i) => el.classList.toggle('fokus', i === kotaIdx));
+        els[kotaIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') { e.preventDefault(); pilihKota(kotaTampil[kotaIdx]); }
+});
+$('kotaList').addEventListener('click', e => {
+    if (e.target.id === 'kotaUlang') { e.preventDefault(); bukaDropdownKota(); return; }
+    const b = e.target.closest('.kota-item');
+    if (b) pilihKota(kotaTampil[+b.dataset.i]);
+});
+
+/* ---------- Geokode kota (Nominatim, 1x per pilihan, di-cache) ---------- */
+async function geokodeKota(item) {
+    const kunci = item.nama + '|' + item.prov;
+    const cache = bacaLS('kk_geo_v1') || {};
+    if (cache[kunci]) return cache[kunci];
+    const bersih = item.nama.replace(/\bAdm\.?\s*/i, '');
+    const kandidat = [[bersih, item.prov, 'Indonesia'], [item.inti, item.prov, 'Indonesia']].map(a => a.filter(Boolean).join(', '));
+    for (let i = 0; i < kandidat.length; i++) {
+        if (i > 0) await tunggu(1100);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=id&accept-language=id&q=${encodeURIComponent(kandidat[i])}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const arr = await res.json();
+        if (arr.length) {
+            const a = arr[0];
+            const g = { lat: +a.lat, lon: +a.lon, bbox: (a.boundingbox || []).map(Number) };
+            cache[kunci] = g;
+            simpanLS('kk_geo_v1', cache);
+            return g;
+        }
+    }
+    throw new Error('lokasi tidak ditemukan');
+}
+function setStatusPeta(t) { $('kkStatusPeta').textContent = t || ''; }
+
+async function pilihKota(item, simpan = true) {
+    tutupSemuaDropdown();
+    $('kotaLabel').textContent = item.nama;
+    setStatusPeta('⏳ Memuat lokasi ' + item.nama + '…');
+    try {
+        const g = await geokodeKota(item);
+        KK.kota = { ...item, ...g };
+        if (simpan) simpanLS('kk_kota_pilihan', { nama: item.nama, inti: item.inti, prov: item.prov, jenis: item.jenis, g });
+        terapkanKota(g, item.nama);
+        setStatusPeta('');
+    } catch (e) {
+        setStatusPeta(`Lokasi "${item.nama}" tidak ditemukan di layanan peta (${e.message}).`);
+    }
+}
+function terapkanKota(g, label) {
+    if (KK.map) {
+        if (g.bbox && g.bbox.length === 4) KK.map.fitBounds([[g.bbox[0], g.bbox[2]], [g.bbox[1], g.bbox[3]]], { maxZoom: 14 });
+        else KK.map.setView([g.lat, g.lon], 12);
+    }
+    $('kkCari').value = ''; $('kkCariHapus').hidden = true;
+    setAnchor({ lat: g.lat, lon: g.lon, label, marker: false });
+}
+function pulihkanKota() {
+    const sv = bacaLS('kk_kota_pilihan');
+    if (sv && sv.nama && sv.g) {
+        const item = bentukItemKota(sv.nama, sv.prov || '');
+        KK.kota = { ...item, ...sv.g };
+        $('kotaLabel').textContent = sv.nama;
+        terapkanKota(sv.g, sv.nama);
+    } else if (profil && profil.kota) {
+        // Belum pernah memilih: pakai kota dari data pendaftaran akun
+        pilihKota({ nama: profil.kota, inti: profil.kota, prov: '', jenis: '' }, false);
+    }
+}
+
+/* ---------- Peta ---------- */
+function initPeta() {
+    if (KK.map) return;
+    if (typeof L === 'undefined') { setStatusPeta('Pustaka peta (Leaflet) gagal dimuat. Periksa koneksi internet.'); return; }
+    KK.map = L.map('kkMap').setView([-2.5489, 118.0149], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(KK.map);
+    KK.layer = L.layerGroup().addTo(KK.map);
+}
+function ikonPin(t) {
+    return L.divIcon({ className: '', html: `<div class="pin" style="background:${WARNA_T[t] || '#6c757d'}"></div>`, iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -26] });
+}
+function badgeTingkat(t) { return t ? `<span class="badge ${t}">${t}</span>` : ''; }
+
+function renderMarkers() {
+    if (!KK.map || !KK.layer) return;
+    KK.layer.clearLayers();
+    KK.laporan.forEach(r => {
+        const t = tingkatOk(r);
+        const mk = L.marker([r.latitude, r.longitude], { icon: ikonPin(t), opacity: r.status === 'selesai' ? 0.45 : 1 });
+        mk.bindPopup(`<div style="min-width:160px"><b>${esc(judulLaporan(r))}</b><br>${badgeTingkat(t)} <small>${esc(waktuRelatif(r.waktu))}</small>` +
+            `<br><img src="${esc(r.foto_url)}" style="width:100%;max-width:200px;margin-top:6px;border-radius:8px" alt=""></div>`);
+        mk.addTo(KK.layer);
+        r._m = mk;
+    });
+}
+function setAnchor(a) {
+    KK.anchor = a;
+    if (KK.map) {
+        if (KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; }
+        if (a.marker) {
+            KK.markerAnchor = L.marker([a.lat, a.lon], { icon: L.divIcon({ className: '', html: '<div class="pin anchor"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), zIndexOffset: 1000 })
+                .addTo(KK.map).bindPopup(esc(a.label));
+        }
+    }
+    renderIsu();
+}
+function bukaLaporanDiPeta(r) {
+    if (!KK.map || !r._m) return;
+    $('kkMapCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    KK.map.setView([r.latitude, r.longitude], 17);
+    setTimeout(() => r._m.openPopup(), 250);
+}
+
+/* ---------- Data laporan (RPC laporan_publik) ---------- */
+function pesanErrLaporan(err) {
+    const m = (err.message || '') + ' ' + (err.details || '');
+    if (err.code === 'PGRST202' || /laporan_publik/i.test(m)) return 'Fungsi database "laporan_publik" belum dibuat di Supabase. Jalankan file setup-kotakita.sql.';
+    return 'Gagal memuat laporan: ' + (err.message || 'periksa koneksi');
+}
+async function muatLaporanKK() {
+    const { data, error } = await db.rpc('laporan_publik', { p_limit: 500 });
+    if (error) { KK.errLaporan = pesanErrLaporan(error); KK.laporan = []; }
+    else {
+        KK.errLaporan = null;
+        KK.laporan = (data || []).map(r => ({ ...r, latitude: Number(r.latitude), longitude: Number(r.longitude) }))
+            .filter(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude));
+    }
+    KK.dimuat = true;
+    renderMarkers(); renderIsu(); renderTerbaru();
+}
+
+function isuTerdekat(n = 5) {
+    if (!KK.anchor) return [];
+    return KK.laporan.filter(r => r.status !== 'selesai')
+        .map(r => ({ r, d: jarakKm(KK.anchor, r) }))
+        .sort((a, b) => a.d - b.d).slice(0, n);
+}
+function renderIsu() {
+    const box = $('isuList'), sub = $('isuSub');
+    if (!KK.dimuat) { sub.textContent = ''; box.innerHTML = '<div class="kk-info">⏳ Memuat laporan…</div>'; return; }
+    if (KK.errLaporan) { sub.textContent = ''; box.innerHTML = `<div class="kk-info">❌ ${esc(KK.errLaporan)}</div>`; return; }
+    if (!KK.anchor) { sub.textContent = ''; box.innerHTML = '<div class="kk-info">Pilih kota, cari nama jalan, atau tekan "Lokasi saya" untuk melihat isu terdekat.</div>'; return; }
+    sub.textContent = 'Terdekat dari ' + KK.anchor.label;
+    const daftar = isuTerdekat();
+    if (!daftar.length) { box.innerHTML = '<div class="kk-info">Belum ada laporan aktif (belum selesai) di database.</div>'; return; }
+    box.innerHTML = daftar.map(({ r, d }, i) => {
+        const t = tingkatOk(r);
+        return `<button type="button" class="isu-item" data-i="${i}">
+            <span class="dot ${t || 'none'}" title="${t || 'tingkat belum diisi'}"></span>
+            <span class="isu-body">
+                <span class="isu-judul">${esc(judulLaporan(r))}</span>
+                <span class="isu-lok">📍 <span data-rev="${kunciRev(r)}">${esc(namaLokasi(r))}</span> · ${esc(fmtJarak(d))}</span>
+                <span class="isu-waktu">🕒 ${esc(waktuRelatif(r.waktu))}</span>
+            </span><span class="isu-panah">›</span></button>`;
+    }).join('');
+    box.querySelectorAll('.isu-item').forEach(el => el.addEventListener('click', () => bukaLaporanDiPeta(daftar[+el.dataset.i].r)));
+    daftar.forEach(({ r }) => mintaReverse(r));
+}
+function renderTerbaru() {
+    const box = $('terbaruGrid');
+    if (KK.errLaporan) { box.innerHTML = `<div class="kk-card kk-info" style="grid-column:1/-1">❌ ${esc(KK.errLaporan)}</div>`; return; }
+    const tiga = [...KK.laporan].sort((a, b) => new Date(b.waktu) - new Date(a.waktu)).slice(0, 3);
+    if (!tiga.length) { box.innerHTML = '<div class="kk-card kk-info" style="grid-column:1/-1">Belum ada laporan di database.</div>'; return; }
+    box.innerHTML = tiga.map((r, i) => `
+        <article class="tb-card" data-i="${i}">
+            <img src="${esc(r.foto_url)}" alt="" loading="lazy" onerror="this.style.display='none'">
+            <div class="tb-shade"></div>
+            <span class="tb-badge">${badgeTingkat(tingkatOk(r))}</span>
+            <div class="tb-body">
+                <div class="tb-lok">📍 <span data-rev="${kunciRev(r)}">${esc(namaLokasi(r))}</span></div>
+                <div class="tb-desk">${r.deskripsi ? esc(r.deskripsi) : '<i>(tanpa deskripsi)</i>'}</div>
+                <div class="tb-waktu">🕒 ${esc(waktuRelatif(r.waktu))}</div>
+            </div></article>`).join('');
+    box.querySelectorAll('.tb-card').forEach(el => el.addEventListener('click', () => bukaLaporanDiPeta(tiga[+el.dataset.i])));
+    tiga.forEach(mintaReverse);
+}
+
+/* ---------- Pencarian jalan (autocomplete Photon/OpenStreetMap) ---------- */
+let cariTimer = null, cariAbort = null, hasilCari = [], cariIdx = -1;
+function tampilSuggest(html) { const b = $('kkSuggest'); b.innerHTML = html; b.hidden = false; }
+
+$('kkCari').addEventListener('input', () => {
+    const q = $('kkCari').value.trim();
+    clearTimeout(cariTimer);
+    $('kkCariHapus').hidden = !q;
+    if (q.length < 3) { if (cariAbort) cariAbort.abort(); $('kkSuggest').hidden = true; return; }
+    cariTimer = setTimeout(() => cariJalan(q), 450);   // debounce: layanan publik dibatasi ±1 req/detik
+});
+$('kkCariHapus').addEventListener('click', () => {
+    $('kkCari').value = ''; $('kkCariHapus').hidden = true; $('kkSuggest').hidden = true; $('kkCari').focus();
+});
+async function cariJalan(q) {
+    if (cariAbort) cariAbort.abort();
+    cariAbort = new AbortController();
+    tampilSuggest('<div class="kk-info">⏳ Mencari…</div>');
+    const p = new URLSearchParams({ q, limit: '10', osm_tag: 'highway' });
+    if (KK.kota && KK.kota.bbox && KK.kota.bbox.length === 4) { const [sel, ut, bar, tim] = KK.kota.bbox; p.set('bbox', `${bar},${sel},${tim},${ut}`); }
+    else p.set('bbox', '95,-11.5,141.5,6.5');    // seluruh Indonesia
+    try {
+        const res = await fetch('https://photon.komoot.io/api/?' + p.toString(), { signal: cariAbort.signal });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const j = await res.json();
+        const lihat = new Set();
+        hasilCari = (j.features || []).filter(f => f.properties && f.properties.name && f.geometry).map(f => ({
+            nama: f.properties.name,
+            sub: [f.properties.district || f.properties.locality, f.properties.city || f.properties.county, f.properties.state].filter(Boolean).join(', '),
+            lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], extent: f.properties.extent
+        })).filter(h => { const k = h.nama + '|' + h.sub; if (lihat.has(k)) return false; lihat.add(k); return true; });
+        cariIdx = -1;
+        if (!hasilCari.length) { tampilSuggest(`<div class="kk-info">Tidak ada jalan "${esc(q)}" ditemukan${KK.kota ? ' di area ' + esc(KK.kota.nama) : ''}.</div>`); return; }
+        tampilSuggest(hasilCari.map((h, i) => `<button type="button" class="sg" data-i="${i}"><b>${esc(h.nama)}</b><span>${esc(h.sub || 'Indonesia')}</span></button>`).join(''));
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        tampilSuggest(`<div class="kk-info">❌ Pencarian jalan gagal (${esc(e.message)}). Coba lagi sebentar lagi.</div>`);
+    }
+}
+$('kkSuggest').addEventListener('click', e => { const b = e.target.closest('.sg'); if (b) pilihJalan(hasilCari[+b.dataset.i]); });
+$('kkCari').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { $('kkSuggest').hidden = true; return; }
+    const els = $('kkSuggest').querySelectorAll('.sg');
+    if (!els.length || $('kkSuggest').hidden) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        cariIdx = (cariIdx + (e.key === 'ArrowDown' ? 1 : -1) + els.length) % els.length;
+        els.forEach((el, i) => el.classList.toggle('fokus', i === cariIdx));
+    } else if (e.key === 'Enter') { e.preventDefault(); pilihJalan(hasilCari[cariIdx >= 0 ? cariIdx : 0]); }
+});
+function pilihJalan(h) {
+    if (!h) return;
+    $('kkCari').value = h.nama; $('kkCariHapus').hidden = false; $('kkSuggest').hidden = true;
+    if (KK.map) {
+        if (Array.isArray(h.extent) && h.extent.length === 4) KK.map.fitBounds([[h.extent[3], h.extent[0]], [h.extent[1], h.extent[2]]], { maxZoom: 17, padding: [30, 30] });
+        else KK.map.setView([h.lat, h.lon], 17);
+    }
+    setAnchor({ lat: h.lat, lon: h.lon, label: h.nama + (h.sub ? ', ' + h.sub : ''), marker: true });
+}
+$('btnLokasiSaya').addEventListener('click', () => {
+    if (!navigator.geolocation) { setStatusPeta('Browser Anda tidak mendukung GPS.'); return; }
+    setStatusPeta('⏳ Mencari lokasi Anda…');
+    navigator.geolocation.getCurrentPosition(pos => {
+        setStatusPeta('');
+        if (KK.map) KK.map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+        setAnchor({ lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Lokasi Anda', marker: true });
+    }, err => setStatusPeta('Lokasi tidak bisa diakses: ' + err.message), { enableHighAccuracy: true, timeout: 15000 });
+});
+$('btnRefresh').addEventListener('click', muatLaporanKK);
+
+/* ---------- Masuk halaman Beranda ---------- */
+function hentikanAutoRefresh() { if (KK.timer) { clearInterval(KK.timer); KK.timer = null; } }
+async function masukKotaKita() {
+    initPeta();
+    if (KK.map) KK.map.invalidateSize();
+    if (!KK.kotaDipulihkan) { KK.kotaDipulihkan = true; pulihkanKota(); }
+    renderIsu();
+    await muatLaporanKK();
+    hentikanAutoRefresh();
+    KK.timer = setInterval(muatLaporanKK, 60000);
+    if (pendingScroll) lakukanScroll();
+}
 
 /* ---------- Laporan saya ---------- */
 const LABEL_STATUS = { baru: '🆕 Baru diterima', diproses: '🛠️ Sedang diproses', selesai: '✅ Selesai ditangani' };
