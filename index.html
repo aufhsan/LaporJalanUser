@@ -246,6 +246,53 @@
         .lihat-detail { display: inline-block; margin-top: 6px; font-size: 13.5px; font-weight: 700; color: #0a2463; text-decoration: none; }
         .lihat-detail:hover { text-decoration: underline; }
         @media (max-width: 640px) { .up-wrap, .dt-wrap { padding: 14px; } .up-kat { grid-template-columns: repeat(2, 1fr); } .dt-grid { grid-template-columns: 1fr; } .kf-aksi { grid-template-columns: 1fr; } #upMap { height: 260px; } }
+
+        /* ===== Welcome, Tamu, Profil, Akun ===== */
+        .wl-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(160deg, #0a2463 0%, #1c4fb8 55%, #3a6fd8 100%); color: #fff; text-align: center; }
+        .wl-card { max-width: 380px; width: 100%; }
+        .wl-logo { width: 92px; height: 92px; margin: 0 auto 18px; border-radius: 26px; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+        .wl-logo svg { width: 54px; height: 54px; fill: #0a2463; }
+        .wl-card h1 { margin: 0 0 8px; font-size: 40px; letter-spacing: -.5px; }
+        .wl-card h1 b { color: #9ec0ff; }
+        .wl-card p { margin: 0 0 34px; opacity: .92; line-height: 1.5; font-size: 15.5px; }
+        .wl-btn { display: block; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 12px; }
+        .wl-btn.mulai { background: #fff; color: #0a2463; border: 2px solid #fff; }
+        .wl-btn.masuk { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.8); }
+        .gst-banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #fff; border-left: 5px solid #3a6fd8; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(10,36,99,.08); font-size: 14px; }
+        .gst-banner .acts { display: flex; gap: 8px; }
+        .gst-banner .btn { margin: 0; text-decoration: none; text-align: center; }
+        .pf-wrap { max-width: 560px; margin: 0 auto; padding: 22px; }
+        .pf-back { display: inline-block; margin-bottom: 12px; color: #0a2463; font-weight: 700; text-decoration: none; }
+        .pf-hero { background: linear-gradient(160deg, #0a2463, #3a6fd8); color: #fff; text-align: center; padding: 26px 18px; }
+        .pf-av { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 12px; border: 4px solid rgba(255,255,255,.6); background: #fff; color: #0a2463; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .pf-av img, .ak-av img { width: 100%; height: 100%; object-fit: cover; }
+        .pf-hero h2 { margin: 0 0 4px; }
+        .pf-hero small { display: block; opacity: .88; margin-top: 3px; font-size: 13.5px; }
+        .pf-stat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0 6px; text-align: center; }
+        .pf-stat div { background: #fff; border-radius: 12px; padding: 12px 4px; box-shadow: 0 4px 18px rgba(10,36,99,.08); }
+        .pf-stat b { display: block; font-size: 22px; color: #0a2463; }
+        .pf-stat span { font-size: 12px; color: #7b88a6; }
+        .pf-menu { padding: 4px 0; margin-top: 14px; }
+        .pf-item { display: flex; justify-content: space-between; padding: 15px 18px; text-decoration: none; color: #1d2a44; font-weight: 600; border-bottom: 1px solid #eef1f8; }
+        .pf-item:last-child { border-bottom: none; }
+        .pf-item:hover { background: #f3f6fd; }
+        .ak-judul { margin: 0 0 14px; color: #0a2463; font-size: 22px; }
+        .ak-avbox { position: relative; width: 120px; height: 120px; margin: 0 auto 18px; }
+        .ak-av { width: 120px; height: 120px; border-radius: 50%; background: #0a2463; color: #fff; font-size: 38px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; box-shadow: 0 6px 20px rgba(10,36,99,.18); }
+        .ak-cam { position: absolute; right: 0; bottom: 0; width: 38px; height: 38px; border-radius: 50%; background: #0a2463; border: 3px solid #fff; color: #fff; cursor: pointer; padding: 0; font-size: 16px; }
+        .ak-in { position: relative; }
+        .ak-in input { padding-right: 48px; }
+        .field input[readonly] { background: #f3f6fd; color: #4a5b7c; }
+        .ak-edit { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #0a2463; cursor: pointer; padding: 7px; border-radius: 8px; display: flex; }
+        .ak-edit.on { background: #dfe9fb; }
+        .rk-item { display: block; padding: 12px 0; border-bottom: 1px solid #eef1f8; text-decoration: none; color: #1d2a44; }
+        .rk-item:last-child { border-bottom: none; }
+        .rk-item small { display: block; color: #7b88a6; margin-top: 4px; font-size: 12.5px; }
+        .pr-baris { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #eef1f8; cursor: pointer; }
+        .pr-baris small { display: block; color: #7b88a6; margin-top: 3px; }
+        .pr-baris input { width: 22px; height: 22px; accent-color: #0a2463; flex-shrink: 0; }
+        .info-teks { font-size: 14.5px; line-height: 1.6; color: #34425f; }
+        @media (max-width: 640px) { .pf-wrap { padding: 14px; } .pf-stat { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
@@ -272,17 +319,103 @@
     <a href="#/dashboard" data-m="lokasi">Lokasi</a>
     <a href="#/upload" data-m="upload">Upload</a>
     <a href="#/laporan" data-m="laporan">Laporan</a>
+    <a href="#/profil" data-m="profil">Profil</a>
   </nav>
 
   <div class="kk-avatar-wrap">
     <button type="button" class="kk-avatar" id="avatarBtn" aria-haspopup="menu" aria-label="Menu akun">?</button>
     <div class="kk-dropdown" id="avatarMenu" hidden>
       <div class="who"><b id="umNama">-</b><span id="umUser"></span></div>
+      <button type="button" id="umProfil">👤 Profil saya</button>
       <button type="button" id="umFoto">📷 Ubah foto profil</button>
       <button type="button" id="umKeluar">🚪 Keluar</button>
+      <button type="button" id="umMasuk" hidden>🔑 Masuk</button>
+      <button type="button" id="umDaftar" hidden>📝 Daftar</button>
     </div>
   </div>
 </header>
+
+<!-- ================= WELCOME ================= -->
+<section class="halaman" id="r-welcome">
+  <div class="wl-wrap"><div class="wl-card">
+    <div class="wl-logo"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></div>
+    <h1>Kota<b>Kita</b></h1>
+    <p>Laporkan jalan rusak, pantau penanganannya, dan bersama wujudkan kota yang lebih nyaman.</p>
+    <button type="button" class="wl-btn mulai" id="wlMulai">Mulai</button>
+    <button type="button" class="wl-btn masuk" id="wlMasuk">Masuk</button>
+  </div></div>
+</section>
+
+<!-- ================= PROFIL GUEST ================= -->
+<section class="halaman" id="r-profil-guest"><div class="pf-wrap">
+  <div class="kk-card" style="text-align:left">
+    <div class="pf-av" style="background:#eef3fc">👤</div>
+    <h2 style="text-align:center;color:#0a2463;margin:0 0 4px">Masuk ke KotaKita</h2>
+    <p class="sub">Anda sedang menjelajah sebagai tamu.</p>
+    <div class="notice" id="notPg"></div>
+    <form id="formProfilGuest" novalidate>
+      <div class="field" data-f="username"><label for="pgUser">Username</label>
+        <input id="pgUser" type="text" autocomplete="username" autocapitalize="none" spellcheck="false"><div class="err"></div></div>
+      <div class="field" data-f="password"><label for="pgPass">Kata Sandi <a class="lupa" href="#/lupa">Lupa Kata Sandi?</a></label>
+        <div class="pw-wrap"><input id="pgPass" type="password" autocomplete="current-password" maxlength="72"><button type="button" class="pw-toggle" data-target="pgPass">Lihat</button></div><div class="err"></div></div>
+      <button class="btn" id="btnPgMasuk" type="submit">Masuk</button>
+    </form>
+    <div class="tautan">Belum punya akun? <a href="#/register">Daftar</a></div>
+    <div class="hint" id="pgDemo" style="text-align:center;margin-top:12px">Akun simulasi: <b>demo</b> / <b>demo1234</b></div>
+  </div>
+</div></section>
+
+<!-- ================= PROFIL USER ================= -->
+<section class="halaman" id="r-profil-user"><div class="pf-wrap">
+  <div class="kk-card pf-hero">
+    <div class="pf-av" id="pfAvatar"></div>
+    <h2 id="pfNama">-</h2>
+    <small id="pfUser"></small><small id="pfKontak"></small><small id="pfAktif"></small>
+  </div>
+  <div class="pf-stat">
+    <div><b id="pfTotal">-</b><span>Laporan</span></div><div><b id="pfProses">-</b><span>Diproses</span></div>
+    <div><b id="pfSelesai">-</b><span>Selesai</span></div><div><b id="pfPoin">-</b><span>Poin ⭐</span></div>
+  </div>
+  <div class="up-hint" style="text-align:center">Poin: +10 per laporan terkirim, +20 saat laporan selesai ditangani.</div>
+  <div class="kk-card pf-menu">
+    <a class="pf-item" href="#/akun"><span>👤 Akun</span><span>›</span></a>
+    <a class="pf-item" href="#/rekaman"><span>🗂️ Rekaman</span><span>›</span></a>
+    <a class="pf-item" href="#/preferensi"><span>⚙️ Preferensi</span><span>›</span></a>
+    <a class="pf-item" href="#/informasi"><span>ℹ️ Informasi</span><span>›</span></a>
+  </div>
+  <button type="button" class="btn btn-danger" id="pfKeluar" style="margin-top:16px">🚪 Logout</button>
+</div></section>
+
+<!-- ================= AKUN ================= -->
+<section class="halaman" id="r-akun"><div class="pf-wrap">
+  <a class="pf-back" href="#/profil">‹ Profil</a>
+  <div class="kk-card" style="text-align:left">
+    <h2 class="ak-judul">Akun</h2>
+    <input type="file" accept="image/*" id="akInFoto" hidden>
+    <div class="ak-avbox"><div class="ak-av" id="akAvatar" title="Ubah foto"></div><button type="button" class="ak-cam" id="akFotoBtn" aria-label="Ubah foto profil">📷</button></div>
+    <div class="notice" id="notAk"></div>
+    <form id="akForm" novalidate>
+      <div id="akFields"></div>
+      <button class="btn" type="submit" id="btnAkSimpan">Simpan</button>
+    </form>
+  </div>
+</div></section>
+
+<!-- ================= REKAMAN / PREFERENSI / INFORMASI ================= -->
+<section class="halaman" id="r-rekaman"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
+  <div class="kk-card" style="text-align:left"><h2 class="ak-judul">Rekaman</h2>
+    <div class="up-hint" style="margin:-6px 0 10px">Riwayat laporan yang pernah Anda kirim.</div><div id="rkList"></div></div></div></section>
+<section class="halaman" id="r-preferensi"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
+  <div class="kk-card" style="text-align:left"><h2 class="ak-judul">Preferensi</h2>
+    <label class="pr-baris"><span><b>Muat ulang otomatis</b><small>Perbarui peta dan daftar laporan di Beranda tiap 60 detik.</small></span><input type="checkbox" id="prAuto"></label>
+    <label class="pr-baris"><span><b>Ingat kota pilihan</b><small>Simpan kota terakhir di perangkat ini.</small></span><input type="checkbox" id="prKota"></label>
+  </div></div></section>
+<section class="halaman" id="r-informasi"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
+  <div class="kk-card info-teks" style="text-align:left"><h2 class="ak-judul">Informasi</h2>
+    <p><b>KotaKita – Lapor Jalan</b> (prototipe). Laporkan kerusakan jalan lewat foto, lokasi, dan keterangan; pantau statusnya dari Baru hingga Selesai.</p>
+    <p><b>Mode tamu</b> hanya menampilkan pratinjau Beranda. Lokasi, Upload, dan Laporan membutuhkan akun.</p>
+    <p><b>Poin</b>: +10 per laporan terkirim dan +20 saat laporan selesai ditangani.</p>
+    <p>Peta dan pencarian memakai OpenStreetMap, Nominatim, dan Photon; data laporan disimpan di Supabase.</p></div></div></section>
 
 <!-- ================= 1. REGISTER ================= -->
 <section class="halaman" id="r-register">
@@ -430,6 +563,10 @@
 <!-- ================= DASHBOARD KOTAKITA ================= -->
 <section class="halaman" id="r-kotakita">
   <main class="kk-main">
+    <div class="gst-banner" id="kkGuestBanner" hidden>
+      <span>👋 Anda melihat <b>pratinjau sebagai tamu</b>. Masuk untuk memakai Lokasi, Upload, dan Laporan.</span>
+      <span class="acts"><a class="btn btn-kecil" href="#/profil">Masuk</a><a class="btn btn-kecil btn-warning" href="#/register">Daftar</a></span>
+    </div>
     <div class="kk-grid">
       <div class="kk-card kk-mapcard" id="kkMapCard">
         <div class="kk-searchbar">
@@ -635,6 +772,11 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const BASE_URL = location.origin + location.pathname;   // tujuan redirect link email (tanpa hash)
 
+/* Login simulasi (demo): set MODE_DEMO = false untuk menonaktifkan sepenuhnya */
+const MODE_DEMO = true;
+const DEMO = { username: 'demo', password: 'demo1234' };
+const KUNCI_DEMO = 'kk_demo_sesi', KUNCI_DEMO_PROFIL = 'kk_demo_profil', KUNCI_DEMO_LAP = 'kk_demo_laporan';
+
 /* =====================================================================
    Validasi input
    ===================================================================== */
@@ -693,14 +835,21 @@ document.querySelectorAll('.pw-toggle').forEach(b => b.addEventListener('click',
 let modeReset = false;            // true hanya saat datang dari link reset password di email
 let pesanLoginBerikut = null;     // pesan yang ditampilkan di halaman login berikutnya
 let profil = null;
+let pesanGuestBerikut = null;     // pesan di halaman Profil (tamu) setelah diarahkan ke login
 
 const RUTE = {
     '/register':    { el: 'r-register' },
     '/login':       { el: 'r-login' },
     '/lupa':        { el: 'r-lupa' },
     '/reset':       { el: 'r-reset' },
+    '/welcome':     { el: 'r-welcome' },
     '/foto-profil': { el: 'r-foto-profil', butuhLogin: true },
-    '/dashboard':   { el: 'r-kotakita',    butuhLogin: true, nav: true },
+    '/dashboard':   { el: 'r-kotakita',    nav: true },                       // tamu boleh (pratinjau)
+    '/profil':      { el: null, dinamis: true, nav: true },                   // tamu: login, user: profil
+    '/akun':        { el: 'r-akun',        butuhLogin: true, nav: true },
+    '/rekaman':     { el: 'r-rekaman',     butuhLogin: true, nav: true },
+    '/preferensi':  { el: 'r-preferensi',  butuhLogin: true, nav: true },
+    '/informasi':   { el: 'r-informasi',   butuhLogin: true, nav: true },
     '/upload':      { el: 'r-upload',      butuhLogin: true, nav: true },
     '/laporan':     { el: 'r-laporan',     butuhLogin: true, nav: true },
     '/konfirmasi':  { el: 'r-konfirmasi',  butuhLogin: true, nav: true },   // #/konfirmasi?kode=LJ-XXXXXXXX
@@ -720,17 +869,19 @@ async function router() {
     const [pathMentah, qs = ''] = hashAsli.replace(/^#/, '').split('?');
     let path = pathMentah;
     rutePar = new URLSearchParams(qs);
-    const { data: { session } } = await db.auth.getSession();
+    const session = await ambilSesi();
+    KK.guest = !session;
 
-    if (!RUTE[path]) path = session ? '/dashboard' : '/login';
+    if (!RUTE[path]) path = session ? '/dashboard' : '/welcome';
     if (path === '/reset' && !(modeReset && session)) path = '/login';
-    if (RUTE[path].butuhLogin && !session) path = '/login';
-    if (session && !modeReset && ['/login', '/register', '/lupa'].includes(path)) path = '/dashboard';
+    if (RUTE[path].butuhLogin && !session) { if (!pesanGuestBerikut) pesanGuestBerikut = 'Silakan masuk untuk mengakses fitur ini.'; path = '/profil'; }
+    if (session && !modeReset && ['/login', '/register', '/lupa', '/welcome'].includes(path)) path = '/dashboard';
 
     const hashAkhir = '#' + path + (path === pathMentah && qs ? '?' + qs : '');
     if (hashAsli !== hashAkhir) history.replaceState(null, '', hashAkhir);
 
-    document.querySelectorAll('.halaman').forEach(h => h.classList.toggle('aktif', h.id === RUTE[path].el));
+    const elId = RUTE[path].dinamis ? (session ? 'r-profil-user' : 'r-profil-guest') : RUTE[path].el;
+    document.querySelectorAll('.halaman').forEach(h => h.classList.toggle('aktif', h.id === elId));
     window.scrollTo(0, 0);
 
     // Navbar KotaKita hanya tampil di halaman setelah login
@@ -751,6 +902,10 @@ async function router() {
     if (path === '/upload') await masukUpload();
     if (path === '/konfirmasi') await masukKonfirmasi();
     if (path === '/detail') await masukDetail();
+    if (path === '/profil') await masukProfil(session);
+    if (path === '/akun') await masukAkun(session);
+    if (path === '/rekaman') await masukRekaman(session);
+    if (path === '/preferensi') masukPreferensi();
 }
 
 window.addEventListener('hashchange', router);
@@ -760,6 +915,8 @@ db.auth.onAuthStateChange((event) => {
 });
 
 async function muatProfil(session) {
+    if (!session) { profil = null; return null; }
+    if (adalahDemo(session)) { profil = { ...profilDemo() }; return profil; }
     const { data } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
     profil = data || null;
     return profil;
@@ -886,27 +1043,39 @@ formReg.addEventListener('submit', async e => {
 const formLogin = $('formLogin');
 let gagalBeruntun = 0, kunciSampai = 0;
 
-formLogin.addEventListener('submit', async e => {
-    e.preventDefault();
-    bersihkanErr(formLogin);
-    notice('notLogin', '');
+async function prosesLogin(form, uEl, pEl, btn, notId) {
+    bersihkanErr(form);
+    notice(notId, '');
 
-    const username = $('logUser').value.trim().toLowerCase();
-    const password = $('logPass').value;
+    const username = uEl.value.trim().toLowerCase();
+    const password = pEl.value;
     let valid = true;
-    if (!username) { setErr(formLogin, 'username', 'Username wajib diisi.'); valid = false; }
-    else if (!RE_USERNAME.test(username)) { setErr(formLogin, 'username', 'Format username tidak valid.'); valid = false; }
-    if (!password) { setErr(formLogin, 'password', 'Password wajib diisi.'); valid = false; }
+    if (!username) { setErr(form, 'username', 'Username wajib diisi.'); valid = false; }
+    else if (!RE_USERNAME.test(username)) { setErr(form, 'username', 'Format username tidak valid.'); valid = false; }
+    if (!password) { setErr(form, 'password', 'Password wajib diisi.'); valid = false; }
     if (!valid) return;
 
     if (Date.now() < kunciSampai) {
         alert(`Terlalu banyak percobaan gagal. Coba lagi dalam ${Math.ceil((kunciSampai - Date.now()) / 1000)} detik.`);
         return;
     }
+    const gagal = () => {
+        gagalBeruntun++;
+        if (gagalBeruntun >= 5) { kunciSampai = Date.now() + 30000; gagalBeruntun = 0; }
+        alert('password itu salah');   // pesan sama untuk username tak dikenal / password salah
+    };
 
-    const btn = $('btnMasuk');
     btn.disabled = true; btn.textContent = 'Memeriksa...';
     try {
+        // Login simulasi (tanpa server)
+        if (MODE_DEMO && username === DEMO.username) {
+            if (password !== (profilDemo().password || DEMO.password)) { gagal(); return; }
+            simpanLS(KUNCI_DEMO, { aktif: true });
+            gagalBeruntun = 0; pEl.value = '';
+            go('/foto-profil');
+            return;
+        }
+
         // Cari identitas login (email/telepon) milik username ini
         const { data: kontak, error: eK } = await db.rpc('kontak_dari_username', { p_username: username });
         if (eK) throw eK;
@@ -924,24 +1093,22 @@ formLogin.addEventListener('submit', async e => {
                 alert('Email Anda belum dikonfirmasi. Buka email konfirmasi yang kami kirim, lalu coba masuk lagi.');
             } else if (hasil.error.status === 429) {
                 alert('Terlalu banyak percobaan. Coba lagi beberapa saat lagi.');
-            } else {
-                gagalBeruntun++;
-                if (gagalBeruntun >= 5) { kunciSampai = Date.now() + 30000; gagalBeruntun = 0; }
-                alert('password itu salah');   // pesan sama untuk username tak dikenal / password salah
-            }
+            } else gagal();
             return;
         }
 
         gagalBeruntun = 0;
-        $('logPass').value = '';
+        pEl.value = '';
         go('/foto-profil');
     } catch (err) {
         console.error(err);
-        notice('notLogin', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
+        notice(notId, 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
     } finally {
         btn.disabled = false; btn.textContent = 'Masuk';
     }
-});
+}
+formLogin.addEventListener('submit', e => { e.preventDefault(); prosesLogin(formLogin, $('logUser'), $('logPass'), $('btnMasuk'), 'notLogin'); });
+$('formProfilGuest').addEventListener('submit', e => { e.preventDefault(); prosesLogin($('formProfilGuest'), $('pgUser'), $('pgPass'), $('btnPgMasuk'), 'notPg'); });
 
 /* ---------- Lupa kata sandi ---------- */
 const formLupa = $('formLupa');
@@ -1072,19 +1239,9 @@ $('btnMulai').addEventListener('click', async () => {
 
     btn.disabled = true; btn.textContent = 'Menyimpan...';
     try {
-        const { data: { session } } = await db.auth.getSession();
-        if (!session) { go('/login'); return; }
-        const uid = session.user.id;
-        const path = `${uid}/avatar.jpg`;
-
-        const { error: eUp } = await db.storage.from('avatar')
-            .upload(path, fotoProfilDipilih, { contentType: 'image/jpeg', upsert: true });
-        if (eUp) throw eUp;
-
-        const { data: u } = db.storage.from('avatar').getPublicUrl(path);
-        const url = `${u.publicUrl}?v=${Date.now()}`;      // paksa browser memuat ulang foto baru
-        const { error: eDb } = await db.from('profiles').update({ foto_url: url }).eq('id', uid);
-        if (eDb) throw eDb;
+        const session = await ambilSesi();
+        if (!session) { go('/profil'); return; }
+        await unggahAvatar(fotoProfilDipilih, session);
 
         fotoProfilDipilih = null;
         go('/dashboard');
@@ -1183,15 +1340,19 @@ async function jalankanReverse() {
 /* ---------- Navbar ---------- */
 function inisial(nama) { return (nama || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase(); }
 function renderNavbar(session) {
-    const nama = (profil && profil.nama) || session.user.email || 'Pengguna';
+    const guest = !session;
+    const nama = guest ? 'Tamu' : ((profil && profil.nama) || session.user.email || 'Pengguna');
     $('umNama').textContent = nama;
-    $('umUser').textContent = profil ? '@' + profil.username : '';
+    $('umUser').textContent = guest ? 'Belum masuk' : (profil ? '@' + profil.username : '');
     const b = $('avatarBtn');
-    if (profil && profil.foto_url) b.innerHTML = `<img src="${esc(profil.foto_url)}" alt="">`;
+    if (guest) b.textContent = '👤';
+    else if (profil && profil.foto_url) b.innerHTML = `<img src="${esc(profil.foto_url)}" alt="">`;
     else b.textContent = inisial(nama);
+    ['umProfil', 'umFoto', 'umKeluar'].forEach(i => { $(i).hidden = guest; });
+    ['umMasuk', 'umDaftar'].forEach(i => { $(i).hidden = !guest; });
 }
 function setMenuAktif(path) {
-    const peta = { '/dashboard': 'beranda', '/upload': 'upload', '/konfirmasi': 'upload', '/laporan': 'laporan', '/detail': 'laporan' };
+    const peta = { '/dashboard': 'beranda', '/upload': 'upload', '/konfirmasi': 'upload', '/laporan': 'laporan', '/detail': 'laporan', '/profil': 'profil', '/akun': 'profil', '/rekaman': 'profil', '/preferensi': 'profil', '/informasi': 'profil' };
     let aktif = peta[path];
     if (path === '/dashboard' && pendingScroll === 'lokasi') aktif = 'lokasi';
     document.querySelectorAll('#kkMenu a').forEach(a => a.classList.toggle('aktif', a.dataset.m === aktif));
@@ -1200,6 +1361,7 @@ $('kkMenu').addEventListener('click', e => {
     const a = e.target.closest('a');
     if (!a || !['beranda', 'lokasi'].includes(a.dataset.m)) return;
     e.preventDefault();
+    if (KK.guest && a.dataset.m === 'lokasi') { arahLogin('Masuk untuk memakai fitur Lokasi.'); return; }
     const sudahDiBeranda = location.hash === '#/dashboard';
     pendingScroll = a.dataset.m;
     if (sudahDiBeranda) { setMenuAktif('/dashboard'); lakukanScroll(); } else go('/dashboard');
@@ -1222,17 +1384,22 @@ document.addEventListener('click', e => {
 });
 $('avatarBtn').addEventListener('click', () => { $('avatarMenu').hidden = !$('avatarMenu').hidden; });
 $('umFoto').addEventListener('click', () => go('/foto-profil'));
-$('umKeluar').addEventListener('click', async () => {
+$('umKeluar').addEventListener('click', keluar);
+$('umProfil').addEventListener('click', () => go('/profil'));
+$('umMasuk').addEventListener('click', () => go('/profil'));
+$('umDaftar').addEventListener('click', () => go('/register'));
+async function keluar() {
     hentikanAutoRefresh();
-    await db.auth.signOut();
+    try { localStorage.removeItem(KUNCI_DEMO); } catch (e) { /* abaikan */ }
+    try { await db.auth.signOut(); } catch (e) { console.warn(e); }
     upReset();
     profil = null; KK.laporan = []; KK.dimuat = false;
     KK.anchor = null; KK.kota = null; KK.kotaDipulihkan = false;
     if (KK.map && KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; }
     try { localStorage.removeItem('kk_kota_pilihan'); } catch (e) { /* abaikan */ }
     $('kotaLabel').textContent = 'Pilih kota'; $('kkCari').value = ''; $('kkCariHapus').hidden = true;
-    go('/login');
-});
+    go('/welcome');
+}
 
 /* ---------- Dropdown kota + fuzzy search ---------- */
 // Sumber data wilayah = API v2 emsifa. JANGAN pakai API lama (emsifa.github.io/api-wilayah-indonesia/api/...):
@@ -1412,7 +1579,10 @@ async function bukaDropdownKota() {
     }
     renderDaftarKota();
 }
-$('kotaBtn').addEventListener('click', () => { $('kotaPanel').hidden ? bukaDropdownKota() : tutupSemuaDropdown(); });
+$('kotaBtn').addEventListener('click', () => {
+    if (KK.guest) { arahLogin('Masuk untuk memilih kota dan memakai fitur Lokasi.'); return; }
+    $('kotaPanel').hidden ? bukaDropdownKota() : tutupSemuaDropdown();
+});
 $('kotaCari').addEventListener('input', renderDaftarKota);
 $('kotaCari').addEventListener('keydown', e => {
     if (e.key === 'Escape') { tutupSemuaDropdown(); return; }
@@ -1465,7 +1635,7 @@ async function pilihKota(item, simpan = true) {
             throw e;
         });
         KK.kota = { ...item, ...g };
-        if (simpan) simpanLS('kk_kota_pilihan', { nama: item.nama, inti: item.inti, prov: item.prov, jenis: item.jenis, g });
+        if (simpan && PREF.ingatKota) simpanLS('kk_kota_pilihan', { nama: item.nama, inti: item.inti, prov: item.prov, jenis: item.jenis, g });
         terapkanKota(g, item.nama);
         setStatusPeta('');
     } catch (e) {
@@ -1562,6 +1732,7 @@ function isuTerdekat(n = 5) {
 }
 function renderIsu() {
     const box = $('isuList'), sub = $('isuSub');
+    if (KK.guest) { sub.textContent = 'Pratinjau tamu'; box.innerHTML = '<div class="kk-info">🔒 Masuk untuk melihat isu terdekat dari lokasi Anda.<br><br><a class="btn btn-kecil" href="#/profil" style="display:inline-block;text-decoration:none">Masuk</a></div>'; return; }
     if (!KK.dimuat) { sub.textContent = ''; box.innerHTML = '<div class="kk-info">⏳ Memuat laporan…</div>'; return; }
     if (KK.errLaporan) { sub.textContent = ''; box.innerHTML = `<div class="kk-info">❌ ${esc(KK.errLaporan)}</div>`; return; }
     if (!KK.anchor) { sub.textContent = ''; box.innerHTML = '<div class="kk-info">Pilih kota, cari nama jalan, atau tekan "Lokasi saya" untuk melihat isu terdekat.</div>'; return; }
@@ -1660,6 +1831,7 @@ function pilihJalan(h) {
     setAnchor({ lat: h.lat, lon: h.lon, label: h.nama + (h.sub ? ', ' + h.sub : ''), marker: true });
 }
 $('btnLokasiSaya').addEventListener('click', () => {
+    if (KK.guest) { arahLogin('Masuk untuk memakai fitur Lokasi.'); return; }
     if (!navigator.geolocation) { setStatusPeta('Browser Anda tidak mendukung GPS.'); return; }
     setStatusPeta('⏳ Mencari lokasi Anda…');
     navigator.geolocation.getCurrentPosition(pos => {
@@ -1674,12 +1846,19 @@ $('btnRefresh').addEventListener('click', muatLaporanKK);
 function hentikanAutoRefresh() { if (KK.timer) { clearInterval(KK.timer); KK.timer = null; } }
 async function masukKotaKita() {
     initPeta();
+    const mode = KK.guest ? 'guest' : 'user';
+    if (KK.modeTerakhir !== mode) {      // ganti tamu <-> user: bersihkan state lokasi
+        KK.modeTerakhir = mode; KK.kotaDipulihkan = false; KK.anchor = null; KK.kota = null;
+        if (KK.map) { if (KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; } KK.map.setView([-2.5489, 118.0149], 5); }
+        $('kkCari').value = ''; $('kkCariHapus').hidden = true; $('kotaLabel').textContent = 'Pilih kota';
+    }
+    terapkanModeTamu();
     if (KK.map) KK.map.invalidateSize();
-    if (!KK.kotaDipulihkan) { KK.kotaDipulihkan = true; pulihkanKota(); }
+    if (!KK.kotaDipulihkan) { KK.kotaDipulihkan = true; if (!KK.guest) pulihkanKota(); }
     renderIsu();
     await muatLaporanKK();
     hentikanAutoRefresh();
-    KK.timer = setInterval(muatLaporanKK, 60000);
+    if (PREF.autoRefresh) KK.timer = setInterval(muatLaporanKK, 60000);
     if (pendingScroll) lakukanScroll();
 }
 
@@ -1690,13 +1869,9 @@ async function muatLaporanSaya() {
     const box = $('daftarSaya');
     box.textContent = 'Memuat...';
     try {
-        const { data: { session } } = await db.auth.getSession();
+        const session = await ambilSesi();
         if (!session) return;
-        const { data, error } = await db.from('laporan_jalan')
-            .select('kode,tingkat,status,waktu,deskripsi,catatan_admin,foto_url')
-            .eq('user_id', session.user.id)
-            .order('waktu', { ascending: false }).limit(50);
-        if (error) throw error;
+        const data = await ambilLaporanSaya(session);
         if (!data.length) { box.innerHTML = '<p style="color:#777">Belum ada laporan. Buat laporan pertama Anda lewat menu Upload.</p>'; return; }
         box.innerHTML = data.map(r => {
             const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
@@ -1961,8 +2136,9 @@ async function upKonfirmasi(e) {
     const btn = $('upBtnKonfirmasi');
     btn.disabled = true; btn.textContent = 'Mengirim…';
     try {
-        const { data: { session } } = await db.auth.getSession();
-        if (!session) { go('/login'); return; }
+        const session = await ambilSesi();
+        if (!session) { go('/profil'); return; }
+        if (adalahDemo(session)) { await kirimDemo(); return; }
 
         const foto = await kompres(UP.foto);
         const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
@@ -2016,6 +2192,8 @@ function kodeDariRute() {
     return /^[A-Z0-9-]{4,24}$/.test(k) ? k : null;
 }
 async function ambilDetail(kode) {
+    const sDemo = await ambilSesi();
+    if (adalahDemo(sDemo)) return demoLaporan().find(x => x.kode === kode) || null;
     const { data, error } = await db.rpc('detail_laporan', { p_kode: kode });
     if (error) throw error;
     return (data && data[0]) || null;
@@ -2100,6 +2278,209 @@ function renderDetail(d) {
 
 $('dtKembali').addEventListener('click', () => {
     if (jumlahNavigasi > 1 && history.length > 1) history.back(); else go('/laporan');
+});
+
+/* =====================================================================
+   FITUR BARU: sesi simulasi, mode tamu, Profil, Akun, Rekaman, Preferensi
+   ===================================================================== */
+let PREF = { autoRefresh: true, ingatKota: true, ...(bacaLS('kk_pref_v1') || {}) };
+const POIN = { kirim: 10, selesai: 20 };
+const blobKeDataUrl = b => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(b); });
+
+function profilDemo() {
+    let p = bacaLS(KUNCI_DEMO_PROFIL);
+    if (!p) {
+        p = { id: 'demo-user', nama: 'Pengguna Demo', username: DEMO.username, email: 'demo@kotakita.id', telp: '', kota: 'Bandung', foto_url: null, password: DEMO.password, created_at: new Date().toISOString() };
+        simpanLS(KUNCI_DEMO_PROFIL, p);
+    }
+    return p;
+}
+const demoLaporan = () => bacaLS(KUNCI_DEMO_LAP) || [];
+function adalahDemo(s) { return !!(s && s.user && s.user.demo); }
+async function ambilSesi() {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) return session;
+    if (MODE_DEMO && (bacaLS(KUNCI_DEMO) || {}).aktif) {
+        const p = profilDemo();
+        return { user: { id: p.id, email: p.email, phone: p.telp, created_at: p.created_at, demo: true } };
+    }
+    return null;
+}
+function arahLogin(pesan) { pesanGuestBerikut = pesan || null; go('/profil'); }
+
+function terapkanModeTamu() {
+    const g = KK.guest;
+    $('kkGuestBanner').hidden = !g;
+    $('kkCari').readOnly = g;
+    $('kkCari').placeholder = g ? '🔒 Masuk untuk mencari jalan' : 'Cari nama jalan...';
+    $('btnLokasiSaya').textContent = g ? '🔒 Lokasi saya' : '🎯 Lokasi saya';
+    if (g) $('kotaLabel').textContent = 'Pilih kota 🔒';
+}
+$('kkCari').addEventListener('focus', () => { if (KK.guest) { $('kkCari').blur(); arahLogin('Masuk untuk mencari jalan dan memakai fitur Lokasi.'); } });
+$('wlMulai').addEventListener('click', () => go('/dashboard'));
+$('wlMasuk').addEventListener('click', () => go('/login'));
+$('pgDemo').hidden = !MODE_DEMO;
+
+async function ambilLaporanSaya(session, batas = 50) {
+    if (adalahDemo(session)) return demoLaporan().slice(0, batas);
+    const { data, error } = await db.from('laporan_jalan')
+        .select('kode,tingkat,status,waktu,deskripsi,catatan_admin,foto_url')
+        .eq('user_id', session.user.id).order('waktu', { ascending: false }).limit(batas);
+    if (error) throw error;
+    return data || [];
+}
+async function kirimDemo() {      // laporan simulasi: disimpan lokal, tidak dikirim ke server
+    const foto = await kompres(UP.foto, 640, 0.7);
+    const kode = buatKode();
+    const lap = demoLaporan();
+    lap.unshift({ kode, latitude: UP.lat, longitude: UP.lon, foto_url: await blobKeDataUrl(foto),
+        alamat: $('upAlamat').value.trim().replace(/\s+/g, ' '), kategori: UP.kategori, tingkat: UP.tingkat,
+        deskripsi: $('upDeskripsi').value.trim(), status: 'baru', waktu: new Date().toISOString(), catatan_admin: null, jumlah_pelapor: 1 });
+    try { localStorage.setItem(KUNCI_DEMO_LAP, JSON.stringify(lap.slice(0, 20))); } catch (e) { throw new Error('penyimpanan lokal penuh'); }
+    upReset();
+    go(`/konfirmasi?kode=${encodeURIComponent(kode)}`);
+}
+async function unggahAvatar(blob, session) {
+    if (adalahDemo(session)) { const p = profilDemo(); p.foto_url = await blobKeDataUrl(blob); simpanLS(KUNCI_DEMO_PROFIL, p); return p.foto_url; }
+    const uid = session.user.id, path = `${uid}/avatar.jpg`;
+    const { error: eUp } = await db.storage.from('avatar').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+    if (eUp) throw eUp;
+    const { data: u } = db.storage.from('avatar').getPublicUrl(path);
+    const url = `${u.publicUrl}?v=${Date.now()}`;
+    const { error: eDb } = await db.from('profiles').update({ foto_url: url }).eq('id', uid);
+    if (eDb) throw eDb;
+    return url;
+}
+
+/* ---------- Profil ---------- */
+async function masukProfil(session) {
+    if (!session) { notice('notPg', pesanGuestBerikut || '', 'info'); pesanGuestBerikut = null; return; }
+    const p = profil || {};
+    const nama = p.nama || session.user.email || 'Pengguna';
+    $('pfAvatar').innerHTML = p.foto_url ? `<img src="${esc(p.foto_url)}" alt="">` : esc(inisial(nama));
+    $('pfNama').textContent = nama;
+    $('pfUser').textContent = p.username ? '@' + p.username : '';
+    $('pfKontak').textContent = session.user.email || p.email || session.user.phone || p.telp || '';
+    const t = new Date(p.created_at || session.user.created_at);
+    $('pfAktif').textContent = isNaN(t) ? '' : 'Aktif sejak ' + t.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const isi = v => ['pfTotal', 'pfProses', 'pfSelesai', 'pfPoin'].forEach((id, i) => { $(id).textContent = v[i]; });
+    isi(['…', '…', '…', '…']);
+    try {
+        const d = await ambilLaporanSaya(session, 500);
+        const sel = d.filter(x => x.status === 'selesai').length, pro = d.filter(x => x.status === 'diproses').length;
+        isi([d.length, pro, sel, d.length * POIN.kirim + sel * POIN.selesai]);
+    } catch (e) { isi(['-', '-', '-', '-']); }
+}
+$('pfKeluar').addEventListener('click', () => { if (confirm('Keluar dari akun?')) keluar(); });
+
+/* ---------- Akun ---------- */
+const AKF = [['nama', 'akNama', 'Nama', 'text', 'name'], ['email', 'akEmail', 'Email', 'email', 'email'], ['telp', 'akTelp', 'No. Telepon', 'tel', 'tel'],
+             ['username', 'akUser', 'Username', 'text', 'username'], ['password', 'akPass', 'Kata Sandi', 'password', 'new-password']];
+const IKON_EDIT = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+$('akFields').innerHTML = AKF.map(([k, id, lbl, tipe, ac]) =>
+    `<div class="field" data-f="${k}"><label for="${id}">${lbl}</label><div class="ak-in"><input id="${id}" type="${tipe}" autocomplete="${ac}" maxlength="72" readonly>` +
+    `<button type="button" class="ak-edit" data-k="${k}" aria-label="Ubah ${lbl}">${IKON_EDIT}</button></div><div class="err"></div></div>`).join('');
+const AK = { foto: null, edit: {}, asli: {} };
+
+async function masukAkun(session) {
+    AK.foto = null; AK.edit = {}; $('akInFoto').value = '';
+    const p = profil || {};
+    AK.asli = { nama: p.nama || '', email: session.user.email || p.email || '', telp: session.user.phone || p.telp || '', username: p.username || '', password: '••••••••' };
+    AKF.forEach(([k, id]) => { const i = $(id); i.value = AK.asli[k]; i.readOnly = true; i.placeholder = ''; });
+    $('akForm').querySelectorAll('.ak-edit').forEach(b => b.classList.remove('on'));
+    bersihkanErr($('akForm')); notice('notAk', '');
+    $('akAvatar').innerHTML = p.foto_url ? `<img src="${esc(p.foto_url)}" alt="">` : esc(inisial(AK.asli.nama || session.user.email || '?'));
+}
+$('akForm').addEventListener('click', e => {
+    const b = e.target.closest('.ak-edit'); if (!b) return;
+    const k = b.dataset.k, inp = $(AKF.find(f => f[0] === k)[1]);
+    AK.edit[k] = !AK.edit[k];
+    inp.readOnly = !AK.edit[k]; b.classList.toggle('on', !!AK.edit[k]);
+    inp.value = (k === 'password' && AK.edit[k]) ? '' : AK.asli[k];      // klik lagi = batal
+    inp.placeholder = (k === 'password' && AK.edit[k]) ? 'Kata sandi baru' : '';
+    if (AK.edit[k]) inp.focus();
+});
+$('akFotoBtn').addEventListener('click', () => $('akInFoto').click());
+$('akAvatar').addEventListener('click', () => $('akInFoto').click());
+$('akInFoto').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    if (!f.type.startsWith('image/') || f.size > BATAS_FOTO) { notice('notAk', 'Pilih file gambar, maksimal 15 MB.', 'err'); return; }
+    try {
+        AK.foto = await cropAvatar(f);
+        $('akAvatar').innerHTML = `<img src="${URL.createObjectURL(AK.foto)}" alt="">`;
+        notice('notAk', 'Foto dipilih. Tekan Simpan untuk menyimpannya.', 'info');
+    } catch (err) { notice('notAk', 'Foto tidak bisa dibaca. Coba foto lain.', 'err'); }
+});
+$('akForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = $('akForm'), a = AK.asli, v = {};
+    bersihkanErr(f); notice('notAk', '');
+    const session = await ambilSesi();
+    if (!session) { arahLogin('Sesi berakhir. Silakan masuk lagi.'); return; }
+    const demo = adalahDemo(session);
+    let ok = true;
+    const salah = (k, m) => { setErr(f, k, m); ok = false; };
+    const nilai = k => $(AKF.find(x => x[0] === k)[1]).value;
+
+    if (AK.edit.nama) { const n = nilai('nama').trim().replace(/\s+/g, ' '); if (!RE_NAMA.test(n)) salah('nama', 'Nama 2–60 karakter, hanya huruf, spasi, titik, apostrof, atau strip.'); else if (n !== a.nama) v.nama = n; }
+    if (AK.edit.email) { const m = nilai('email').trim().toLowerCase(); if (!RE_EMAIL.test(m)) salah('email', 'Format email tidak valid.'); else if (m !== a.email.toLowerCase()) v.email = m; }
+    if (AK.edit.telp) { const t = normalisasiTelp(nilai('telp')); if (!t) salah('telp', 'Nomor telepon tidak valid. Contoh: 08123456789.'); else if (t !== normalisasiTelp(a.telp)) v.telp = t; }
+    if (AK.edit.username) {
+        const u = nilai('username').trim().toLowerCase();
+        if (!RE_USERNAME.test(u)) salah('username', 'Username 4–20 karakter: huruf kecil, angka, _ atau ., diawali huruf.');
+        else if (u !== a.username) {
+            if (!demo) { const { data: ada } = await db.rpc('username_tersedia', { p_username: u }); if (ada === false) salah('username', 'Username sudah dipakai.'); else v.username = u; }
+            else v.username = u;
+        }
+    }
+    if (AK.edit.password) { const pw = cekPassword(nilai('password')); if (pw) salah('password', pw); else v.password = nilai('password'); }
+    if (!ok) { f.querySelector('.salah input')?.focus(); return; }
+    if (!Object.keys(v).length && !AK.foto) { notice('notAk', 'Tidak ada perubahan untuk disimpan.', 'info'); return; }
+
+    const btn = $('btnAkSimpan');
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    let pesan = 'Perubahan berhasil disimpan.';
+    try {
+        if (demo) {
+            const p = profilDemo();
+            ['nama', 'email', 'telp', 'username', 'password'].forEach(k => { if (v[k]) p[k] = v[k]; });
+            if (AK.foto) p.foto_url = await blobKeDataUrl(AK.foto);
+            simpanLS(KUNCI_DEMO_PROFIL, p);
+        } else {
+            if (AK.foto) await unggahAvatar(AK.foto, session);
+            const up = {}; if (v.nama) up.nama = v.nama; if (v.username) up.username = v.username;
+            if (Object.keys(up).length) { const { error } = await db.from('profiles').update(up).eq('id', session.user.id); if (error) throw error; }
+            if (v.email) { const { error } = await db.auth.updateUser({ email: v.email }, { emailRedirectTo: BASE_URL }); if (error) throw error; pesan += ' Cek email baru Anda untuk mengonfirmasi alamat tersebut.'; }
+            if (v.telp) { const { error } = await db.auth.updateUser({ phone: v.telp }); if (error) throw error; }
+            if (v.password) { const { error } = await db.auth.updateUser({ password: v.password }); if (error) throw error; }
+        }
+        const s2 = await ambilSesi();
+        await muatProfil(s2); renderNavbar(s2); await masukAkun(s2);
+        notice('notAk', pesan, 'ok');
+    } catch (err) {
+        console.error(err);
+        if (err.code === '23505') setErr(f, 'username', 'Username sudah dipakai.');
+        notice('notAk', 'Gagal menyimpan: ' + (err.message || 'periksa koneksi.'), 'err');
+    } finally { btn.disabled = false; btn.textContent = 'Simpan'; }
+});
+
+/* ---------- Rekaman & Preferensi ---------- */
+async function masukRekaman(session) {
+    const box = $('rkList'); box.textContent = 'Memuat...';
+    try {
+        const d = await ambilLaporanSaya(session, 100);
+        box.innerHTML = d.length ? d.map(r => {
+            const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
+            return `<a class="rk-item" href="#/detail?kode=${encodeURIComponent(r.kode)}"><b style="font-family:monospace">${esc(r.kode)}</b> <span class="badge ${st}">${LABEL_STATUS[st]}</span>` +
+                `<small>${esc(new Date(r.waktu).toLocaleString('id-ID'))}${r.deskripsi ? ' · ' + esc(r.deskripsi.slice(0, 70)) : ''}</small></a>`;
+        }).join('') : '<p class="kk-info">Belum ada rekaman. Buat laporan pertama Anda lewat menu Upload.</p>';
+    } catch (err) { box.textContent = 'Gagal memuat rekaman: ' + (err.message || 'periksa koneksi.'); }
+}
+function masukPreferensi() { $('prAuto').checked = PREF.autoRefresh; $('prKota').checked = PREF.ingatKota; }
+$('prAuto').addEventListener('change', e => { PREF.autoRefresh = e.target.checked; simpanLS('kk_pref_v1', PREF); if (!PREF.autoRefresh) hentikanAutoRefresh(); });
+$('prKota').addEventListener('change', e => {
+    PREF.ingatKota = e.target.checked; simpanLS('kk_pref_v1', PREF);
+    if (!PREF.ingatKota) { try { localStorage.removeItem('kk_kota_pilihan'); } catch (x) { /* abaikan */ } }
 });
 
 /* =====================================================================
