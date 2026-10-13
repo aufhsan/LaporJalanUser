@@ -281,6 +281,20 @@
         .pr-baris input { width: 22px; height: 22px; accent-color: #0a2463; flex-shrink: 0; }
         .info-teks { font-size: 14.5px; line-height: 1.6; color: #34425f; }
         @media (max-width: 640px) { .pf-wrap { padding: 14px; } .pf-stat { grid-template-columns: repeat(2, 1fr); } }
+        /* ===== Chatbot Pusat Bantuan ===== */
+        .chat-container { display: flex; flex-direction: column; height: 60vh; max-height: 550px; border: 1.5px solid #d3def5; border-radius: 12px; overflow: hidden; background: #fff; margin-top: 10px; }
+        .chat-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f9fbfd; }
+        .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
+        .chat-bot { align-self: flex-start; background: #eef3fc; color: #0a2463; border-bottom-left-radius: 0; }
+        .chat-user { align-self: flex-end; background: #0a2463; color: #fff; border-bottom-right-radius: 0; }
+        .chat-input-area { display: flex; padding: 12px; background: #fff; border-top: 1.5px solid #d3def5; gap: 8px; }
+        .chat-input { flex: 1; padding: 10px 14px; border: 1.5px solid #d3def5; border-radius: 20px; font-size: 14.5px; outline: none; font-family: inherit; }
+        .chat-input:focus { border-color: #0a2463; }
+        .chat-btn { background: #0a2463; color: #fff; border: none; padding: 0 18px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .chat-btn:hover { background: #1c4fb8; }
+        .chat-quick { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; background: #f9fbfd; border-top: 1.5px solid #e8eef9; }
+        .chat-chip { background: #fff; border: 1px solid #b9ccf1; color: #0a2463; padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; white-space: nowrap; font-weight: 600; }
+        .chat-chip:hover { background: #eef3fc; border-color: #3a6fd8; }
     </style>
 </head>
 <body>
@@ -398,11 +412,29 @@
     <label class="pr-baris"><span><b>Ingat kota pilihan</b><small>Simpan kota terakhir di perangkat ini.</small></span><input type="checkbox" id="prKota"></label>
   </div></div></section>
 <section class="halaman" id="r-informasi"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
-  <div class="kk-card info-teks" style="text-align:left"><h2 class="ak-judul">Informasi</h2>
-    <p><b>KotaKita – Lapor Jalan</b> (prototipe). Laporkan kerusakan jalan lewat foto, lokasi, dan keterangan; pantau statusnya dari Baru hingga Selesai.</p>
-    <p><b>Mode tamu</b> hanya menampilkan pratinjau Beranda. Lokasi, Upload, dan Laporan membutuhkan akun.</p>
-    <p><b>Poin</b>: +10 per laporan terkirim dan +20 saat laporan selesai ditangani.</p>
-    <p>Peta dan pencarian memakai OpenStreetMap, Nominatim, dan Photon; data laporan disimpan di Supabase.</p></div></div></section>
+  <div class="kk-card" style="text-align:left; padding:16px;">
+    <h2 class="ak-judul" style="margin: 0;">Pusat Bantuan AI</h2>
+    <div class="up-hint" style="margin-bottom: 12px;">Tanya apa saja seputar penggunaan aplikasi KotaKita.</div>
+    
+    <div class="chat-container">
+        <div class="chat-box" id="aiChatBox">
+            <div class="chat-msg chat-bot">Halo! Saya Asisten AI KotaKita. Ada yang bisa saya bantu terkait pelaporan jalan rusak, sistem poin, atau keamanan akun Anda?</div>
+        </div>
+        
+        <!-- Quick Replies (Chip) -->
+        <div class="chat-quick">
+            <button type="button" class="chat-chip" onclick="kirimChat('Berapa lama laporan diproses?')">Lama proses?</button>
+            <button type="button" class="chat-chip" onclick="kirimChat('Bagaimana sistem poin KotaKita?')">Sistem Poin</button>
+            <button type="button" class="chat-chip" onclick="kirimChat('Apakah identitas pelapor aman?')">Keamanan Identitas</button>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="aiChatInput" class="chat-input" placeholder="Ketik pertanyaan di sini..." onkeypress="if(event.key==='Enter') kirimChat()">
+            <button type="button" class="chat-btn" onclick="kirimChat()">Kirim</button>
+        </div>
+    </div>
+  </div>
+</div></section>
 
 <!-- ================= 1. REGISTER ================= -->
 <section class="halaman" id="r-register">
@@ -1572,8 +1604,8 @@ function initPeta() {
     if (KK.map) return;
     if (typeof L === 'undefined') { setStatusPeta('Pustaka peta (Leaflet) gagal dimuat. Periksa koneksi internet.'); return; }
     KK.map = L.map('kkMap').setView([-2.5489, 118.0149], 5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(KK.map);
-    KK.layer = L.layerGroup().addTo(KK.map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap contributors & CARTO', maxZoom: 19 }).addTo(KK.map);
+    KK.layer = L.layerGroup().addTo(KK.map);   
 }
 function ikonPin(t) {
     return L.divIcon({ className: '', html: `<div class="pin" style="background:${WARNA_T[t] || '#6c757d'}"></div>`, iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -26] });
@@ -1887,7 +1919,7 @@ function upInitPeta() {
     }
     const a = KK.anchor;
     UP.map = L.map('upMap').setView(a ? [a.lat, a.lon] : [-2.5489, 118.0149], a ? 14 : 5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(UP.map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap contributors & CARTO', maxZoom: 19 }).addTo(UP.map);
     UP.map.on('click', e => upSetLokasi(e.latlng.lat, e.latlng.lng, false));
     setTimeout(() => UP.map.invalidateSize(), 150);
     if (UP.lat !== null) upSetLokasi(UP.lat, UP.lon, true);
@@ -2386,6 +2418,46 @@ $('prKota').addEventListener('change', e => {
     PREF.ingatKota = e.target.checked; simpanLS('kk_pref_v1', PREF);
     if (!PREF.ingatKota) { try { localStorage.removeItem('kk_kota_pilihan'); } catch (x) { /* abaikan */ } }
 });
+
+/* ---------- AI Chatbot Logic ---------- */
+async function kirimChat(teksDariTombol = null) {
+    const inputEl = $('aiChatInput');
+    const chatBox = $('aiChatBox');
+    const teks = teksDariTombol || inputEl.value.trim();
+    if (!teks) return;
+
+    // 1. Render pesan User
+    inputEl.value = '';
+    chatBox.innerHTML += `<div class="chat-msg chat-user">${esc(teks)}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // 2. Render status Loading Bot
+    const idLoading = 'load_' + Date.now();
+    chatBox.innerHTML += `<div class="chat-msg chat-bot" id="${idLoading}">Mengetik...</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        // Ambil ID User dari Supabase, atau buat anonim jika Tamu
+        const sesi = await ambilSesi();
+        const sid = sesi ? sesi.user.id : "tamu_" + Math.random().toString(36).substr(2, 9);
+
+        // 3. Request ke API Python FastAPI Lokal
+        const res = await fetch('http://127.0.0.1:8000/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sid, message: teks })
+        });
+        const data = await res.json();
+        
+        // 4. Hapus loading, render teks balasan AI
+        $(idLoading).remove();
+        chatBox.innerHTML += `<div class="chat-msg chat-bot">${esc(data.reply)}</div>`;
+    } catch (e) {
+        $(idLoading).remove();
+        chatBox.innerHTML += `<div class="chat-msg chat-bot" style="color:#e03131;">Koneksi terputus. Pastikan server backend AI sedang berjalan.</div>`;
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
 
 /* =====================================================================
    Mulai aplikasi
