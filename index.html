@@ -44,6 +44,18 @@
         .notice.err { display: block; background: #ffe3e3; color: #a61e1e; }
         .notice.info { display: block; background: #e7f5ff; color: #1864ab; }
 
+        /* ===== Foto profil ===== */
+        .foto-wrap { min-height: 100vh; background: #dce8fb; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .foto-card { width: 100%; max-width: 420px; text-align: center; padding: 20px; }
+        .foto-card h1 { color: #0a2463; font-size: 28px; margin: 0 0 8px; }
+        .foto-card p { color: #4a5b7c; font-size: 14px; margin: 0 0 34px; }
+        .avatar-box { position: relative; width: 190px; height: 190px; margin: 0 auto 36px; }
+        .avatar { width: 190px; height: 190px; border-radius: 50%; background: #fff; box-shadow: 0 6px 20px rgba(10,36,99,0.18); overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .avatar-badge { position: absolute; right: 6px; bottom: 6px; width: 48px; height: 48px; border-radius: 50%; background: #0a2463; border: 4px solid #dce8fb; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+        .avatar-badge svg { width: 22px; height: 22px; fill: white; }
+        #pesanFoto { margin-top: 14px; font-size: 14px; min-height: 20px; }
+
         /* ===== Halaman dalam (Upload / Laporan) ===== */
         .tabisi { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
         .tabisi.aktif { display: block; }
@@ -281,20 +293,6 @@
         .pr-baris input { width: 22px; height: 22px; accent-color: #0a2463; flex-shrink: 0; }
         .info-teks { font-size: 14.5px; line-height: 1.6; color: #34425f; }
         @media (max-width: 640px) { .pf-wrap { padding: 14px; } .pf-stat { grid-template-columns: repeat(2, 1fr); } }
-        /* ===== Chatbot Pusat Bantuan ===== */
-        .chat-container { display: flex; flex-direction: column; height: 60vh; max-height: 550px; border: 1.5px solid #d3def5; border-radius: 12px; overflow: hidden; background: #fff; margin-top: 10px; }
-        .chat-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f9fbfd; }
-        .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
-        .chat-bot { align-self: flex-start; background: #eef3fc; color: #0a2463; border-bottom-left-radius: 0; }
-        .chat-user { align-self: flex-end; background: #0a2463; color: #fff; border-bottom-right-radius: 0; }
-        .chat-input-area { display: flex; padding: 12px; background: #fff; border-top: 1.5px solid #d3def5; gap: 8px; }
-        .chat-input { flex: 1; padding: 10px 14px; border: 1.5px solid #d3def5; border-radius: 20px; font-size: 14.5px; outline: none; font-family: inherit; }
-        .chat-input:focus { border-color: #0a2463; }
-        .chat-btn { background: #0a2463; color: #fff; border: none; padding: 0 18px; border-radius: 20px; font-weight: 600; cursor: pointer; }
-        .chat-btn:hover { background: #1c4fb8; }
-        .chat-quick { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; background: #f9fbfd; border-top: 1.5px solid #e8eef9; }
-        .chat-chip { background: #fff; border: 1px solid #b9ccf1; color: #0a2463; padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; white-space: nowrap; font-weight: 600; }
-        .chat-chip:hover { background: #eef3fc; border-color: #3a6fd8; }
     </style>
 </head>
 <body>
@@ -329,6 +327,7 @@
     <div class="kk-dropdown" id="avatarMenu" hidden>
       <div class="who"><b id="umNama">-</b><span id="umUser"></span></div>
       <button type="button" id="umProfil">👤 Profil saya</button>
+      <button type="button" id="umFoto">📷 Ubah foto profil</button>
       <button type="button" id="umKeluar">🚪 Keluar</button>
       <button type="button" id="umMasuk" hidden>🔑 Masuk</button>
       <button type="button" id="umDaftar" hidden>📝 Daftar</button>
@@ -412,29 +411,11 @@
     <label class="pr-baris"><span><b>Ingat kota pilihan</b><small>Simpan kota terakhir di perangkat ini.</small></span><input type="checkbox" id="prKota"></label>
   </div></div></section>
 <section class="halaman" id="r-informasi"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
-  <div class="kk-card" style="text-align:left; padding:16px;">
-    <h2 class="ak-judul" style="margin: 0;">Pusat Bantuan AI</h2>
-    <div class="up-hint" style="margin-bottom: 12px;">Tanya apa saja seputar penggunaan aplikasi KotaKita.</div>
-    
-    <div class="chat-container">
-        <div class="chat-box" id="aiChatBox">
-            <div class="chat-msg chat-bot">Halo! Saya Asisten AI KotaKita. Ada yang bisa saya bantu terkait pelaporan jalan rusak, sistem poin, atau keamanan akun Anda?</div>
-        </div>
-        
-        <!-- Quick Replies (Chip) -->
-        <div class="chat-quick">
-            <button type="button" class="chat-chip" onclick="kirimChat('Berapa lama laporan diproses?')">Lama proses?</button>
-            <button type="button" class="chat-chip" onclick="kirimChat('Bagaimana sistem poin KotaKita?')">Sistem Poin</button>
-            <button type="button" class="chat-chip" onclick="kirimChat('Apakah identitas pelapor aman?')">Keamanan Identitas</button>
-        </div>
-
-        <div class="chat-input-area">
-            <input type="text" id="aiChatInput" class="chat-input" placeholder="Ketik pertanyaan di sini..." onkeypress="if(event.key==='Enter') kirimChat()">
-            <button type="button" class="chat-btn" onclick="kirimChat()">Kirim</button>
-        </div>
-    </div>
-  </div>
-</div></section>
+  <div class="kk-card info-teks" style="text-align:left"><h2 class="ak-judul">Informasi</h2>
+    <p><b>KotaKita – Lapor Jalan</b> (prototipe). Laporkan kerusakan jalan lewat foto, lokasi, dan keterangan; pantau statusnya dari Baru hingga Selesai.</p>
+    <p><b>Mode tamu</b> hanya menampilkan pratinjau Beranda. Lokasi, Upload, dan Laporan membutuhkan akun.</p>
+    <p><b>Poin</b>: +10 per laporan terkirim dan +20 saat laporan selesai ditangani.</p>
+    <p>Peta dan pencarian memakai OpenStreetMap, Nominatim, dan Photon; data laporan disimpan di Supabase.</p></div></div></section>
 
 <!-- ================= 1. REGISTER ================= -->
 <section class="halaman" id="r-register">
@@ -557,6 +538,25 @@
       </div>
       <button class="btn" id="btnReset" type="submit">Simpan Password</button>
     </form>
+  </div></div>
+</section>
+
+<!-- ================= 3. FOTO PROFIL ================= -->
+<section class="halaman" id="r-foto-profil">
+  <div class="foto-wrap"><div class="foto-card">
+    <h1>Tambah Foto Profil</h1>
+    <p>Pilih foto agar akun Anda mudah dikenali.</p>
+    <input type="file" accept="image/*" id="inFotoProfil" style="display:none">
+    <div class="avatar-box">
+      <div class="avatar" id="avatarKlik" title="Pilih foto">
+        <img id="avatarImg" alt="Foto profil">
+      </div>
+      <button type="button" class="avatar-badge" id="avatarBadge" aria-label="Tambah foto">
+        <svg viewBox="0 0 24 24"><path d="M9 3L7.17 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.17L15 3H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+      </button>
+    </div>
+    <button class="btn btn-navy" id="btnMulai">Mulai</button>
+    <div id="pesanFoto"></div>
   </div></div>
 </section>
 
@@ -843,6 +843,7 @@ const RUTE = {
     '/lupa':        { el: 'r-lupa' },
     '/reset':       { el: 'r-reset' },
     '/welcome':     { el: 'r-welcome' },
+    '/foto-profil': { el: 'r-foto-profil', butuhLogin: true },
     '/dashboard':   { el: 'r-kotakita',    nav: true },                       // tamu boleh (pratinjau)
     '/profil':      { el: null, dinamis: true, nav: true },                   // tamu: login, user: profil
     '/akun':        { el: 'r-akun',        butuhLogin: true, nav: true },
@@ -895,6 +896,7 @@ async function router() {
         notice('notLogin', pesanLoginBerikut.teks, pesanLoginBerikut.tipe);
         pesanLoginBerikut = null;
     }
+    if (path === '/foto-profil') await masukFotoProfil(session);
     if (path === '/dashboard') await masukKotaKita();
     if (path === '/laporan') await muatLaporanSaya();
     if (path === '/upload') await masukUpload();
@@ -1070,7 +1072,7 @@ async function prosesLogin(form, uEl, pEl, btn, notId) {
             if (password !== (profilDemo().password || DEMO.password)) { gagal(); return; }
             simpanLS(KUNCI_DEMO, { aktif: true });
             gagalBeruntun = 0; pEl.value = '';
-            go('/dashboard');
+            go('/foto-profil');
             return;
         }
 
@@ -1097,7 +1099,7 @@ async function prosesLogin(form, uEl, pEl, btn, notId) {
 
         gagalBeruntun = 0;
         pEl.value = '';
-        go('/dashboard');
+        go('/foto-profil');
     } catch (err) {
         console.error(err);
         notice(notId, 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
@@ -1179,7 +1181,29 @@ formReset.addEventListener('submit', async e => {
     }
 });
 
-// Potong persegi dari tengah, kecilkan ke 512px, simpan JPEG (dipakai Profil > Akun)
+/* =====================================================================
+   3. FOTO PROFIL
+   ===================================================================== */
+const inFotoProfil = $('inFotoProfil'), avatarImg = $('avatarImg'), pesanFoto = $('pesanFoto');
+let fotoProfilDipilih = null;      // Blob hasil crop, siap upload
+
+function tampilAvatar(src) {
+    if (src) { avatarImg.src = src; avatarImg.style.display = 'block'; }
+    else { avatarImg.removeAttribute('src'); avatarImg.style.display = 'none'; }
+}
+
+async function masukFotoProfil(session) {
+    fotoProfilDipilih = null;
+    inFotoProfil.value = '';
+    pesanFoto.textContent = '';
+    await muatProfil(session);
+    tampilAvatar(profil && profil.foto_url);
+}
+
+$('avatarKlik').addEventListener('click', () => inFotoProfil.click());
+$('avatarBadge').addEventListener('click', () => inFotoProfil.click());
+
+// Potong persegi dari tengah, kecilkan ke 512px, simpan JPEG
 async function cropAvatar(file, ukuran = 512, kualitas = 0.85) {
     const bmp = await createImageBitmap(file);
     const sisi = Math.min(bmp.width, bmp.height);
@@ -1189,6 +1213,45 @@ async function cropAvatar(file, ukuran = 512, kualitas = 0.85) {
     c.getContext('2d').drawImage(bmp, sx, sy, sisi, sisi, 0, 0, c.width, c.height);
     return await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
 }
+
+inFotoProfil.addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    pesanFoto.style.color = '#c92a2a';
+    if (!f.type.startsWith('image/')) { pesanFoto.textContent = 'File harus berupa gambar.'; return; }
+    if (f.size > 15 * 1024 * 1024) { pesanFoto.textContent = 'Ukuran foto terlalu besar (maks. 15 MB).'; return; }
+    try {
+        const blob = await cropAvatar(f);
+        if (!blob) throw new Error('gagal memproses gambar');
+        fotoProfilDipilih = blob;
+        tampilAvatar(URL.createObjectURL(blob));
+        pesanFoto.textContent = '';
+    } catch (err) {
+        pesanFoto.textContent = 'Foto tidak bisa dibaca. Coba foto lain.';
+    }
+});
+
+$('btnMulai').addEventListener('click', async () => {
+    const btn = $('btnMulai');
+    pesanFoto.style.color = '#c92a2a';
+    pesanFoto.textContent = '';
+    if (!fotoProfilDipilih) { go('/dashboard'); return; }   // foto bersifat opsional
+
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    try {
+        const session = await ambilSesi();
+        if (!session) { go('/profil'); return; }
+        await unggahAvatar(fotoProfilDipilih, session);
+
+        fotoProfilDipilih = null;
+        go('/dashboard');
+    } catch (err) {
+        console.error(err);
+        pesanFoto.textContent = 'Gagal menyimpan foto: ' + (err.message || 'periksa koneksi.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Mulai';
+    }
+});
 
 /* =====================================================================
    DASHBOARD KOTAKITA
@@ -1285,7 +1348,7 @@ function renderNavbar(session) {
     if (guest) b.textContent = '👤';
     else if (profil && profil.foto_url) b.innerHTML = `<img src="${esc(profil.foto_url)}" alt="">`;
     else b.textContent = inisial(nama);
-    ['umProfil', 'umKeluar'].forEach(i => { $(i).hidden = guest; });
+    ['umProfil', 'umFoto', 'umKeluar'].forEach(i => { $(i).hidden = guest; });
     ['umMasuk', 'umDaftar'].forEach(i => { $(i).hidden = !guest; });
 }
 function setMenuAktif(path) {
@@ -1320,6 +1383,7 @@ document.addEventListener('click', e => {
     if (!e.target.closest('.kk-search')) $('kkSuggest').hidden = true;
 });
 $('avatarBtn').addEventListener('click', () => { $('avatarMenu').hidden = !$('avatarMenu').hidden; });
+$('umFoto').addEventListener('click', () => go('/foto-profil'));
 $('umKeluar').addEventListener('click', keluar);
 $('umProfil').addEventListener('click', () => go('/profil'));
 $('umMasuk').addEventListener('click', () => go('/profil'));
@@ -1604,8 +1668,8 @@ function initPeta() {
     if (KK.map) return;
     if (typeof L === 'undefined') { setStatusPeta('Pustaka peta (Leaflet) gagal dimuat. Periksa koneksi internet.'); return; }
     KK.map = L.map('kkMap').setView([-2.5489, 118.0149], 5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap contributors & CARTO', maxZoom: 19 }).addTo(KK.map);
-    KK.layer = L.layerGroup().addTo(KK.map);   
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(KK.map);
+    KK.layer = L.layerGroup().addTo(KK.map);
 }
 function ikonPin(t) {
     return L.divIcon({ className: '', html: `<div class="pin" style="background:${WARNA_T[t] || '#6c757d'}"></div>`, iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -26] });
@@ -1919,7 +1983,7 @@ function upInitPeta() {
     }
     const a = KK.anchor;
     UP.map = L.map('upMap').setView(a ? [a.lat, a.lon] : [-2.5489, 118.0149], a ? 14 : 5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap contributors & CARTO', maxZoom: 19 }).addTo(UP.map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(UP.map);
     UP.map.on('click', e => upSetLokasi(e.latlng.lat, e.latlng.lng, false));
     setTimeout(() => UP.map.invalidateSize(), 150);
     if (UP.lat !== null) upSetLokasi(UP.lat, UP.lon, true);
@@ -2419,52 +2483,12 @@ $('prKota').addEventListener('change', e => {
     if (!PREF.ingatKota) { try { localStorage.removeItem('kk_kota_pilihan'); } catch (x) { /* abaikan */ } }
 });
 
-/* ---------- AI Chatbot Logic ---------- */
-async function kirimChat(teksDariTombol = null) {
-    const inputEl = $('aiChatInput');
-    const chatBox = $('aiChatBox');
-    const teks = teksDariTombol || inputEl.value.trim();
-    if (!teks) return;
-
-    // 1. Render pesan User
-    inputEl.value = '';
-    chatBox.innerHTML += `<div class="chat-msg chat-user">${esc(teks)}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    // 2. Render status Loading Bot
-    const idLoading = 'load_' + Date.now();
-    chatBox.innerHTML += `<div class="chat-msg chat-bot" id="${idLoading}">Mengetik...</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-        // Ambil ID User dari Supabase, atau buat anonim jika Tamu
-        const sesi = await ambilSesi();
-        const sid = sesi ? sesi.user.id : "tamu_" + Math.random().toString(36).substr(2, 9);
-
-        // 3. Request ke API Python FastAPI Lokal
-        const res = await fetch('http://127.0.0.1:8000/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session_id: sid, message: teks })
-        });
-        const data = await res.json();
-        
-        // 4. Hapus loading, render teks balasan AI
-        $(idLoading).remove();
-        chatBox.innerHTML += `<div class="chat-msg chat-bot">${esc(data.reply)}</div>`;
-    } catch (e) {
-        $(idLoading).remove();
-        chatBox.innerHTML += `<div class="chat-msg chat-bot" style="color:#e03131;">Koneksi terputus. Pastikan server backend AI sedang berjalan.</div>`;
-    }
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
 /* =====================================================================
    Mulai aplikasi
    ===================================================================== */
 (async function mulai() {
     if (DARI_RECOVERY) { modeReset = true; history.replaceState(null, '', BASE_URL + '#/reset'); }
-    else if (DARI_SIGNUP) { history.replaceState(null, '', BASE_URL + '#/dashboard'); }   // baru konfirmasi email
+    else if (DARI_SIGNUP) { history.replaceState(null, '', BASE_URL + '#/foto-profil'); }   // baru konfirmasi email
     else if (GALAT_LINK) {
         history.replaceState(null, '', BASE_URL + '#/login');
         pesanLoginBerikut = { tipe: 'err', teks: 'Tautan tidak valid atau sudah kedaluwarsa: ' + decodeURIComponent(GALAT_LINK.replace(/\+/g, ' ')) };
