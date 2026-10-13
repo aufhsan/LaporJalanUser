@@ -44,18 +44,6 @@
         .notice.err { display: block; background: #ffe3e3; color: #a61e1e; }
         .notice.info { display: block; background: #e7f5ff; color: #1864ab; }
 
-        /* ===== Foto profil ===== */
-        .foto-wrap { min-height: 100vh; background: #dce8fb; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .foto-card { width: 100%; max-width: 420px; text-align: center; padding: 20px; }
-        .foto-card h1 { color: #0a2463; font-size: 28px; margin: 0 0 8px; }
-        .foto-card p { color: #4a5b7c; font-size: 14px; margin: 0 0 34px; }
-        .avatar-box { position: relative; width: 190px; height: 190px; margin: 0 auto 36px; }
-        .avatar { width: 190px; height: 190px; border-radius: 50%; background: #fff; box-shadow: 0 6px 20px rgba(10,36,99,0.18); overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .avatar-badge { position: absolute; right: 6px; bottom: 6px; width: 48px; height: 48px; border-radius: 50%; background: #0a2463; border: 4px solid #dce8fb; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
-        .avatar-badge svg { width: 22px; height: 22px; fill: white; }
-        #pesanFoto { margin-top: 14px; font-size: 14px; min-height: 20px; }
-
         /* ===== Halaman dalam (Upload / Laporan) ===== */
         .tabisi { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
         .tabisi.aktif { display: block; }
@@ -327,7 +315,6 @@
     <div class="kk-dropdown" id="avatarMenu" hidden>
       <div class="who"><b id="umNama">-</b><span id="umUser"></span></div>
       <button type="button" id="umProfil">👤 Profil saya</button>
-      <button type="button" id="umFoto">📷 Ubah foto profil</button>
       <button type="button" id="umKeluar">🚪 Keluar</button>
       <button type="button" id="umMasuk" hidden>🔑 Masuk</button>
       <button type="button" id="umDaftar" hidden>📝 Daftar</button>
@@ -538,25 +525,6 @@
       </div>
       <button class="btn" id="btnReset" type="submit">Simpan Password</button>
     </form>
-  </div></div>
-</section>
-
-<!-- ================= 3. FOTO PROFIL ================= -->
-<section class="halaman" id="r-foto-profil">
-  <div class="foto-wrap"><div class="foto-card">
-    <h1>Tambah Foto Profil</h1>
-    <p>Pilih foto agar akun Anda mudah dikenali.</p>
-    <input type="file" accept="image/*" id="inFotoProfil" style="display:none">
-    <div class="avatar-box">
-      <div class="avatar" id="avatarKlik" title="Pilih foto">
-        <img id="avatarImg" alt="Foto profil">
-      </div>
-      <button type="button" class="avatar-badge" id="avatarBadge" aria-label="Tambah foto">
-        <svg viewBox="0 0 24 24"><path d="M9 3L7.17 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.17L15 3H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
-      </button>
-    </div>
-    <button class="btn btn-navy" id="btnMulai">Mulai</button>
-    <div id="pesanFoto"></div>
   </div></div>
 </section>
 
@@ -843,7 +811,6 @@ const RUTE = {
     '/lupa':        { el: 'r-lupa' },
     '/reset':       { el: 'r-reset' },
     '/welcome':     { el: 'r-welcome' },
-    '/foto-profil': { el: 'r-foto-profil', butuhLogin: true },
     '/dashboard':   { el: 'r-kotakita',    nav: true },                       // tamu boleh (pratinjau)
     '/profil':      { el: null, dinamis: true, nav: true },                   // tamu: login, user: profil
     '/akun':        { el: 'r-akun',        butuhLogin: true, nav: true },
@@ -896,7 +863,6 @@ async function router() {
         notice('notLogin', pesanLoginBerikut.teks, pesanLoginBerikut.tipe);
         pesanLoginBerikut = null;
     }
-    if (path === '/foto-profil') await masukFotoProfil(session);
     if (path === '/dashboard') await masukKotaKita();
     if (path === '/laporan') await muatLaporanSaya();
     if (path === '/upload') await masukUpload();
@@ -1072,7 +1038,7 @@ async function prosesLogin(form, uEl, pEl, btn, notId) {
             if (password !== (profilDemo().password || DEMO.password)) { gagal(); return; }
             simpanLS(KUNCI_DEMO, { aktif: true });
             gagalBeruntun = 0; pEl.value = '';
-            go('/foto-profil');
+            go('/dashboard');
             return;
         }
 
@@ -1099,7 +1065,7 @@ async function prosesLogin(form, uEl, pEl, btn, notId) {
 
         gagalBeruntun = 0;
         pEl.value = '';
-        go('/foto-profil');
+        go('/dashboard');
     } catch (err) {
         console.error(err);
         notice(notId, 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
@@ -1181,29 +1147,7 @@ formReset.addEventListener('submit', async e => {
     }
 });
 
-/* =====================================================================
-   3. FOTO PROFIL
-   ===================================================================== */
-const inFotoProfil = $('inFotoProfil'), avatarImg = $('avatarImg'), pesanFoto = $('pesanFoto');
-let fotoProfilDipilih = null;      // Blob hasil crop, siap upload
-
-function tampilAvatar(src) {
-    if (src) { avatarImg.src = src; avatarImg.style.display = 'block'; }
-    else { avatarImg.removeAttribute('src'); avatarImg.style.display = 'none'; }
-}
-
-async function masukFotoProfil(session) {
-    fotoProfilDipilih = null;
-    inFotoProfil.value = '';
-    pesanFoto.textContent = '';
-    await muatProfil(session);
-    tampilAvatar(profil && profil.foto_url);
-}
-
-$('avatarKlik').addEventListener('click', () => inFotoProfil.click());
-$('avatarBadge').addEventListener('click', () => inFotoProfil.click());
-
-// Potong persegi dari tengah, kecilkan ke 512px, simpan JPEG
+// Potong persegi dari tengah, kecilkan ke 512px, simpan JPEG (dipakai Profil > Akun)
 async function cropAvatar(file, ukuran = 512, kualitas = 0.85) {
     const bmp = await createImageBitmap(file);
     const sisi = Math.min(bmp.width, bmp.height);
@@ -1213,45 +1157,6 @@ async function cropAvatar(file, ukuran = 512, kualitas = 0.85) {
     c.getContext('2d').drawImage(bmp, sx, sy, sisi, sisi, 0, 0, c.width, c.height);
     return await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
 }
-
-inFotoProfil.addEventListener('change', async e => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    pesanFoto.style.color = '#c92a2a';
-    if (!f.type.startsWith('image/')) { pesanFoto.textContent = 'File harus berupa gambar.'; return; }
-    if (f.size > 15 * 1024 * 1024) { pesanFoto.textContent = 'Ukuran foto terlalu besar (maks. 15 MB).'; return; }
-    try {
-        const blob = await cropAvatar(f);
-        if (!blob) throw new Error('gagal memproses gambar');
-        fotoProfilDipilih = blob;
-        tampilAvatar(URL.createObjectURL(blob));
-        pesanFoto.textContent = '';
-    } catch (err) {
-        pesanFoto.textContent = 'Foto tidak bisa dibaca. Coba foto lain.';
-    }
-});
-
-$('btnMulai').addEventListener('click', async () => {
-    const btn = $('btnMulai');
-    pesanFoto.style.color = '#c92a2a';
-    pesanFoto.textContent = '';
-    if (!fotoProfilDipilih) { go('/dashboard'); return; }   // foto bersifat opsional
-
-    btn.disabled = true; btn.textContent = 'Menyimpan...';
-    try {
-        const session = await ambilSesi();
-        if (!session) { go('/profil'); return; }
-        await unggahAvatar(fotoProfilDipilih, session);
-
-        fotoProfilDipilih = null;
-        go('/dashboard');
-    } catch (err) {
-        console.error(err);
-        pesanFoto.textContent = 'Gagal menyimpan foto: ' + (err.message || 'periksa koneksi.');
-    } finally {
-        btn.disabled = false; btn.textContent = 'Mulai';
-    }
-});
 
 /* =====================================================================
    DASHBOARD KOTAKITA
@@ -1348,7 +1253,7 @@ function renderNavbar(session) {
     if (guest) b.textContent = '👤';
     else if (profil && profil.foto_url) b.innerHTML = `<img src="${esc(profil.foto_url)}" alt="">`;
     else b.textContent = inisial(nama);
-    ['umProfil', 'umFoto', 'umKeluar'].forEach(i => { $(i).hidden = guest; });
+    ['umProfil', 'umKeluar'].forEach(i => { $(i).hidden = guest; });
     ['umMasuk', 'umDaftar'].forEach(i => { $(i).hidden = !guest; });
 }
 function setMenuAktif(path) {
@@ -1383,7 +1288,6 @@ document.addEventListener('click', e => {
     if (!e.target.closest('.kk-search')) $('kkSuggest').hidden = true;
 });
 $('avatarBtn').addEventListener('click', () => { $('avatarMenu').hidden = !$('avatarMenu').hidden; });
-$('umFoto').addEventListener('click', () => go('/foto-profil'));
 $('umKeluar').addEventListener('click', keluar);
 $('umProfil').addEventListener('click', () => go('/profil'));
 $('umMasuk').addEventListener('click', () => go('/profil'));
@@ -2488,7 +2392,7 @@ $('prKota').addEventListener('change', e => {
    ===================================================================== */
 (async function mulai() {
     if (DARI_RECOVERY) { modeReset = true; history.replaceState(null, '', BASE_URL + '#/reset'); }
-    else if (DARI_SIGNUP) { history.replaceState(null, '', BASE_URL + '#/foto-profil'); }   // baru konfirmasi email
+    else if (DARI_SIGNUP) { history.replaceState(null, '', BASE_URL + '#/dashboard'); }   // baru konfirmasi email
     else if (GALAT_LINK) {
         history.replaceState(null, '', BASE_URL + '#/login');
         pesanLoginBerikut = { tipe: 'err', teks: 'Tautan tidak valid atau sudah kedaluwarsa: ' + decodeURIComponent(GALAT_LINK.replace(/\+/g, ' ')) };
