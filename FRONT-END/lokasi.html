@@ -806,37 +806,20 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/laporanData.js"></script>
 <script>
-/* =====================================================
-   KONFIGURASI SUPABASE — sesuaikan dengan project Anda
-   ===================================================== */
-const CONFIG = {
-  SUPABASE_URL: 'https://ilmnhyyarurqszcyidnx.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_7w3KZhi9QkMOhRiIRoAGGg_JY9M0Mcy',
-  TABLE: 'laporan_jalan',    // nama tabel
-  BUCKET: 'laporan',         // bucket Storage (dipakai jika foto_url hanya berupa path)
-  DEFAULT_CENTER: [-6.9175, 107.6191], // Bandung
-  // Pemetaan nama kolom di tabel Anda
-  COLS: {
-    id:        'id',
-    title:     'deskripsi',   // dipakai sebagai judul laporan
-    address:   'alamat',      // opsional: jika kolom tidak ada, alamat dicari otomatis dari koordinat
-    lat:       'latitude',
-    lng:       'longitude',
-    status:    'status',      // opsional: menunggu | diproses | selesai | ditolak
-    photo:     'foto_url',
-    createdAt: 'waktu'
-  }
-};
+/* Memakai helper yang sama dengan halaman lain: window.db (supabaseClient.js) & window.KKL (laporanData.js) */
+const K = window.KKL;
+const DEFAULT_CENTER = [-6.9175, 107.6191]; // Bandung
 
-const C = CONFIG.COLS;
-const STATUS = {
-  baru:     { label: 'Dilaporkan', bg: '#dbe7fb', fg: '#092e6d', bar: '#378deb' },
-  menunggu: { label: 'Menunggu', bg: '#ffe0e0', fg: '#8a0000', bar: '#ad0000' },
-  diproses: { label: 'Diproses', bg: '#ffd9a8', fg: '#7a4000', bar: '#e08a00' },
-  selesai:  { label: 'Selesai',  bg: '#c9f0d4', fg: '#0b5a2a', bar: '#1f9d55' },
-  ditolak:  { label: 'Ditolak',  bg: '#e4e4e4', fg: '#444',    bar: '#8a8a8a' }
+const WARNA = {
+  sent:       { bg: '#dbe7fb', fg: '#092e6d', bar: '#378deb' },
+  verified:   { bg: '#e3f1ff', fg: '#0b4a8a', bar: '#4da6cc' },
+  processing: { bg: '#ffd9a8', fg: '#7a4000', bar: '#e08a00' },
+  completed:  { bg: '#c9f0d4', fg: '#0b5a2a', bar: '#1f9d55' },
+  rejected:   { bg: '#ffe0e0', fg: '#8a0000', bar: '#ad0000' }
 };
 const PIN_SVG = '<svg viewBox="0 0 63.33 79.21"><path fill-rule="nonzero" d="M31.67 0C14.21 0 0 14.21 0 31.67c-.12 25.49 28.18 45.91 29.37 46.79a3.1 3.1 0 0 0 4.6 0c1.19-.87 29.49-21.26 29.37-46.79C63.33 14.21 49.12 0 31.67 0Zm0 47.5a15.83 15.83 0 1 1 0-31.67 15.83 15.83 0 0 1 0 31.67Z"/></svg>';
 
@@ -844,7 +827,6 @@ const $ = (id) => document.getElementById(id);
 const listEl = $('locationList');
 const cardEl = $('reportCard');
 
-let sb = null;
 let reports = [];
 let selectedId = null;
 let activeFilter = 'all';
@@ -852,17 +834,17 @@ let query = '';
 let userPos = null;
 const markers = new Map();
 
-/* ---------- Helpers ---------- */
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function timeAgo(iso) {
   if (!iso) return '';
   const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (!Number.isFinite(s)) return '';
   if (s < 60) return 'Baru saja';
   const m = Math.floor(s / 60); if (m < 60) return `${m} Menit yang lalu`;
   const h = Math.floor(m / 60); if (h < 24) return `${h} Jam yang lalu`;
   const d = Math.floor(h / 24); if (d < 30) return `${d} Hari yang lalu`;
-  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  return K.tanggal(iso);
 }
 
 function distKm(a, b) {
@@ -873,82 +855,34 @@ function distKm(a, b) {
 }
 const fmtDist = (km) => km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 
-function photoUrl(v) {
-  if (!v) return null;
-  if (/^https?:\/\//i.test(v)) return v;
-  return sb.storage.from(CONFIG.BUCKET).getPublicUrl(v).data.publicUrl;
+function decorate(n, i) {
+  const alamat = [n.alamat.utama, K.segmen1(n.alamat.rinci)].filter(Boolean).join(', ');
+  return Object.assign(n, {
+    id: n.kode || `row-${i}`,
+    title: n.kategori + (n.tingkat ? ` (${K.huruf1(n.tingkat)})` : ''),
+    addr: alamat,
+    hasPos: K.koordinatOk(n.lat, n.lng),
+    warna: WARNA[n.st.key] || WARNA.sent,
+    dist: null
+  });
 }
-
-/* ---------- Alamat otomatis dari koordinat (reverse geocoding) ---------- */
-const geoKey = (lat, lng) => `geo:${lat.toFixed(4)},${lng.toFixed(4)}`;
-function cachedAddr(lat, lng) {
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return '';
-  try { return localStorage.getItem(geoKey(lat, lng)) || ''; } catch (e) { return ''; }
-}
-
-async function fillAddresses() {
-  const todo = reports.filter((r) => !r.address && r.hasPos).slice(0, 40);
-  const done = new Map();
-  for (const r of todo) {
-    const key = geoKey(r.lat, r.lng);
-    let addr = done.get(key);
-    if (addr === undefined) {
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=id&lat=${r.lat}&lon=${r.lng}`);
-        const j = await res.json();
-        const a = j.address || {};
-        const area = a.village || a.suburb || a.neighbourhood || a.city_district || a.city || '';
-        addr = [a.road, area].filter(Boolean).join(', ') || (j.display_name || '').split(',').slice(0, 2).join(',').trim();
-        try { localStorage.setItem(key, addr); } catch (e) {}
-      } catch (e) { addr = ''; }
-      done.set(key, addr);
-      await new Promise((ok) => setTimeout(ok, 1100)); // batas Nominatim: 1 request/detik
-    }
-    if (!addr) continue;
-    // semua laporan dengan koordinat sama ikut terisi
-    reports.filter((x) => !x.address && x.hasPos && geoKey(x.lat, x.lng) === key).forEach((x) => {
-      x.address = addr;
-      const row = listEl.querySelector(`.location-row[data-id="${x.id}"] .row-address`);
-      if (row) row.textContent = addr + (x.dist != null ? ` • ${fmtDist(x.dist)}` : '');
-      if (x.id === selectedId) $('cardReportDesc').textContent = addr;
-    });
-  }
-}
-
-function normalize(row) {
-  const st = String(row[C.status] || 'baru').toLowerCase();
-  const lat = parseFloat(row[C.lat]), lng = parseFloat(row[C.lng]);
-  const o = {
-    id: row[C.id],
-    title: (row[C.title] || '').trim() || `Laporan Jalan #${row[C.id]}`,
-    address: row[C.address] || cachedAddr(parseFloat(row[C.lat]), parseFloat(row[C.lng])) || '',
-    lat, lng,
-    hasPos: Number.isFinite(lat) && Number.isFinite(lng),
-    statusKey: st,
-    status: STATUS[st] || { label: row[C.status] || '-', bg: '#e4e4e4', fg: '#444', bar: '#8a8a8a' },
-    photo: photoUrl(row[C.photo]),
-    createdAt: row[C.createdAt]
-  };
-  o.dist = (userPos && o.hasPos) ? distKm(userPos, [lat, lng]) : null;
-  return o;
+function hitungJarak() {
+  reports.forEach((r) => { r.dist = (userPos && r.hasPos) ? distKm(userPos, [r.lat, r.lng]) : null; });
 }
 
 /* ---------- Peta ---------- */
-const map = L.map('map', { zoomControl: true }).setView(CONFIG.DEFAULT_CENTER, 13);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap'
+const map = L.map('map').setView(DEFAULT_CENTER, 13);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19,
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
 }).addTo(map);
 const markerLayer = L.layerGroup().addTo(map);
 
-function pinIcon(selected) {
-  return L.divIcon({
-    className: '',
-    html: `<div class="pin${selected ? ' sel' : ''}">${PIN_SVG}</div>`,
-    iconSize: [40, 50],
-    iconAnchor: [20, 50]
-  });
-}
+const pinIcon = (sel) => L.divIcon({
+  className: '',
+  html: `<div class="pin${sel ? ' sel' : ''}">${PIN_SVG}</div>`,
+  iconSize: [40, 50], iconAnchor: [20, 50]
+});
 
 function mapMsg(text) {
   let el = document.querySelector('.map-msg');
@@ -957,45 +891,37 @@ function mapMsg(text) {
   el.textContent = text;
 }
 
-/* ---------- Data tampil (filter + cari + urut) ---------- */
+/* ---------- Filter / cari / urut ---------- */
 function visibleReports() {
   const q = query.trim().toLowerCase();
-  let out = reports.filter((r) => !q || r.title.toLowerCase().includes(q) || r.address.toLowerCase().includes(q));
-  if (activeFilter === 'nearest') {
-    out = out.filter((r) => r.dist != null).sort((a, b) => a.dist - b.dist);
-  } else {
-    out = out.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }
+  let out = reports.filter((r) => !q || r.title.toLowerCase().includes(q) || r.addr.toLowerCase().includes(q) || r.kode.toLowerCase().includes(q));
+  if (activeFilter === 'nearest') out = out.filter((r) => r.dist != null).sort((a, b) => a.dist - b.dist);
+  else out = out.sort(K.terbaruDulu);
   return out;
 }
 
 function render() {
   const data = visibleReports();
 
-  // Daftar
   if (!data.length) {
     listEl.innerHTML = `<p class="list-msg">${reports.length ? 'Tidak ada laporan yang cocok.' : 'Belum ada laporan.'}</p>`;
   } else {
     listEl.innerHTML = data.map((r) => {
       const dist = r.dist != null ? ` • ${fmtDist(r.dist)}` : '';
       return `
-      <div class="location-row${r.id === selectedId ? ' selected' : ''}" data-id="${esc(r.id)}" style="--bar:${r.status.bar}">
+      <div class="location-row${r.id === selectedId ? ' selected' : ''}" data-id="${esc(r.id)}" style="--bar:${r.warna.bar}">
         <div>
           <h3 class="row-title">${esc(r.title)}</h3>
-          <p class="row-address">${esc(r.address)}${dist}</p>
-          <p class="row-time">${esc(timeAgo(r.createdAt))}${r.createdAt ? ' dilaporkan' : ''}</p>
+          <p class="row-address">${esc(r.addr)}${dist}</p>
+          <p class="row-time">${esc(timeAgo(r.dibuat))}${r.dibuat ? ' dilaporkan' : ''}</p>
         </div>
-        <a class="row-chevron" href="detailLaporan.html?id=${encodeURIComponent(r.id)}" aria-label="Lihat detail laporan">
+        <a class="row-chevron" href="${esc(K.linkDetail(r.kode))}" aria-label="Lihat detail laporan">
           <svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg>
         </a>
       </div>`;
     }).join('');
-    listEl.querySelectorAll('.location-row').forEach((row) => {
-      row.querySelector('.row-chevron').addEventListener('click', (e) => e.stopPropagation());
-    });
   }
 
-  // Marker
   markerLayer.clearLayers();
   markers.clear();
   data.filter((r) => r.hasPos).forEach((r) => {
@@ -1005,13 +931,8 @@ function render() {
     markers.set(r.id, m);
   });
 
-  // Jika item terpilih tidak lagi tampil, pilih yang pertama
-  if (data.length && !data.some((r) => r.id === selectedId)) {
-    select(data[0].id, { pan: false });
-  } else if (!data.length) {
-    selectedId = null;
-    cardEl.hidden = true;
-  }
+  if (data.length && !data.some((r) => r.id === selectedId)) select(data[0].id, { pan: false });
+  else if (!data.length) { selectedId = null; cardEl.hidden = true; }
 }
 
 /* ---------- Pilih laporan ---------- */
@@ -1028,48 +949,42 @@ function select(id, opts = {}) {
   markers.forEach((m, mid) => m.setIcon(pinIcon(mid === id)));
   if (markers.has(id)) markers.get(id).setZIndexOffset(1000);
 
-  // Card
   cardEl.hidden = false;
   $('cardReportTitle').textContent = r.title;
-  $('cardReportDesc').textContent = r.address || 'Memuat alamat…';
-  $('cardReportTime').textContent = timeAgo(r.createdAt);
+  $('cardReportDesc').textContent = r.addr || '-';
+  $('cardReportTime').textContent = timeAgo(r.dibuat);
   const st = $('cardStatus');
-  st.style.background = r.status.bg;
-  st.style.color = r.status.fg;
-  $('cardStatusLabel').textContent = r.status.label;
-  const ph = $('cardPhoto');
-  ph.style.backgroundImage = r.photo ? `url("${r.photo.replace(/"/g, '%22')}")` : '';
-  $('cardPhotoLabel').style.display = r.photo ? 'none' : '';
-  $('cardDetail').href = `detailLaporan.html?id=${encodeURIComponent(r.id)}`;
+  st.style.background = r.warna.bg;
+  st.style.color = r.warna.fg;
+  $('cardStatusLabel').textContent = r.st.label;
+  $('cardPhoto').style.backgroundImage = r.foto ? `url("${r.foto.replace(/"/g, '%22')}")` : '';
+  $('cardPhotoLabel').style.display = r.foto ? 'none' : '';
+  $('cardDetail').href = K.linkDetail(r.kode);
 
   if (opts.pan !== false && r.hasPos) map.flyTo([r.lat, r.lng], Math.max(map.getZoom(), 16), { duration: 0.6 });
 }
 
 /* ---------- Event UI ---------- */
 listEl.addEventListener('click', (e) => {
+  if (e.target.closest('.row-chevron')) return;       // panah → ke halaman detail
   const row = e.target.closest('.location-row');
-  if (!row) return;
-  const r = reports.find((x) => String(x.id) === row.dataset.id);
-  if (r) select(r.id);
+  if (row) select(row.dataset.id);
 });
 
 $('searchInput').addEventListener('input', (e) => { query = e.target.value; render(); });
 
 document.querySelectorAll('.filter').forEach((btn) => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     activeFilter = btn.dataset.filter;
-    if (activeFilter === 'nearest' && !userPos) {
-      locate().then(() => { render(); fitToVisible(); });
-    } else {
-      render(); fitToVisible();
-    }
+    if (activeFilter === 'nearest' && !userPos) await locate();
+    render(); fitToVisible();
   });
 });
 
-$('cardReportTitle').closest('.report-card').addEventListener('click', (e) => {
+cardEl.addEventListener('click', (e) => {
   if (e.target.closest('a')) return;
   const r = reports.find((x) => x.id === selectedId);
-  if (r) window.location.href = `detailLaporan.html?id=${encodeURIComponent(r.id)}`;
+  if (r && r.kode) window.location.href = K.linkDetail(r.kode);
 });
 
 function fitToVisible() {
@@ -1078,62 +993,40 @@ function fitToVisible() {
   else if (pts.length === 1) map.setView(pts[0], 16);
 }
 
-/* ---------- Lokasi pengguna (untuk filter "Terdekat") ---------- */
 function locate() {
   return new Promise((resolve) => {
     if (!navigator.geolocation) return resolve();
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        userPos = [pos.coords.latitude, pos.coords.longitude];
-        reports.forEach((r) => { r.dist = r.hasPos ? distKm(userPos, [r.lat, r.lng]) : null; });
-        resolve();
-      },
+      (pos) => { userPos = [pos.coords.latitude, pos.coords.longitude]; hitungJarak(); resolve(); },
       () => { mapMsg('Izin lokasi ditolak — "Terdekat" tidak tersedia'); setTimeout(() => mapMsg(''), 3500); resolve(); },
-      { enableHighAccuracy: false, timeout: 8000 }
+      { timeout: 8000 }
     );
   });
 }
 
-/* ---------- Ambil data dari Supabase ---------- */
-async function load() {
-  if (CONFIG.SUPABASE_URL.includes('XXXXXXXX')) {
-    listEl.innerHTML = '<p class="list-msg">Isi SUPABASE_URL & SUPABASE_ANON_KEY di bagian CONFIG pada file ini.</p>';
+/* ---------- Muat data ---------- */
+(async function init() {
+  if (!K || !window.db || !window.KK) {
+    listEl.innerHTML = '<p class="list-msg">Supabase belum dimuat. Periksa tag &lt;script&gt; (js/supabaseClient.js & js/laporanData.js).</p>';
     return;
   }
-  sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  const sesi = await K.pastikanLogin();
+  if (!sesi) return;
+  K.buka();
 
-  const { data, error } = await sb
-    .from(CONFIG.TABLE)
-    .select('*')
-    .order(C.createdAt, { ascending: false })
-    .limit(300);
-
-  if (error) {
-    console.error(error);
-    listEl.innerHTML = `<p class="list-msg">Gagal memuat data: ${esc(error.message)}</p>`;
+  try {
+    reports = (await K.ambilPublik(300, sesi.user.id)).map(decorate);
+  } catch (err) {
+    console.error('[lokasi]', err);
+    listEl.innerHTML = `<p class="list-msg">${esc(K.pesanGalat(err))}</p>`;
     return;
   }
-
-  reports = data.map(normalize);
   render();
   fitToVisible();
-  fillAddresses();
 
-  // Buka laporan tertentu lewat ?id=...
-  const wanted = new URLSearchParams(location.search).get('id');
-  const hit = wanted && reports.find((r) => String(r.id) === wanted);
-  if (hit) select(hit.id, { scroll: true });
-
-  // Realtime: laporan baru/berubah langsung muncul
-  sb.channel('laporan-lokasi')
-    .on('postgres_changes', { event: '*', schema: 'public', table: CONFIG.TABLE }, async () => {
-      const { data: fresh } = await sb.from(CONFIG.TABLE).select('*').order(C.createdAt, { ascending: false }).limit(300);
-      if (fresh) { reports = fresh.map(normalize); render(); fillAddresses(); }
-    })
-    .subscribe();
-}
-
-load();
+  const wanted = new URLSearchParams(location.search).get('kode');
+  if (wanted && reports.some((r) => r.id === wanted)) select(wanted, { scroll: true });
+})();
 
 </script></body>
 </html>
