@@ -508,17 +508,17 @@
       Profil
     </h1>
 
-    <div class="avatar" aria-label="Foto profil kosong"></div>
+    <div class="avatar" id="pAvatar" aria-label="Foto profil kosong"></div>
 
-    <p class="box text"
+    <p class="box text" id="pNama"
       style="--x:350px;--y:256px;--w:129px;--h:22px;--fs:20px;--fw:700">
       Nabil
     </p>
-    <p class="box text"
+    <p class="box text" id="pUser"
       style="--x:350px;--y:281px;--w:129px;--h:22px;--fs:16px">
       sammmm
     </p>
-    <p class="box text"
+    <p class="box text" id="pSejak"
       style="--x:350px;--y:305px;--w:231px;--h:22px;--fs:16px;--fw:500">
       Aktif sejak September 2025
     </p>
@@ -625,8 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const c=btn.className; if(c.includes('vouchers')) go('Profil-Poin(Semua).html#voucher'); else if(c.includes('history')) go('rekamLaporan.html'); else go('Profil-Poin(Semua).html');
   }));
   document.querySelectorAll('.save').forEach(btn => btn.addEventListener('click', () => { alert('Perubahan berhasil disimpan.'); }));
-  document.querySelectorAll('.logout').forEach(btn => btn.addEventListener('click', () => go('welcome.html')));
-  document.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', () => go('detail-after-UploadLaporan.html')));
+    document.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', () => go('detail-after-UploadLaporan.html')));
   document.querySelectorAll('.detail-button.withdraw').forEach(btn => btn.addEventListener('click', () => { if(confirm('Tarik laporan ini?')) go('rekamLaporan.html'); }));
   document.querySelectorAll('.download').forEach(btn => btn.addEventListener('click', () => {
     const blob=new Blob(['Riwayat laporan KotaKita'],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='riwayat-laporan.txt'; a.click(); URL.revokeObjectURL(a.href);
@@ -641,6 +640,111 @@ document.addEventListener('DOMContentLoaded', function () {
   }));
   document.querySelectorAll('.location-card__edit-btn').forEach(btn => btn.addEventListener('click', () => go('lokasi.html')));
 });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/laporanData.js"></script>
+<script>
+(function () {
+'use strict';
+/* ===== Data profil pengguna (tabel Supabase "profiles") =====
+   Nama kolom berbeda-beda antar project, jadi dicari dari daftar kandidat.
+   Jika kolom Anda bernama lain, tambahkan di daftar ini. */
+const PROFIL_TABEL = 'profiles';
+const FIELDS = {
+  nama:     ['nama', 'nama_lengkap', 'full_name', 'name'],
+  username: ['username', 'nama_pengguna', 'user_name'],
+  telp:     ['no_telp', 'no_telepon', 'telepon', 'phone', 'no_hp', 'nomor_telepon', 'no_telpon'],
+  radius:   ['radius', 'radius_km', 'radius_laporan', 'radius_lokasi'],
+  avatar:   ['avatar_url', 'foto_url', 'foto_profil', 'avatar'],
+  poin:     ['poin', 'points', 'total_poin'],
+  dibuat:   ['created_at', 'dibuat_pada']
+};
+const K = window.KKL;
+const $ = (id) => document.getElementById(id);
+const kunci = (row, f) => (row ? FIELDS[f].find((k) => k in row) || null : null);
+
+async function muatProfil(user) {
+  for (const kol of ['id', 'user_id']) {
+    const { data, error } = await db.from(PROFIL_TABEL).select('*').eq(kol, user.id).maybeSingle();
+    if (!error && data) return { row: data, kolId: kol };
+    if (error && kol === 'id') console.warn('[profil]', error.message);
+  }
+  return { row: null, kolId: 'id' };
+}
+
+function nilai(row, user, f) {
+  const k = kunci(row, f);
+  const v = k ? row[k] : null;
+  if (v !== null && v !== undefined && v !== '') return v;
+  const m = user.user_metadata || {};
+  if (f === 'nama') return m.nama || m.full_name || m.name || '';
+  if (f === 'username') return m.username || '';
+  if (f === 'telp') return m.phone || user.phone || '';
+  if (f === 'avatar') return m.avatar_url || '';
+  if (f === 'dibuat') return user.created_at || '';
+  return '';
+}
+
+function setPoin(n) {
+  const t = `${n} Poin`;
+  document.querySelectorAll('.points span:last-child, .my-points .right').forEach((e) => { e.textContent = t; });
+}
+
+(async function init() {
+  if (!K || !window.db || !window.KK) {
+    const g = $('kk-guard'); if (g) g.remove();
+    console.error('Supabase belum dimuat. Periksa tag <script> di halaman.');
+    return;
+  }
+  const sesi = await K.pastikanLogin();
+  if (!sesi) return;
+  K.buka();
+  const user = sesi.user;
+
+  // tombol keluar: akhiri sesi Supabase lalu ke welcome
+  const out = document.querySelector('.logout');
+  if (out) out.addEventListener('click', async () => {
+    try { await db.auth.signOut(); } catch (e) { console.error(e); }
+    window.location.href = 'welcome.html';
+  });
+
+  let row = null;
+  try { row = (await muatProfil(user)).row; } catch (e) { console.error('[profil]', e); }
+
+  const nama = nilai(row, user, 'nama') || nilai(row, user, 'username') || (user.email || '').split('@')[0] || 'Pengguna';
+  $('pNama').textContent = nama;
+  $('pUser').textContent = nilai(row, user, 'username') || user.email || '';
+
+  const dibuat = nilai(row, user, 'dibuat');
+  const d = dibuat ? new Date(dibuat) : null;
+  $('pSejak').textContent = d && !isNaN(d)
+    ? 'Aktif sejak ' + d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+    : '';
+
+  const av = nilai(row, user, 'avatar');
+  if (av && /^https?:\/\//i.test(av)) {
+    const a = $('pAvatar');
+    a.style.background = `#d9d9d9 center / cover no-repeat url("${av.replace(/"/g, '%22')}")`;
+    a.setAttribute('aria-label', 'Foto profil ' + nama);
+  }
+
+  const kp = kunci(row, 'poin');
+  setPoin(kp && Number.isFinite(Number(row[kp])) ? Number(row[kp]) : 0);
+
+  // statistik laporan milik pengguna ini
+  try {
+    const mine = await K.ambilMilikSaya(user.id);
+    const sudah = (n) => ['verified', 'processing', 'completed'].includes(n.st.key);
+    const angka = [mine.length, mine.filter(sudah).length, mine.filter((n) => n.st.key === 'completed').length];
+    document.querySelectorAll('.stat-number').forEach((e, i) => { if (i < 3) e.textContent = angka[i]; });
+  } catch (e) {
+    console.error('[profil] statistik', e);
+    document.querySelectorAll('.stat-number').forEach((e) => { e.textContent = '0'; });
+  }
+})();
+
+})();
 </script>
 </body>
 </html>
