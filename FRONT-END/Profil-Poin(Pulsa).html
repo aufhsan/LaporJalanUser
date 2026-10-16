@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil • Poin — Kuota / Pulsa — KotaKita</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #092e6d;
+      --text: #131b2e;
+      --surface: #f7fbfd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background: linear-gradient(90deg, #fff 0%, #d5e1f4 57.2%, #a8bfe7 100%);
+      zoom: 0.67; /* Disamakan dengan detailLaporan.html */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      padding: 0;
+      border: 0;
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    img, p, h1, h2 {
+      margin: 0;
+      display: block;
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Header Navbar Glassmorphism (Sama dengan detailLaporan.html) */
+    .header {
+      position: fixed;
+      top: 15px;
+      left: 17px;
+      right: 17px;
+      z-index: 1000;
+      min-height: 96px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(177,201,242,0.3));
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 32px rgba(9,46,109,0.12);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--navy);
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .city-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--navy);
+      border-radius: 58px;
+      background: rgba(247,251,253,0.4);
+      color: var(--navy);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .city-picker .icon-arrow {
+      transform: rotate(90deg);
+      width: 18px;
+      height: 18px;
+    }
+
+    .navigation {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-left: auto;
+    }
+
+    .navigation a {
+      position: relative;
+      padding: 12px 0;
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .navigation a.active {
+      font-weight: 600;
+    }
+
+    .navigation a.active::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -2px;
+      left: 0;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--navy);
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: 20px;
+    }
+
+    .points {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 58px;
+      background: linear-gradient(135deg, #3280f3, #0c336c);
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .coin {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #ffe588;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffdf6d, #ffb300);
+      color: #7a4b00;
+      font-size: 14px;
+      font-weight: 900;
+    }
+.profile {
+      display: grid;
+      place-items: center;
+      width: 49px;
+      height: 49px;
+      border-radius: 50%;
+      background: #b2d1ff;
+      color: var(--navy);
+    }
+
+    /* Layout Konten Utama */
+    .page {
+      position: relative;
+      width: 1920px;
+      height: 1200px;
+      margin: 0 auto;
+      padding-top: 140px;
+    }
+
+    .t {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      line-height: 16px;
+      letter-spacing: .24px;
+    }
+
+    .center {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .breadcrumb {
+      left: 201px;
+      top: 166px;
+      width: 265px;
+      height: 22px;
+      font-size: 32px;
+      font-weight: 600;
+      white-space: pre;
+      color: var(--navy);
+    }
+
+    .breadcrumb strong {
+      font-weight: 700;
+    }
+
+    .page-title {
+      left: 201px;
+      top: 242px;
+      width: 265px;
+      height: 22px;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .balance {
+      position: absolute;
+      left: 195px;
+      top: 303px;
+      width: 679px;
+      height: 219px;
+      border-radius: 20px;
+      background: linear-gradient(103deg, #f4dc3b, #fff 125%);
+    }
+
+    .balance-label {
+      left: 45px;
+      top: 28px;
+      width: 309px;
+      height: 22px;
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    .balance-value {
+      position: absolute;
+      left: 45px;
+      top: 74px;
+      width: 364px;
+      height: 112px;
+      font-size: 128px;
+      font-weight: 700;
+      line-height: 112px;
+      letter-spacing: -3px;
+      white-space: nowrap;
+      color: var(--navy);
+    }
+
+    .balance-value span {
+      font-size: 64px;
+    }
+
+    .balance-art {
+      position: absolute;
+      left: 409px;
+      top: 28px;
+      width: 215px;
+      height: 158px;
+    }
+
+    .earn {
+      position: absolute;
+      left: 195px;
+      top: 540px;
+      width: 679px;
+      height: 468px;
+      border-radius: 20px;
+      background: var(--navy);
+    }
+
+    .earn-title {
+      left: 45px;
+      top: 40px;
+      width: 309px;
+      height: 22px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .earn-row {
+      position: absolute;
+      left: 45px;
+      width: 595px;
+      height: 88px;
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--navy);
+    }
+
+    .earn-row-1 { top: 86px; }
+    .earn-row-2 { top: 195px; }
+    .earn-row-3 { top: 306px; }
+
+    .earn-row .circle {
+      position: absolute;
+      left: 16px;
+      top: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f4dc3b;
+    }
+
+    .earn-row .plus {
+      left: 16px;
+      top: 33px;
+      width: 48px;
+      height: 22px;
+      font-size: 17.5px;
+      font-weight: 600;
+    }
+
+    .earn-row h2 {
+      left: 76px;
+      top: 22px;
+      width: 359px;
+      height: 22px;
+      font-size: 17.5px;
+      font-weight: 600;
+    }
+
+    .earn-row p {
+      left: 76px;
+      top: 44px;
+      width: 498px;
+      height: 22px;
+      font-size: 17.5px;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+
+    .earn-note {
+      left: 45px;
+      top: 406px;
+      width: 498px;
+      height: 22px;
+      color: #fff;
+      font-size: 17.5px;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+
+    .tab {
+      position: absolute;
+      top: 303px;
+      height: 50px;
+      border-radius: 13px;
+      background: var(--surface);
+      color: var(--navy);
+    }
+
+    .tab .t {
+      top: 13px;
+      height: 24px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .tab-redeem {
+      left: 897px;
+      width: 175px;
+      background: var(--navy);
+      color: var(--surface);
+    }
+
+    .tab-redeem .t { left: 8px; width: 159px; }
+    .tab-vouchers { left: 1082px; width: 216px; }
+    .tab-vouchers .t { left: 28px; width: 159px; }
+    .tab-history { left: 1308px; width: 119px; }
+    .tab-history .t { left: 9px; width: 102px; }
+
+    .category {
+      position: absolute;
+      top: 367px;
+      height: 43px;
+      border-radius: 100px;
+      box-shadow: inset 0 0 0 2px var(--navy);
+      font-size: 17.5px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .category.active {
+      background: var(--navy);
+      color: var(--surface);
+      box-shadow: none;
+    }
+
+    .category .t {
+      left: -20px;
+      top: 10px;
+      width: 159px;
+      height: 24px;
+    }
+
+    .cat-all { left: 897px; width: 120px; }
+    .cat-fashion { left: 1028px; width: 120px; }
+    .cat-pulsa { left: 1159px; width: 150px; }
+    .cat-transport { left: 1320px; width: 150px; }
+    .cat-pulsa .t, .cat-transport .t { left: 10px; top: 11.999862px; width: 133px; height: 20.075472px; }
+    .cat-cashback { left: 1481px; width: 114px; }
+    .cat-cashback .t { left: 11px; top: 11.999862px; width: 92px; height: 20px; }
+
+    .voucher {
+      position: absolute;
+      left: var(--x);
+      top: 423px;
+      width: 264px;
+      height: 277px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--navy);
+    }
+
+    .voucher-hero {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 264px;
+      height: 156px;
+      background: #d1d1d1;
+    }
+
+    .voucher-logo {
+      position: absolute;
+      left: 15px;
+      top: 19px;
+      width: 51px;
+      height: 51px;
+      border-radius: 100px;
+      box-shadow: inset 0 0 0 1px var(--navy);
+    }
+
+    .voucher-logo .t {
+      left: 8px;
+      top: 18px;
+      width: 35px;
+      height: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .voucher-tag {
+      position: absolute;
+      left: 153px;
+      top: 33px;
+      width: 91px;
+      height: 24px;
+      border-radius: 100px;
+      box-shadow: inset 0 0 0 1.5px var(--navy);
+    }
+
+    .voucher-tag .t {
+      left: 6px;
+      top: 4px;
+      width: 79px;
+      height: 16px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .voucher-title {
+      left: 15px;
+      top: 172px;
+      width: var(--title-w);
+      height: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .voucher-description {
+      position: absolute;
+      left: 15px;
+      top: 191px;
+      width: 203px;
+      height: 39px;
+      font-size: 12px;
+      font-weight: 300;
+      line-height: 13px;
+      letter-spacing: .24px;
+    }
+
+    .price-icon {
+      position: absolute;
+      left: 15px;
+      top: 238px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .price {
+      left: 41px;
+      top: 241px;
+      width: var(--price-w,54px);
+      height: 16px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .redeem {
+      position: absolute;
+      left: 169px;
+      top: 233px;
+      width: 82px;
+      height: 31px;
+      border-radius: 13px;
+      background: var(--navy);
+      color: var(--surface);
+    }
+
+    .redeem:disabled {
+      background: #84a5d6;
+      cursor: default;
+    }
+
+    .redeem .t {
+      left: 21px;
+      top: 8px;
+      width: 40px;
+      height: 16px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .definitions {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+  
+
+/* Responsive mobile layout — desktop styles remain unchanged */
+@media (max-width: 767px) {
+  html { overflow-x: hidden; }
+  body { zoom: 1 !important; overflow-x: hidden; }
+  .header {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+    border-radius: 16px !important;
+  }
+  .header > .brand { order: 1 !important; flex: 0 1 auto !important; min-width: 0; gap: 5px !important; font-size: clamp(16px, 4.5vw, 21px) !important; white-space: nowrap; }
+  .header > .brand svg { width: 22px !important; height: 30px !important; }
+  .header > .city-picker { order: 2 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 4px !important; font-size: 12px !important; white-space: nowrap; }
+  .header > .city-picker .icon { width: 16px !important; height: 16px !important; }
+  .header > .header__actions { display: contents !important; }
+  .header .points { order: 3 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 5px !important; font-size: 12px !important; white-space: nowrap; }
+  .header .points .coin { width: 17px !important; height: 17px !important; font-size: 10px !important; }
+  .header > .profile { order: 4 !important; display: inline-flex !important; flex: 0 0 34px !important; width: 34px !important; height: 34px !important; align-items: center !important; justify-content: center !important; margin: 0 !important; }
+  .header > .profile .icon { width: 22px !important; height: 22px !important; }
+  .header > .navigation { order: 5 !important; flex: 0 0 100% !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 2px 0 0 !important; display: flex !important; flex-flow: row nowrap !important; align-items: center !important; justify-content: space-between !important; gap: clamp(6px, 2.5vw, 14px) !important; overflow-x: auto !important; scrollbar-width: none; }
+  .header > .navigation::-webkit-scrollbar { display: none; }
+  .header > .navigation a { flex: 0 0 auto !important; font-size: clamp(10px, 2.8vw, 13px) !important; line-height: 1.3 !important; padding: 7px 0 !important; white-space: nowrap !important; }
+  .header > .navigation a.active::after { height: 2px !important; bottom: 0 !important; }
+  body { padding-top: 112px; }
+  img, video, iframe, canvas, svg { max-width: 100%; }
+  main, .main-content, .main-content, .content, .page-content, .container, .wrapper, .dashboard-content, .content-wrapper {
+    max-width: 100% !important;
+  }
+  main, .main-content, .content, .page-content, .dashboard-content, .content-wrapper { width: auto; }
+  .main-content, .content, .page-content, .dashboard-content, .content-wrapper { margin-left: 12px !important; margin-right: 12px !important; }
+  input, select, textarea { max-width: 100%; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+}
+@media (max-width: 420px) {
+  .header { padding: 8px 9px !important; column-gap: 5px !important; }
+  .header > .brand { gap: 3px !important; font-size: 16px !important; }
+  .header > .city-picker { padding: 0 7px !important; }
+  .header .points { padding: 0 7px !important; }
+  .header > .navigation { gap: 7px !important; }
+  .header > .navigation a { font-size: 10px !important; }
+}
+/* >>> MOBILE-OPT >>> */
+@media (max-width: 767px) {
+  body { padding-top: 100px; }
+  .page { width: 100% !important; height: auto !important; padding: 0 12px 24px !important; overflow: visible !important; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+  .page > .t { position: static !important; width: auto !important; height: auto !important; flex: 0 0 100%; line-height: 1.25 !important; white-space: normal !important; margin: 2px 2px 0; }
+  .breadcrumb { order: 0; font-size: 13px !important; margin-top: 4px; white-space: pre !important; }
+  .breadcrumb { display: block !important; }
+  .page-title { order: 1; font-size: 18px !important; }
+  .balance { order: 2; flex: 0 0 100%; position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 14px 16px; border-radius: 16px; overflow: hidden; }
+  .balance .balance-label { position: static !important; width: auto !important; height: auto !important; font-size: 13px !important; margin: 0 0 2px; }
+  .balance-value { position: static !important; width: auto !important; height: auto !important; font-size: 52px !important; line-height: 1.05 !important; letter-spacing: -1px !important; margin: 0; }
+  .balance-value span { font-size: 24px !important; }
+  .balance-art { left: auto !important; right: 8px; top: 50% !important; width: 112px !important; height: 82px !important; transform: translateY(-50%); opacity: .9; }
+  .tab { order: 3; position: relative !important; left: auto !important; top: auto !important; width: auto !important; height: 38px !important; flex: 1 1 28%; border-radius: 11px; display: flex; align-items: center; justify-content: center; }
+  .tab .t { position: static !important; width: auto !important; height: auto !important; font-size: 13px !important; }
+  nav[aria-label="Kategori voucher"] { order: 4; flex: 0 0 100%; display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+  nav[aria-label="Kategori voucher"]::-webkit-scrollbar { display: none; }
+  .category { position: static !important; left: auto !important; top: auto !important; width: auto !important; height: 30px !important; padding: 0 12px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px !important; }
+  .category .t { position: static !important; width: auto !important; height: auto !important; font-size: 12px !important; }
+  section[aria-label^="Voucher"] { order: 5; flex: 0 0 100%; display: flex; flex-direction: column; gap: 8px; }
+  .earn { order: 6; flex: 0 0 100%; position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .earn > .t { position: static !important; width: auto !important; height: auto !important; margin: 0; white-space: normal !important; }
+  .earn-title { font-size: 15px !important; }
+  .earn-note { font-size: 11.5px !important; letter-spacing: 0 !important; line-height: 1.35 !important; }
+  .earn-row { position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 10px 12px; border-radius: 14px; display: grid; grid-template-columns: 38px 1fr; column-gap: 10px; row-gap: 1px; align-items: center; }
+  .earn-row .circle { position: static !important; grid-column: 1; grid-row: 1 / 3; width: 36px !important; height: 36px !important; }
+  .earn-row .plus { position: static !important; grid-column: 1; grid-row: 1 / 3; width: auto !important; height: auto !important; justify-self: center; align-self: center; font-size: 13px !important; z-index: 1; }
+  .earn-row h2 { position: static !important; grid-column: 2; grid-row: 1; width: auto !important; height: auto !important; font-size: 13px !important; line-height: 1.3 !important; margin: 0; white-space: normal !important; }
+  .earn-row p { position: static !important; grid-column: 2; grid-row: 2; width: auto !important; height: auto !important; font-size: 11.5px !important; line-height: 1.35 !important; letter-spacing: 0 !important; margin: 0; white-space: normal !important; }
+  .voucher { position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 10px; border-radius: 14px; display: grid; grid-template-columns: 84px auto 1fr auto; column-gap: 10px; row-gap: 4px; align-items: center; }
+  .voucher-hero { position: relative !important; grid-column: 1; grid-row: 1 / 4; width: 84px !important; height: 84px !important; border-radius: 10px; overflow: hidden; align-self: start; }
+  .voucher-logo { display: none !important; }
+  .voucher-tag { left: 50% !important; top: auto !important; bottom: 5px; width: auto !important; height: auto !important; transform: translateX(-50%); padding: 2px 7px; white-space: nowrap; }
+  .voucher-tag .t { position: static !important; width: auto !important; height: auto !important; font-size: 9px !important; line-height: 1.2 !important; }
+  .shop { left: 50% !important; top: 8px !important; width: 38px !important; height: 38px !important; margin-left: -19px; -webkit-mask-size: 38px 38px !important; mask-size: 38px 38px !important; }
+  .voucher-title { position: static !important; grid-column: 2 / -1; grid-row: 1; width: auto !important; height: auto !important; font-size: 13px !important; line-height: 1.3 !important; white-space: normal !important; margin: 0; align-self: end; }
+  .voucher-description { position: static !important; grid-column: 2 / -1; grid-row: 2; width: auto !important; height: auto !important; font-size: 11px !important; line-height: 1.3 !important; margin: 0; }
+  .price-icon { position: static !important; grid-column: 2; grid-row: 3; width: 16px !important; height: 16px !important; }
+  .voucher .price { position: static !important; grid-column: 3; grid-row: 3; width: auto !important; height: auto !important; font-size: 12.5px !important; margin: 0; }
+  .redeem { position: static !important; grid-column: 4; grid-row: 3; width: 68px !important; height: 28px !important; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .redeem .t { position: static !important; width: auto !important; height: auto !important; font-size: 12px !important; }
+  .scroll-indicator { display: none !important; }
+}
+/* <<< MOBILE-OPT <<< */
+</style>
+</head>
+<body>
+  <!-- SVG Symbols (Sama seperti detailLaporan.html) -->
+  <svg style="display:none">
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 4 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="icon-pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></symbol>
+    <symbol id="icon-profile" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4" fill="currentColor"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z" fill="currentColor"/></symbol>
+  </svg>
+
+  <!-- Navbar Glassmorphism Modern -->
+  <header class="header">
+    <a class="brand" href="welcome.html">
+      <svg width="37" height="50" viewBox="0 0 40 54">
+        <path fill="#092e6d" fill-rule="evenodd" d="M18 0C10 0 4 6 4 14c0 8 14 21 14 21s14-13 14-21C32 6 26 0 18 0Zm0 8a6 6 0 1 1 0 12 6 6 0 1 1 0-12Z"/>
+        <path fill="#378deb" d="M0 33l10-4v19L0 51Zm28-7 12-6v25l-12 4Z"/>
+        <path fill="#4da6cc" d="m13 40 12-11v17l-12 7Z"/>
+        <path fill="#27afa5" d="M2 52c15 3 24-15 38-13-1 12-14 19-38 13Z"/>
+      </svg>
+      <span>KotaKita</span>
+    </a>
+
+    <button class="city-picker" type="button">
+      <svg class="icon"><use href="#icon-pin"/></svg>
+      <span>Bandung</span>
+    </button>
+
+    <nav class="navigation">
+      <a href="dashboard.html">Beranda</a>
+      <a href="lokasi.html">Lokasi</a>
+      <a href="uploadLaporan.html">Upload Laporan</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="points" href="Profil-Poin(Semua).html" style="text-decoration:none;color:#FFFFFF;cursor:pointer"><span class="coin">★</span><span>23 Poin</span></a>
+      </div>
+      <a class="profile" href="Profil.html"><svg class="icon"><use href="#icon-profile"/></svg></a>
+    </div>
+  </header>
+
+  <main class="page">
+    <svg class="definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="point-icon" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="8.25" fill="none" stroke="currentColor" stroke-width="1.833334"/>
+          <path d="m11 6.875 1.283 2.75 2.842.367-2.108 1.925.55 2.842L11 13.292l-2.567 1.467.55-2.842-2.108-1.925 2.842-.367Z" fill="none" stroke="currentColor" stroke-width="1.833334"/>
+        </symbol>
+      </defs>
+    </svg>
+
+    <p class="t breadcrumb">Profil<strong> • Poin</strong></p>
+    <h1 class="t page-title">Poin Saya</h1>
+
+    <section class="balance" aria-label="Saldo poin">
+      <p class="t balance-label">Saldo Poin Kamu</p>
+      <p class="balance-value">23 <span>Poin</span></p>
+      <svg class="balance-art" viewBox="0 0 215 158" aria-hidden="true">
+        <g stroke="#06306f" stroke-width="3">
+          <ellipse cx="57.333335" cy="103.418182" rx="40.133335" ry="40.218182" fill="#06306f" fill-opacity=".12"/>
+          <ellipse cx="137.6" cy="89.054545" rx="51.6" ry="51.709091" fill="#06306f" fill-opacity=".18"/>
+          <ellipse cx="137.6" cy="89.054546" rx="34.4" ry="34.472729" fill="none"/>
+          <path d="m137.6 68.945454 6.02 12.352726 13.616666 2.010911-9.889991 9.623633 2.293331 13.645455-12.04-6.463637-12.04 6.463637 2.293331-13.645455-9.889991-9.623633 13.616666-2.010911Z" fill="#06306f"/>
+          <path d="M189.2 28.727273v17.236364m-8.6-8.618182h17.2M25.8 43.090909v11.490909m-5.733333-5.745454h11.466666" fill="none"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="earn" aria-label="Cara mendapatkan poin">
+      <h2 class="t earn-title">Cara dapat Poin</h2>
+      <div class="earn-row earn-row-1">
+        <span class="circle"></span>
+        <span class="t center plus">+10</span>
+        <h2 class="t">Kirim Laporan Valid</h2>
+        <p class="t">Otomatis setelah lolos filter dasar/foto jernih</p>
+      </div>
+      <div class="earn-row earn-row-2">
+        <span class="circle"></span>
+        <span class="t center plus">+15</span>
+        <h2 class="t">Laporan Dikonfirmasi Admin/Mitra</h2>
+        <p class="t">Verifikasi bahwa laporan asli &amp; bukan spam</p>
+      </div>
+      <div class="earn-row earn-row-3">
+        <span class="circle"></span>
+        <span class="t center plus">+25</span>
+        <h2 class="t">Laporan Selesai Ditangani</h2>
+        <p class="t">Apresiasi karena masalah jalan berhasil terselesaikan</p>
+      </div>
+      <p class="t earn-note">Makin banyak laporan valid, makin banyak poin yang kamu dapat</p>
+    </section>
+
+    <button class="tab tab-redeem" type="button"><span class="t center">Tukar Poin</span></button>
+    <button class="tab tab-vouchers" type="button"><span class="t center">Voucher Saya</span></button>
+    <button class="tab tab-history" type="button"><span class="t center">Riwayat</span></button>
+
+    <nav aria-label="Kategori voucher">
+      <a class="category cat-all" href="Profil-Poin(Semua).html"><span class="t center">Semua</span></a>
+      <a class="category cat-fashion" href="Profil-Poin(Fashion).html"><span class="t center">Fashion</span></a>
+      <a class="category cat-pulsa active" href="Profil-Poin(Pulsa).html" aria-current="page"><span class="t center">Kuota / Pulsa</span></a>
+      <a class="category cat-transport" href="Profil-Poin(Transportasi).html"><span class="t center">Transportasi</span></a>
+      <a class="category cat-cashback" href="Profil-Poin(Cashback).html"><span class="t center">Cashback</span></a>
+    </nav>
+
+    <section aria-label="Voucher kuota dan pulsa">
+      <article class="voucher" style="--x:897px;--title-w:154px;--price-w:51px">
+        <div class="voucher-hero">
+          <div class="voucher-logo"><span class="t">Logo</span></div>
+          <div class="voucher-tag"><span class="t center">Pulsa/Kuota</span></div>
+        </div>
+        <h2 class="t voucher-title">Pulsa/Kuota Rp 3.000</h2>
+        <p class="voucher-description">Tukar jadi pulsa atau potongan harga kuota senilai Rp 3.000.</p>
+        <svg class="price-icon" aria-hidden="true"><use href="#point-icon"/></svg>
+        <p class="t price">15 Poin</p>
+        <button class="redeem" type="button"><span class="t">Tukar</span></button>
+      </article>
+
+      <article class="voucher" style="--x:1179px;--title-w:162px">
+        <div class="voucher-hero">
+          <div class="voucher-logo"><span class="t">Logo</span></div>
+          <div class="voucher-tag"><span class="t center">Pulsa/Kuota</span></div>
+        </div>
+        <h2 class="t voucher-title">Pulsa/Kuota Rp 10.000</h2>
+        <p class="voucher-description">Tukar jadi pulsa atau potongan harga kuota senilai Rp 10.000.</p>
+        <svg class="price-icon" aria-hidden="true"><use href="#point-icon"/></svg>
+        <p class="t price">40 Poin</p>
+        <button class="redeem" type="button" disabled><span class="t">Tukar</span></button>
+      </article>
+
+      <article class="voucher" style="--x:1463px;--title-w:163px">
+        <div class="voucher-hero">
+          <div class="voucher-logo"><span class="t">Logo</span></div>
+          <div class="voucher-tag"><span class="t center">Pulsa/Kuota</span></div>
+        </div>
+        <h2 class="t voucher-title">Pulsa/Kuota Rp 25.000</h2>
+        <p class="voucher-description">Tukar jadi pulsa atau potongan harga kuota senilai Rp 25.000.</p>
+        <svg class="price-icon" aria-hidden="true"><use href="#point-icon"/></svg>
+        <p class="t price">80 Poin</p>
+        <button class="redeem" type="button" disabled><span class="t">Tukar</span></button>
+      </article>
+    </section>
+  </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const go = (url) => { if (url) window.location.href = url; };
+  document.querySelectorAll('form').forEach(form => form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.classList.contains('login__form')) { go('dashboard.html'); return; }
+    if (form.classList.contains('registration__form')) { go('login.html'); return; }
+    if (form.querySelector('input[type="file"]')) { go('detail-after-UploadLaporan.html'); return; }
+  }));
+  document.querySelectorAll('.issue-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.issue-btn').forEach(x => x.classList.remove('selected')); btn.classList.add('selected');
+  }));
+  document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active')); btn.classList.add('active');
+  }));
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    const c=btn.className; if(c.includes('vouchers')) go('profil-poin(voucherSaya).html'); else if(c.includes('history')) go('profil-poin(riwayat).html'); else go('Profil-Poin(Semua).html');
+  }));
+  document.querySelectorAll('.save').forEach(btn => btn.addEventListener('click', () => { alert('Perubahan berhasil disimpan.'); }));
+  document.querySelectorAll('.logout').forEach(btn => btn.addEventListener('click', () => go('welcome.html')));
+  document.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', () => go('detail-after-UploadLaporan.html')));
+  document.querySelectorAll('.detail-button.withdraw').forEach(btn => btn.addEventListener('click', () => { if(confirm('Tarik laporan ini?')) go('rekamLaporan.html'); }));
+  document.querySelectorAll('.download').forEach(btn => btn.addEventListener('click', () => {
+    const blob=new Blob(['Riwayat laporan KotaKita'],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='riwayat-laporan.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }));
+  document.querySelectorAll('.redeem:not(:disabled)').forEach(btn => btn.addEventListener('click', () => alert('Penukaran poin dipilih. Konfirmasi transaksi memerlukan backend aplikasi.')));
+  document.querySelectorAll('.action').forEach(btn => btn.addEventListener('click', () => alert(btn.classList.contains('feedback')?'Terima kasih atas masukan Anda.':'Silakan gunakan kanal kontak resmi KotaKita.')));
+  document.querySelectorAll('.city-picker').forEach(btn => btn.addEventListener('click', () => {
+    const city=prompt('Masukkan nama kota:', 'Bandung'); if(city&&city.trim()){btn.setAttribute('aria-label','Kota '+city.trim()); const t=Array.from(btn.childNodes).find(n=>n.nodeType===3&&n.textContent.trim()); if(t)t.textContent=' '+city.trim()+' ';}
+  }));
+  document.querySelectorAll('.avatar-upload').forEach(btn => btn.addEventListener('click', () => {
+    let i=document.querySelector('#avatar-file'); if(!i){i=document.createElement('input');i.type='file';i.id='avatar-file';i.accept='image/*';i.hidden=true;document.body.appendChild(i);} i.click();
+  }));
+  document.querySelectorAll('.location-card__edit-btn').forEach(btn => btn.addEventListener('click', () => go('lokasi.html')));
+});
+</script>
+</body>
+</html>

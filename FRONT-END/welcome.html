@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#092e6d" />
+    <meta
+      name="description"
+      content="KotaKita — Bersama, Membuat Kota-mu Menjadi Lebih Baik."
+    />
+
+    <title>KotaKita — Selamat Datang</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        font-family: "Inter", Arial, sans-serif;
+        color: #131b2e;
+        background: #dce6f5;
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+
+        --navy: #092e6d;
+        --teal: #27afa5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background: linear-gradient(110deg, #fff 0%, #a8bfe7 100%);
+      }
+
+      .page {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      .welcome {
+        width: min(480px, 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .welcome__brand {
+        margin: 0;
+        width: 100%;
+        line-height: 0;
+      }
+
+      /* Gambar dibuat sedikit lebih besar */
+      .welcome__logo {
+        display: block;
+        margin: 0 auto;
+        width: 58%;
+        max-width: 240px;
+        height: auto;
+      }
+
+      /* Font tagline diperkecil & dicegah membuat baris baru (no-wrap) */
+      .welcome__tagline {
+        margin: 12px 0 16px;
+        color: var(--teal);
+        font-size: clamp(14px, 1.8vw, 18px);
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: -0.025em;
+        white-space: nowrap; /* Memastikan teks tetap dalam 1 baris */
+      }
+
+      .welcome__start {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        width: 100%;
+        min-height: 48px;
+        padding: 14px 21px;
+
+        border-radius: 16px;
+        background: var(--navy);
+        color: #fff;
+
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+        text-decoration: none;
+
+        transition: background-color 150ms ease;
+      }
+
+      .welcome__start svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .welcome__start:hover {
+        background: #15417f;
+      }
+
+      .welcome__account {
+        margin-top: 12px;
+        color: var(--navy);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+
+      .welcome__account a {
+        color: inherit;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .welcome__account a:hover {
+        text-decoration: underline;
+      }
+
+      a:focus-visible {
+        outline: 3px solid var(--teal);
+        outline-offset: 5px;
+      }
+
+      @media (max-width: 600px) {
+        .welcome__logo {
+          width: 65%;
+        }
+
+        .welcome__tagline {
+          margin: 10px 0 14px;
+          font-size: 13px;
+        }
+
+        .welcome__account {
+          margin-top: 10px;
+          font-weight: 700;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .welcome__start {
+          transition: none;
+        }
+      }
+    
+
+/* Responsive mobile layout — desktop styles remain unchanged */
+@media (max-width: 767px) {
+  html { overflow-x: hidden; }
+  body { zoom: 1 !important; overflow-x: hidden; }
+  .header {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+    border-radius: 16px !important;
+  }
+  .header > .brand { order: 1 !important; flex: 0 1 auto !important; min-width: 0; gap: 5px !important; font-size: clamp(16px, 4.5vw, 21px) !important; white-space: nowrap; }
+  .header > .brand svg { width: 22px !important; height: 30px !important; }
+  .header > .city-picker { order: 2 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 4px !important; font-size: 12px !important; white-space: nowrap; }
+  .header > .city-picker .icon { width: 16px !important; height: 16px !important; }
+  .header > .header__actions { display: contents !important; }
+  .header .points { order: 3 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 5px !important; font-size: 12px !important; white-space: nowrap; }
+  .header .points .coin { width: 17px !important; height: 17px !important; font-size: 10px !important; }
+  .header > .profile { order: 4 !important; display: inline-flex !important; flex: 0 0 34px !important; width: 34px !important; height: 34px !important; align-items: center !important; justify-content: center !important; margin: 0 !important; }
+  .header > .profile .icon { width: 22px !important; height: 22px !important; }
+  .header > .navigation { order: 5 !important; flex: 0 0 100% !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 2px 0 0 !important; display: flex !important; flex-flow: row nowrap !important; align-items: center !important; justify-content: space-between !important; gap: clamp(6px, 2.5vw, 14px) !important; overflow-x: auto !important; scrollbar-width: none; }
+  .header > .navigation::-webkit-scrollbar { display: none; }
+  .header > .navigation a { flex: 0 0 auto !important; font-size: clamp(10px, 2.8vw, 13px) !important; line-height: 1.3 !important; padding: 7px 0 !important; white-space: nowrap !important; }
+  .header > .navigation a.active::after { height: 2px !important; bottom: 0 !important; }
+  body { padding-top: 112px; }
+  img, video, iframe, canvas, svg { max-width: 100%; }
+  main, .main-content, .main-content, .content, .page-content, .container, .wrapper, .dashboard-content, .content-wrapper {
+    max-width: 100% !important;
+  }
+  main, .main-content, .content, .page-content, .dashboard-content, .content-wrapper { width: auto; }
+  .main-content, .content, .page-content, .dashboard-content, .content-wrapper { margin-left: 12px !important; margin-right: 12px !important; }
+  input, select, textarea { max-width: 100%; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+}
+@media (max-width: 420px) {
+  .header { padding: 8px 9px !important; column-gap: 5px !important; }
+  .header > .brand { gap: 3px !important; font-size: 16px !important; }
+  .header > .city-picker { padding: 0 7px !important; }
+  .header .points { padding: 0 7px !important; }
+  .header > .navigation { gap: 7px !important; }
+  .header > .navigation a { font-size: 10px !important; }
+}
+/* >>> MOBILE-OPT >>> */
+@media (max-width: 767px) {
+  body { padding-top: 0 !important; }
+  .page { padding: 16px !important; min-height: 100svh; }
+  .login, .registration, .welcome { width: 100% !important; max-width: 340px; }
+  .login__title, .registration__title { font-size: 22px !important; margin-bottom: 18px !important; }
+  .login__input, .registration__input { height: 42px !important; padding: 0 16px !important; font-size: 13px !important; border-radius: 13px !important; }
+  .login__button, .registration__button, .welcome__start { min-height: 42px !important; padding: 10px 16px !important; font-size: 13px !important; border-radius: 13px !important; }
+  .login__forgot, .welcome__account { font-size: 12.5px !important; margin-top: 12px !important; }
+  .welcome__logo { width: 52% !important; max-width: 180px !important; }
+  .welcome__tagline { font-size: 12.5px !important; margin: 8px 0 14px !important; }
+}
+/* <<< MOBILE-OPT <<< */
+</style>
+    <style id="kk-guard">html{visibility:hidden}</style>
+  </head>
+
+  <body>
+    <main class="page">
+      <section class="welcome" aria-label="Selamat datang di KotaKita">
+        <h1 class="welcome__brand">
+          <img
+            class="welcome__logo"
+            src="assets/kotakita-logo.png"
+            alt="KotaKita"
+            width="441"
+            height="383"
+          />
+        </h1>
+
+        <p class="welcome__tagline">
+          Bersama, Membuat Kota-mu Menjadi Lebih Baik
+        </p>
+
+        <a class="welcome__start" href="regist.html">
+          <span>Mulai</span>
+
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M4 12h16m-6-6 6 6-6 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+
+        <p class="welcome__account">
+          Sudah punya akun? <a href="login.html">Masuk</a>
+        </p>
+      </section>
+    </main>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/welcome.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const go = (url) => { if (url) window.location.href = url; };
+  document.querySelectorAll('form').forEach(form => form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.classList.contains('login__form')) { go('dashboard.html'); return; }
+    if (form.classList.contains('registration__form')) { go('login.html'); return; }
+    if (form.querySelector('input[type="file"]')) { go('detail-after-UploadLaporan.html'); return; }
+  }));
+  document.querySelectorAll('.issue-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.issue-btn').forEach(x => x.classList.remove('selected')); btn.classList.add('selected');
+  }));
+  document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active')); btn.classList.add('active');
+  }));
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    const c=btn.className; if(c.includes('vouchers')) go('Profil-Poin(Semua).html#voucher'); else if(c.includes('history')) go('rekamLaporan.html'); else go('Profil-Poin(Semua).html');
+  }));
+  document.querySelectorAll('.save').forEach(btn => btn.addEventListener('click', () => { alert('Perubahan berhasil disimpan.'); }));
+  document.querySelectorAll('.logout').forEach(btn => btn.addEventListener('click', () => go('welcome.html')));
+  document.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', () => go('detail-after-UploadLaporan.html')));
+  document.querySelectorAll('.detail-button.withdraw').forEach(btn => btn.addEventListener('click', () => { if(confirm('Tarik laporan ini?')) go('rekamLaporan.html'); }));
+  document.querySelectorAll('.download').forEach(btn => btn.addEventListener('click', () => {
+    const blob=new Blob(['Riwayat laporan KotaKita'],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='riwayat-laporan.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }));
+  document.querySelectorAll('.redeem:not(:disabled)').forEach(btn => btn.addEventListener('click', () => alert('Penukaran poin dipilih. Konfirmasi transaksi memerlukan backend aplikasi.')));
+  document.querySelectorAll('.action').forEach(btn => btn.addEventListener('click', () => alert(btn.classList.contains('feedback')?'Terima kasih atas masukan Anda.':'Silakan gunakan kanal kontak resmi KotaKita.')));
+  document.querySelectorAll('.city-picker').forEach(btn => btn.addEventListener('click', () => {
+    const city=prompt('Masukkan nama kota:', 'Bandung'); if(city&&city.trim()){btn.setAttribute('aria-label','Kota '+city.trim()); const t=Array.from(btn.childNodes).find(n=>n.nodeType===3&&n.textContent.trim()); if(t)t.textContent=' '+city.trim()+' ';}
+  }));
+  document.querySelectorAll('.avatar-upload').forEach(btn => btn.addEventListener('click', () => {
+    let i=document.querySelector('#avatar-file'); if(!i){i=document.createElement('input');i.type='file';i.id='avatar-file';i.accept='image/*';i.hidden=true;document.body.appendChild(i);} i.click();
+  }));
+  document.querySelectorAll('.location-card__edit-btn').forEach(btn => btn.addEventListener('click', () => go('lokasi.html')));
+});
+</script>
+</body>
+</html>

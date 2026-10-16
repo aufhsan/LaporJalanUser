@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Laporan — KotaKita</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #092e6d;
+      --text: #131b2e;
+      --muted: #5c5c5c;
+      --danger: #ad0000;
+      --light-blue: #f0f8ff;
+      --border-blue: #49a3ee;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(
+        90deg,
+        #ffffff 0%,
+        #d5e1f4 57.2%,
+        #a8bfe7 100%
+      );
+      -webkit-font-smoothing: antialiased;
+      zoom: 0.67; /* Disamakan dengan detailLaporan2-5.html */
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .icon {
+      display: block;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .svg-definitions {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    /* HEADER NAVBAR GLASSMORPHISM (Sama dengan detailLaporan2-5.html) */
+    .header {
+      position: fixed;
+      top: 15px;
+      left: 17px;
+      right: 17px;
+      z-index: 1000;
+      min-height: 96px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(177,201,242,0.3));
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 32px rgba(9,46,109,0.12);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      color: var(--navy);
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .city-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--navy);
+      border-radius: 58px;
+      background: rgba(247, 251, 253, 0.4);
+      color: var(--navy);
+      font-size: 18px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .city-picker .icon-arrow {
+      transform: rotate(90deg);
+      width: 18px;
+      height: 18px;
+    }
+
+    .navigation {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-left: auto;
+    }
+
+    .navigation a {
+      position: relative;
+      padding: 12px 0;
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .navigation a.active {
+      font-weight: 600;
+    }
+
+    .navigation a.active::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -2px;
+      left: 0;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--navy);
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: 20px;
+    }
+
+    .points {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 58px;
+      background: linear-gradient(135deg, #3280f3, #0c336c);
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .coin {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #ffe588;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffdf6d, #ffb300);
+      color: #7a4b00;
+      font-size: 14px;
+      font-weight: 900;
+    }
+.profile {
+      display: grid;
+      place-items: center;
+      width: 49px;
+      height: 49px;
+      border-radius: 50%;
+      background: #b2d1ff;
+      color: var(--navy);
+      flex-shrink: 0;
+    }
+
+    /* MAIN CONTAINER CONTENT */
+    .container {
+      width: min(1508px, calc(100% - 64px));
+      margin: 140px auto 32px; /* Top margin disesuaikan agar tidak tertutup header fixed */
+    }
+
+    .page-title {
+      margin: 0 0 24px;
+      color: var(--navy);
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 46px;
+      align-items: stretch;
+    }
+
+    /* Kolom meregang; kartu terakhir di tiap kolom mengisi sisa tinggi
+       sehingga tepi bawah "Lokasi yang Terdeteksi" sejajar dengan "Apa yang terjadi ?" */
+    .form-column {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .form-column > .form-group:last-child {
+      flex: 1 1 auto;
+    }
+
+    .form-column > .form-group:last-child > .location-card,
+    .form-column > .form-group:last-child > .description-panel {
+      flex: 1 1 auto;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 32px;
+    }
+
+    .section-label {
+      margin: 0 0 16px;
+      color: var(--navy);
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    /* PANEL STYLES */
+    .panel {
+      padding: 30px;
+      border-radius: 45px;
+      background: #f7fbfd;
+      border: 1px solid rgba(0, 22, 69, 0.15);
+      box-shadow: 0 3px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* BUKTI FOTO PANEL */
+    .photo-upload {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .photo-upload__left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex: 1;
+    }
+
+    .camera-box {
+      display: grid;
+      place-items: center;
+      width: 109px;
+      height: 109px;
+      border: 1px solid var(--border-blue);
+      border-radius: 23px;
+      background: rgba(73, 163, 238, 0.24);
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+
+    .camera-box .icon {
+      width: 52px;
+      height: 52px;
+    }
+
+    .photo-upload__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--navy);
+      margin: 0 0 6px;
+    }
+
+    .photo-upload__help {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .photo-upload__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 250px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 55px;
+      padding: 0 24px;
+      border: 0;
+      border-radius: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn--primary {
+      background: var(--navy);
+      color: #ffffff;
+    }
+
+    .btn--secondary {
+      background: #d3e9fb;
+      color: var(--navy);
+      border: 1px solid var(--border-blue);
+    }
+
+    /* JENIS MASALAH PANEL */
+    /* Kontainer Jenis Masalah: tampil 4 opsi, sisanya di-scroll di dalam kotak */
+    .issue-options {
+      --issue-btn-h: 70px;
+      --issue-gap: 16px;
+      --issue-visible: 4;
+      display: flex;
+      flex-direction: column;
+      gap: var(--issue-gap);
+      max-height: calc(var(--issue-btn-h) * var(--issue-visible) + var(--issue-gap) * (var(--issue-visible) - 1));
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-blue) transparent;
+    }
+
+    .issue-options::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .issue-options::-webkit-scrollbar-thumb {
+      background: var(--border-blue);
+      border-radius: 6px;
+    }
+
+    .issue-options::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .issue-btn {
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto;
+      width: 100%;
+      height: var(--issue-btn-h);
+      padding: 0 24px;
+      border: 1px solid var(--border-blue);
+      border-radius: 15px;
+      background: var(--light-blue);
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 600;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .issue-btn:focus-visible {
+      outline: 2px solid var(--navy);
+      outline-offset: -3px;
+    }
+
+    .issue-btn.selected {
+      border: 0;
+      background: var(--navy);
+      color: #ffffff;
+    }
+
+    /* LOKASI PANEL */
+    .location-card {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 45px;
+      background: #f7fbfd;
+      border: 1px solid rgba(9, 46, 109, 0.3);
+    }
+
+    .location-card__map {
+      flex: 1 0 auto;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .location-card__map img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .location-card__info {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 30px;
+    }
+
+    .location-card__address {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--navy);
+      margin: 0 0 4px;
+    }
+
+    .location-card__subtext {
+      font-size: 16px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .location-card__edit-btn {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      background: #d3e9fb;
+      color: var(--navy);
+    }
+
+    /* DESKRIPSI PANEL */
+    .description-panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .description-textarea {
+      width: 100%;
+      flex: 1 0 auto;
+      height: 160px;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1.5;
+      resize: none;
+    }
+
+    .description-counter {
+      display: block;
+      text-align: right;
+      color: rgba(0, 0, 0, 0.35);
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    /* TOMBOL KONFIRMASI */
+    .confirm-container {
+      margin-top: 20px;
+    }
+
+    .btn-confirm {
+      width: 100%;
+      height: 80px;
+      border-radius: 30px;
+      background: var(--navy);
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 700;
+      border: 0;
+      box-shadow: 0 4px 15px rgba(9, 46, 109, 0.3);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1400px) {
+      .navigation {
+        gap: 20px;
+      }
+      .navigation a {
+        font-size: 17px;
+      }
+      .brand {
+        font-size: 26px;
+      }
+      .form-grid {
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .header {
+        flex-wrap: wrap;
+      }
+
+      .navigation {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin: 10px 0 0;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-upload {
+        flex-direction: column;
+      }
+
+      .photo-upload__actions {
+        width: 100%;
+      }
+    }
+  
+
+/* Responsive mobile layout — desktop styles remain unchanged */
+@media (max-width: 767px) {
+  html { overflow-x: hidden; }
+  body { zoom: 1 !important; overflow-x: hidden; }
+  .header {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+    border-radius: 16px !important;
+  }
+  .header > .brand { order: 1 !important; flex: 0 1 auto !important; min-width: 0; gap: 5px !important; font-size: clamp(16px, 4.5vw, 21px) !important; white-space: nowrap; }
+  .header > .brand svg { width: 22px !important; height: 30px !important; }
+  .header > .city-picker { order: 2 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 4px !important; font-size: 12px !important; white-space: nowrap; }
+  .header > .city-picker .icon { width: 16px !important; height: 16px !important; }
+  .header > .header__actions { display: contents !important; }
+  .header .points { order: 3 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 5px !important; font-size: 12px !important; white-space: nowrap; }
+  .header .points .coin { width: 17px !important; height: 17px !important; font-size: 10px !important; }
+  .header > .profile { order: 4 !important; display: inline-flex !important; flex: 0 0 34px !important; width: 34px !important; height: 34px !important; align-items: center !important; justify-content: center !important; margin: 0 !important; }
+  .header > .profile .icon { width: 22px !important; height: 22px !important; }
+  .header > .navigation { order: 5 !important; flex: 0 0 100% !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 2px 0 0 !important; display: flex !important; flex-flow: row nowrap !important; align-items: center !important; justify-content: space-between !important; gap: clamp(6px, 2.5vw, 14px) !important; overflow-x: auto !important; scrollbar-width: none; }
+  .header > .navigation::-webkit-scrollbar { display: none; }
+  .header > .navigation a { flex: 0 0 auto !important; font-size: clamp(10px, 2.8vw, 13px) !important; line-height: 1.3 !important; padding: 7px 0 !important; white-space: nowrap !important; }
+  .header > .navigation a.active::after { height: 2px !important; bottom: 0 !important; }
+  body { padding-top: 112px; }
+  img, video, iframe, canvas, svg { max-width: 100%; }
+  main, .main-content, .main-content, .content, .page-content, .container, .wrapper, .dashboard-content, .content-wrapper {
+    max-width: 100% !important;
+  }
+  main, .main-content, .content, .page-content, .dashboard-content, .content-wrapper { width: auto; }
+  .main-content, .content, .page-content, .dashboard-content, .content-wrapper { margin-left: 12px !important; margin-right: 12px !important; }
+  input, select, textarea { max-width: 100%; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+}
+@media (max-width: 420px) {
+  .header { padding: 8px 9px !important; column-gap: 5px !important; }
+  .header > .brand { gap: 3px !important; font-size: 16px !important; }
+  .header > .city-picker { padding: 0 7px !important; }
+  .header .points { padding: 0 7px !important; }
+  .header > .navigation { gap: 7px !important; }
+  .header > .navigation a { font-size: 10px !important; }
+}
+/* >>> MOBILE-OPT >>> */
+@media (max-width: 767px) {
+  body { padding-top: 100px; }
+  .container { width: auto !important; margin: 0 12px 20px !important; }
+  .page-title { font-size: 18px !important; margin: 0 0 10px !important; }
+  .form-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .form-group { margin-bottom: 14px !important; }
+  .section-label { font-size: 14px !important; margin: 0 0 8px !important; }
+  .panel { padding: 14px !important; border-radius: 18px !important; }
+  .photo-upload { flex-direction: column; gap: 12px !important; }
+  .photo-upload__left { width: 100%; }
+  .camera-box { width: 72px !important; height: 72px !important; border-radius: 16px !important; margin-bottom: 8px !important; }
+  .camera-box .icon { width: 34px !important; height: 34px !important; }
+  .photo-upload__title { font-size: 14px !important; margin: 0 0 4px !important; }
+  .photo-upload__help { font-size: 11.5px !important; }
+  .photo-upload__actions { width: 100% !important; flex-direction: row !important; gap: 8px !important; }
+  .photo-upload__actions .btn { flex: 1 1 0; }
+  .btn { height: 40px !important; padding: 0 12px !important; font-size: 13px !important; border-radius: 12px !important; }
+  .issue-options { --issue-btn-h: 44px; --issue-gap: 8px; padding-right: 4px !important; }
+  .issue-btn { height: var(--issue-btn-h) !important; padding: 0 14px !important; font-size: 13px !important; border-radius: 12px !important; }
+  .location-card { border-radius: 18px !important; }
+  .location-card__map { height: 150px !important; }
+  .location-card__info { padding: 12px 14px !important; }
+  .location-card__address { font-size: 14px !important; margin: 0 0 2px !important; }
+  .location-card__subtext { font-size: 11.5px !important; }
+  .location-card__edit-btn { width: 34px !important; height: 34px !important; }
+  .description-textarea { height: 110px !important; font-size: 13px !important; }
+  .description-counter { font-size: 11px !important; margin-top: 4px !important; }
+  .confirm-container { margin-top: 6px !important; }
+  .btn-confirm { height: 48px !important; border-radius: 14px !important; font-size: 15px !important; }
+}
+/* <<< MOBILE-OPT <<< */
+</style>
+
+  <!-- Leaflet (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+  <style id="kk-upload-style">
+    /* ===== Kirim laporan ===== */
+    .camera-box { overflow: hidden; }
+    .camera-box img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .camera-box [hidden], .photo-upload__remove[hidden] { display: none; }
+    .photo-upload__remove {
+      margin-top: 8px; padding: 4px 10px; border: 0; background: none; cursor: pointer;
+      color: #ad0000; font-size: 14px; font-weight: 600; text-decoration: underline;
+    }
+
+    /* Tingkat kerusakan */
+    .tingkat-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .tingkat-btn {
+      height: 60px; border: 1px solid var(--border-blue); border-radius: 15px;
+      background: var(--light-blue); color: var(--navy);
+      font-size: 20px; font-weight: 600; text-transform: capitalize; cursor: pointer; transition: all 0.2s;
+    }
+    .tingkat-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: -3px; }
+    .tingkat-btn.selected { border-color: transparent; color: #ffffff; }
+    .tingkat-btn[data-tingkat="ringan"].selected { background: #c99700; }
+    .tingkat-btn[data-tingkat="sedang"].selected { background: #e8710a; }
+    .tingkat-btn[data-tingkat="parah"].selected { background: #d92d2d; }
+
+    /* Peta pemilih lokasi */
+    .location-card__map { position: relative; min-height: 240px; }
+    #petaLokasi { position: absolute; inset: 0; isolation: isolate; font-family: "Inter", Arial, sans-serif; cursor: crosshair; }
+    #petaLokasi.leaflet-dragging { cursor: grabbing; }
+    #petaLokasi.petaLokasi--err { display: grid; place-items: center; padding: 16px; text-align: center; color: #b42318; font-size: 14px; }
+    .kk-pin { background: none; border: 0; }
+    .kk-pin svg { display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35)); }
+    .location-card__hint { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .location-card__hint--warn { color: #b45309; }
+    .location-card__edit-btn { cursor: pointer; transition: background 0.2s, color 0.2s; }
+    .location-card__edit-btn.active { background: var(--navy); color: #ffffff; }
+
+    /* Validasi & pesan */
+    .panel--err, .location-card.panel--err { border-color: #e03131 !important; box-shadow: 0 0 0 3px rgba(224, 49, 49, 0.2) !important; }
+    .kk-form-msg { margin: 0 0 14px; padding: 14px 20px; border-radius: 16px; font-size: 18px; font-weight: 500; line-height: 1.4; }
+    .kk-form-msg[hidden] { display: none; }
+    .kk-form-msg--err { border: 1px solid #f5b5b5; background: #ffe3e3; color: #a61e1e; }
+    .kk-form-msg--info { border: 1px solid #b6c8f5; background: #dbe4ff; color: #1c3d99; }
+    .btn-confirm { cursor: pointer; }
+    .btn-confirm:disabled { opacity: 0.65; cursor: wait; }
+
+    @media (max-width: 767px) {
+      .location-card__map { height: 240px !important; min-height: 240px; }
+      .tingkat-options { gap: 8px; }
+      .tingkat-btn { height: 44px; font-size: 13px; border-radius: 12px; }
+      .photo-upload__remove { font-size: 12px; }
+      .location-card__hint { font-size: 11.5px; }
+      .kk-form-msg { font-size: 13px; padding: 10px 14px; border-radius: 12px; }
+    }
+  </style>
+  <style id="kk-guard">html{visibility:hidden}</style>
+</head>
+
+<body>
+  <!-- DEFINISI SVGs -->
+  <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="icon-chevron" viewBox="0 0 24 24">
+        <path d="m9 4 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+
+      <symbol id="icon-pin" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+      </symbol>
+
+      <symbol id="icon-profile" viewBox="0 0 24 24">
+        <circle cx="12" cy="7" r="4" fill="currentColor"/>
+        <path d="M4 21v-2a8 8 0 0 1 16 0v2Z" fill="currentColor"/>
+      </symbol>
+
+      <symbol id="icon-camera" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+      </symbol>
+
+      <symbol id="icon-edit" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+      </symbol>
+
+      <symbol id="icon-locate" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- NAVBAR GLASSMORPHISM -->
+  <header class="header">
+    <a class="brand" href="welcome.html" aria-label="KotaKita">
+      <svg width="37" height="50" viewBox="0 0 40 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#092e6d" fill-rule="evenodd" d="M18 0C10 0 4 6 4 14c0 8 14 21 14 21s14-13 14-21C32 6 26 0 18 0Zm0 8a6 6 0 1 1 0 12 6 6 0 1 1 0-12Z"/>
+        <path fill="#378deb" d="M0 33l10-4v19L0 51Zm28-7 12-6v25l-12 4Z"/>
+        <path fill="#4da6cc" d="m13 40 12-11v17l-12 7Z"/>
+        <path fill="#27afa5" d="M2 52c15 3 24-15 38-13-1 12-14 19-38 13Z"/>
+      </svg>
+      <span>KotaKita</span>
+    </a>
+
+    <button class="city-picker" type="button" aria-label="Pilih Kota">
+      <svg class="icon" aria-hidden="true"><use href="#icon-pin"/></svg>
+      <span>Bandung</span>
+    </button>
+
+    <nav class="navigation" aria-label="Navigasi utama">
+      <a href="dashboard.html">Beranda</a>
+      <a href="lokasi.html">Lokasi</a>
+      <a class="active" href="uploadLaporan.html">Upload Laporan</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="points" aria-label="23 poin" href="Profil-Poin(Semua).html" style="text-decoration:none;color:#FFFFFF;cursor:pointer">
+        <span class="coin" aria-hidden="true">★</span>
+        <span>23 Poin</span>
+      </a>
+      </div>
+
+      <a class="profile" href="Profil.html" aria-label="Profil Pengguna">
+        <svg class="icon" aria-hidden="true"><use href="#icon-profile"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container">
+    <h1 class="page-title">Upload Laporan</h1>
+
+    <div class="form-grid">
+      <!-- KOLOM KIRI -->
+      <div class="form-column">
+        <!-- BUKTI FOTO -->
+        <div class="form-group">
+          <h2 class="section-label">Bukti Foto</h2>
+          <div class="panel photo-upload" id="panelFoto">
+            <div class="photo-upload__left">
+              <div class="camera-box" id="fotoBox">
+                <svg class="icon" id="fotoIkon" aria-hidden="true">
+                  <use href="#icon-camera"/>
+                </svg>
+                <img id="fotoPratinjau" alt="Pratinjau foto laporan" hidden>
+              </div>
+              <p class="photo-upload__title" id="fotoJudul">Ambil atau unggah foto</p>
+              <p class="photo-upload__help" id="fotoBantu">Foto jelas kerusakan jalan. Otomatis diperkecil sebelum diunggah (maks. 5&nbsp;MB).</p>
+              <button type="button" class="photo-upload__remove" id="fotoHapus" hidden>Hapus foto</button>
+            </div>
+            <div class="photo-upload__actions">
+              <button type="button" class="btn btn--primary" id="btnKamera">Gunakan Kamera</button>
+              <button type="button" class="btn btn--secondary" id="btnGaleri">Galeri</button>
+            </div>
+            <input type="file" id="inputKamera" accept="image/*" capture="environment" hidden>
+            <input type="file" id="inputGaleri" accept="image/*" hidden>
+          </div>
+        </div>
+
+        <!-- LOKASI YANG TERDETEKSI -->
+        <div class="form-group">
+          <h2 class="section-label">Lokasi yang Terdeteksi</h2>
+          <div class="location-card" id="kartuLokasi">
+            <div class="location-card__map">
+              <div id="petaLokasi" role="application" aria-label="Peta untuk memilih titik lokasi laporan"></div>
+            </div>
+            <div class="location-card__info">
+              <div>
+                <p class="location-card__address" id="alamatUtama" aria-live="polite">Lokasi belum dipilih</p>
+                <p class="location-card__subtext" id="alamatRinci">Ketuk peta atau aktifkan GPS untuk menandai titik</p>
+                <p class="location-card__hint" id="infoLokasi" aria-live="polite"></p>
+              </div>
+              <button type="button" class="location-card__edit-btn" id="btnGps" aria-pressed="false"
+                      aria-label="Ikuti lokasi GPS saya" title="Ikuti lokasi GPS saya">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-locate"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KOLOM KANAN -->
+      <div class="form-column">
+        <!-- JENIS MASALAH -->
+        <div class="form-group">
+          <h2 class="section-label">Jenis Masalah</h2>
+          <div class="panel" id="panelKategori">
+            <div class="issue-options" id="opsiKategori" role="group" aria-label="Jenis masalah">
+              <button type="button" class="issue-btn selected" aria-pressed="true">Kerusakan Jalan</button>
+              <button type="button" class="issue-btn" aria-pressed="false">Sampah / Limbah</button>
+              <button type="button" class="issue-btn" aria-pressed="false">Banjir / Genangan Air</button>
+              <button type="button" class="issue-btn" aria-pressed="false">Rambu Lalu Lintas</button>
+              <button type="button" class="issue-btn" aria-pressed="false">Trotoar</button>
+              <button type="button" class="issue-btn" aria-pressed="false">Lainnya</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TINGKAT KERUSAKAN -->
+        <div class="form-group">
+          <h2 class="section-label">Tingkat Kerusakan</h2>
+          <div class="panel" id="panelTingkat">
+            <div class="tingkat-options" id="opsiTingkat" role="group" aria-label="Tingkat kerusakan">
+              <button type="button" class="tingkat-btn" data-tingkat="ringan" aria-pressed="false">Ringan</button>
+              <button type="button" class="tingkat-btn" data-tingkat="sedang" aria-pressed="false">Sedang</button>
+              <button type="button" class="tingkat-btn" data-tingkat="parah" aria-pressed="false">Parah</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- APA YANG TERJADI -->
+        <div class="form-group">
+          <h2 class="section-label">Apa yang terjadi ?</h2>
+          <div class="panel description-panel" id="panelDeskripsi">
+            <textarea
+              class="description-textarea"
+              id="deskripsi"
+              maxlength="500"
+              placeholder="Jelaskan masalahnya, misalnya: lubang dalam di jalur tengah tepat setelah persimpangan..."
+              aria-label="Deskripsi masalah"
+            ></textarea>
+            <span class="description-counter" id="hitungDeskripsi">0 / 500</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOMBOL KONFIRMASI -->
+    <div class="confirm-container">
+      <p class="kk-form-msg" id="pesanForm" role="alert" aria-live="assertive" hidden></p>
+      <button type="button" class="btn-confirm" id="btnKirim">Konfirmasi Laporan</button>
+    </div>
+  </main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/uploadLaporan.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const go = (url) => { if (url) window.location.href = url; };
+  document.querySelectorAll('form').forEach(form => form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.classList.contains('login__form')) { go('dashboard.html'); return; }
+    if (form.classList.contains('registration__form')) { go('login.html'); return; }
+    if (form.querySelector('input[type="file"]')) { go('laporanTerkonfirmasi.html'); return; }
+  }));
+  document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active')); btn.classList.add('active');
+  }));
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    const c=btn.className; if(c.includes('vouchers')) go('Profil-Poin(Semua).html#voucher'); else if(c.includes('history')) go('rekamLaporan.html'); else go('Profil-Poin(Semua).html');
+  }));
+  document.querySelectorAll('.save').forEach(btn => btn.addEventListener('click', () => { alert('Perubahan berhasil disimpan.'); }));
+  document.querySelectorAll('.logout').forEach(btn => btn.addEventListener('click', () => go('welcome.html')));
+  document.querySelectorAll('.detail-button.withdraw').forEach(btn => btn.addEventListener('click', () => { if(confirm('Tarik laporan ini?')) go('rekamLaporan.html'); }));
+  document.querySelectorAll('.download').forEach(btn => btn.addEventListener('click', () => {
+    const blob=new Blob(['Riwayat laporan KotaKita'],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='riwayat-laporan.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }));
+  document.querySelectorAll('.redeem:not(:disabled)').forEach(btn => btn.addEventListener('click', () => alert('Penukaran poin dipilih. Konfirmasi transaksi memerlukan backend aplikasi.')));
+  document.querySelectorAll('.action').forEach(btn => btn.addEventListener('click', () => alert(btn.classList.contains('feedback')?'Terima kasih atas masukan Anda.':'Silakan gunakan kanal kontak resmi KotaKita.')));
+  document.querySelectorAll('.city-picker').forEach(btn => btn.addEventListener('click', () => {
+    const city=prompt('Masukkan nama kota:', 'Bandung'); if(city&&city.trim()){btn.setAttribute('aria-label','Kota '+city.trim()); const t=Array.from(btn.childNodes).find(n=>n.nodeType===3&&n.textContent.trim()); if(t)t.textContent=' '+city.trim()+' ';}
+  }));
+  document.querySelectorAll('.avatar-upload').forEach(btn => btn.addEventListener('click', () => {
+    let i=document.querySelector('#avatar-file'); if(!i){i=document.createElement('input');i.type='file';i.id='avatar-file';i.accept='image/*';i.hidden=true;document.body.appendChild(i);} i.click();
+  }));
+});
+</script>
+</body>
+</html>
