@@ -149,7 +149,9 @@
         sembunyi(E.tarik, n.st.key !== 'sent');       // hanya laporan yang belum diverifikasi
     }
 
-    /* ---------- Tarik laporan ---------- */
+    /* ---------- Tarik laporan (hapus permanen + foto di storage) ---------- */
+    const STATUS_BISA_TARIK = ['menunggu', 'terkirim', 'baru'];   // = status "Terkirim" di tampilan
+
     const pathFoto = url => {
         const m = String(url || '').match(new RegExp('/' + BUCKET + '/([^?]+)'));
         try { return m ? decodeURIComponent(m[1]) : ''; } catch (_) { return ''; }
@@ -158,31 +160,51 @@
     async function tarik() {
         const n = state.semua.find(x => x.kode === state.dipilih);
         if (!n || n.st.key !== 'sent') return;
-        if (!window.confirm('Tarik laporan ini? Laporan akan dihapus dan tidak dapat dikembalikan.')) return;
+        if (!window.confirm('Tarik laporan ini?\nLaporan beserta fotonya akan dihapus permanen dan tidak dapat dikembalikan.')) return;
 
+        const label = E.tarik.querySelector('span');
+        const labelAsal = label ? label.textContent : '';
         E.tarik.disabled = true;
+        if (label) label.textContent = 'Menarik…';
+
         try {
+            // 1) hapus baris laporan (hanya milik sendiri & belum diverifikasi)
             const { data, error } = await db.from(TABEL).delete()
-                .eq('kode', n.kode).eq('user_id', state.uid).select('kode');
+                .eq('kode', n.kode)
+                .eq('user_id', state.uid)
+                .in('status', STATUS_BISA_TARIK)
+                .select('kode');
             if (error) throw error;
             if (!data || !data.length) {
-                window.alert('Laporan tidak dapat ditarik. Mungkin statusnya sudah berubah atau tidak diizinkan oleh database.');
+                window.alert('Laporan tidak dapat ditarik. Mungkin statusnya sudah berubah, atau izin hapus belum dibuat di database (jalankan sql/tarik-laporan.sql).');
                 return;
             }
-            const p = pathFoto(n.foto);                       // bersihkan foto (tanpa menggagalkan penarikan)
-            if (p) { try { await db.storage.from(BUCKET).remove([p]); } catch (_) { /* abaikan */ } }
 
+            // 2) hapus foto di storage agar hemat ruang (tidak menggagalkan penarikan bila gagal)
+            const p = pathFoto(n.foto);
+            if (p) {
+                try {
+                    const { data: terhapus, error: eFoto } = await db.storage.from(BUCKET).remove([p]);
+                    if (eFoto || !terhapus || !terhapus.length) {
+                        console.warn('[rekamLaporan] foto belum terhapus dari storage (cek policy storage di sql/tarik-laporan.sql):', eFoto || 'tidak ada objek terhapus');
+                    }
+                } catch (e) { console.warn('[rekamLaporan] hapus foto:', e); }
+            }
+
+            // 3) perbarui tampilan
             state.semua = state.semua.filter(x => x.kode !== n.kode);
             state.dipilih = '';
             render();
+            window.alert('Laporan berhasil ditarik.');
         } catch (err) {
             console.error('[rekamLaporan] tarik:', err);
             const kode = String((err && err.code) || '');
             window.alert(kode === '42501'
-                ? 'Laporan tidak dapat ditarik: izin hapus belum dibuat. Jalankan sql/baca-laporan.sql di Supabase.'
+                ? 'Laporan tidak dapat ditarik: izin hapus belum dibuat. Jalankan sql/tarik-laporan.sql di Supabase.'
                 : 'Gagal menarik laporan: ' + ((err && err.message) || 'terjadi kesalahan.'));
         } finally {
             E.tarik.disabled = false;
+            if (label) label.textContent = labelAsal;
         }
     }
 
