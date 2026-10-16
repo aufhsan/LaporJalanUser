@@ -619,7 +619,7 @@ const PROFIL_TABEL = 'profiles';
 const FIELDS = {
   nama:     ['nama', 'nama_lengkap', 'full_name', 'name'],
   username: ['username', 'nama_pengguna', 'user_name'],
-  telp:     ['no_telp', 'no_telepon', 'telepon', 'phone', 'no_hp', 'nomor_telepon', 'no_telpon'],
+  telp:     ['telp', 'kontak', 'no_telp', 'no_telepon', 'telepon', 'phone', 'no_hp', 'nomor_telepon', 'no_telpon'],
   radius:   ['radius', 'radius_km', 'radius_laporan', 'radius_lokasi'],
   avatar:   ['avatar_url', 'foto_url', 'foto_profil', 'avatar'],
   poin:     ['poin', 'points', 'total_poin'],
@@ -639,8 +639,9 @@ async function muatProfil(user) {
 }
 
 function nilai(row, user, f) {
-  const k = kunci(row, f);
-  const v = k ? row[k] : null;
+  const ada = row ? FIELDS[f].filter((c) => c in row) : [];
+  const kIsi = ada.find((c) => row[c] !== null && row[c] !== undefined && row[c] !== '');
+  const v = kIsi ? row[kIsi] : null;
   if (v !== null && v !== undefined && v !== '') return v;
   const m = user.user_metadata || {};
   if (f === 'nama') return m.nama || m.full_name || m.name || '';
@@ -825,7 +826,14 @@ btnSimpan.addEventListener('click', async () => {
     }
     if (hasil.error) throw hasil.error;
 
-    if (dilewati.length) alert('Tersimpan, kecuali: ' + dilewati.join(', ') + '. Kolomnya tidak ditemukan di tabel "profiles".');
+    if (dilewati.length) {
+      const nama = { nama: 'nama', username: 'username', telp: 'no. telepon', radius: 'radius', avatar: 'foto profil' };
+      let t = 'Tersimpan, kecuali: ' + dilewati.map((f) => nama[f] || f).join(', ') + '. Kolomnya belum ada di tabel "profiles".';
+      if (dilewati.includes('radius'))
+        t += '\n\nRadius tetap berlaku di perangkat ini. Agar tersimpan di database, jalankan di SQL Editor:\n'
+          + 'alter table public.profiles add column if not exists radius integer not null default 4 check (radius between 1 and 10);';
+      alert(t);
+    }
     try { localStorage.setItem('kk:radius', String(radius)); } catch (e) {}   // dipakai halaman peta (dashboard/lokasi/laporan)
     window.location.href = 'Profil.html';
   } catch (err) {
