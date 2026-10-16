@@ -9,20 +9,10 @@ function tampil(teks, ok) {
   status.style.color = ok ? '#2fa866' : '#d63a3a';
 }
 
-// Cari client Supabase yang dibuat js/supabaseClient.js (script biasa, bukan module)
+// supabaseClient.js menyimpan client di window.db
 function getClient() {
-  const ok = c => c && typeof c.from === 'function' && c.auth;
-  // const/let di script biasa tidak masuk window, jadi dicek lewat nama langsung
-  const cobaNama = [
-    () => supabaseClient, () => sb, () => db, () => client, () => supabaseDb, () => _supabase
-  ];
-  for (const f of cobaNama) {
-    try { const c = f(); if (ok(c)) return c; } catch (e) { /* belum ada */ }
-  }
-  for (const k of Object.keys(window)) {
-    try { if (k !== 'supabase' && ok(window[k])) return window[k]; } catch (e) {}
-  }
-  throw new Error('Client belum ditemukan. Pastikan CDN supabase-js dan js/supabaseClient.js dimuat sebelum masukan.js.');
+  if (window.db && typeof window.db.from === 'function' && window.db.auth) return window.db;
+  throw new Error('window.db tidak ada. Pastikan CDN supabase-js dan js/supabaseClient.js dimuat sebelum masukan.js.');
 }
 
 btn.addEventListener('click', async () => {
