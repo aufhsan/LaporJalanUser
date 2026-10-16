@@ -361,6 +361,14 @@
       font-weight: 600;
     }
 
+    .row-title {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+
     .row-address,
     .row-time {
       margin: 0;
@@ -804,26 +812,27 @@ document.addEventListener('DOMContentLoaded', function () {
    KONFIGURASI SUPABASE — sesuaikan dengan project Anda
    ===================================================== */
 const CONFIG = {
-  SUPABASE_URL: 'https://ilmnhyyarurqszcyidnx.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_7w3KZhi9QkMOhRiIRoAGGg_JY9M0Mcy',
-  TABLE: 'laporan',          // nama tabel
+  SUPABASE_URL: 'https://XXXXXXXX.supabase.co',
+  SUPABASE_ANON_KEY: 'ISI_ANON_PUBLIC_KEY',
+  TABLE: 'laporan_jalan',    // nama tabel
   BUCKET: 'laporan',         // bucket Storage (dipakai jika foto_url hanya berupa path)
   DEFAULT_CENTER: [-6.9175, 107.6191], // Bandung
   // Pemetaan nama kolom di tabel Anda
   COLS: {
     id:        'id',
-    title:     'judul',       // mis. "Banjir (40 - 50cm)"
-    address:   'alamat',
+    title:     'deskripsi',   // dipakai sebagai judul laporan
+    address:   'alamat',      // opsional: jika kolom tidak ada, alamat dicari otomatis dari koordinat
     lat:       'latitude',
     lng:       'longitude',
-    status:    'status',      // menunggu | diproses | selesai | ditolak
+    status:    'status',      // opsional: menunggu | diproses | selesai | ditolak
     photo:     'foto_url',
-    createdAt: 'created_at'
+    createdAt: 'waktu'
   }
 };
 
 const C = CONFIG.COLS;
 const STATUS = {
+  baru:     { label: 'Dilaporkan', bg: '#dbe7fb', fg: '#092e6d', bar: '#378deb' },
   menunggu: { label: 'Menunggu', bg: '#ffe0e0', fg: '#8a0000', bar: '#ad0000' },
   diproses: { label: 'Diproses', bg: '#ffd9a8', fg: '#7a4000', bar: '#e08a00' },
   selesai:  { label: 'Selesai',  bg: '#c9f0d4', fg: '#0b5a2a', bar: '#1f9d55' },
@@ -870,13 +879,49 @@ function photoUrl(v) {
   return sb.storage.from(CONFIG.BUCKET).getPublicUrl(v).data.publicUrl;
 }
 
+/* ---------- Alamat otomatis dari koordinat (reverse geocoding) ---------- */
+const geoKey = (lat, lng) => `geo:${lat.toFixed(4)},${lng.toFixed(4)}`;
+function cachedAddr(lat, lng) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return '';
+  try { return localStorage.getItem(geoKey(lat, lng)) || ''; } catch (e) { return ''; }
+}
+
+async function fillAddresses() {
+  const todo = reports.filter((r) => !r.address && r.hasPos).slice(0, 40);
+  const done = new Map();
+  for (const r of todo) {
+    const key = geoKey(r.lat, r.lng);
+    let addr = done.get(key);
+    if (addr === undefined) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=id&lat=${r.lat}&lon=${r.lng}`);
+        const j = await res.json();
+        const a = j.address || {};
+        const area = a.village || a.suburb || a.neighbourhood || a.city_district || a.city || '';
+        addr = [a.road, area].filter(Boolean).join(', ') || (j.display_name || '').split(',').slice(0, 2).join(',').trim();
+        try { localStorage.setItem(key, addr); } catch (e) {}
+      } catch (e) { addr = ''; }
+      done.set(key, addr);
+      await new Promise((ok) => setTimeout(ok, 1100)); // batas Nominatim: 1 request/detik
+    }
+    if (!addr) continue;
+    // semua laporan dengan koordinat sama ikut terisi
+    reports.filter((x) => !x.address && x.hasPos && geoKey(x.lat, x.lng) === key).forEach((x) => {
+      x.address = addr;
+      const row = listEl.querySelector(`.location-row[data-id="${x.id}"] .row-address`);
+      if (row) row.textContent = addr + (x.dist != null ? ` • ${fmtDist(x.dist)}` : '');
+      if (x.id === selectedId) $('cardReportDesc').textContent = addr;
+    });
+  }
+}
+
 function normalize(row) {
-  const st = String(row[C.status] || 'menunggu').toLowerCase();
+  const st = String(row[C.status] || 'baru').toLowerCase();
   const lat = parseFloat(row[C.lat]), lng = parseFloat(row[C.lng]);
   const o = {
     id: row[C.id],
-    title: row[C.title] || 'Laporan',
-    address: row[C.address] || '',
+    title: (row[C.title] || '').trim() || `Laporan Jalan #${row[C.id]}`,
+    address: row[C.address] || cachedAddr(parseFloat(row[C.lat]), parseFloat(row[C.lng])) || '',
     lat, lng,
     hasPos: Number.isFinite(lat) && Number.isFinite(lng),
     statusKey: st,
@@ -986,7 +1031,7 @@ function select(id, opts = {}) {
   // Card
   cardEl.hidden = false;
   $('cardReportTitle').textContent = r.title;
-  $('cardReportDesc').textContent = r.address || '-';
+  $('cardReportDesc').textContent = r.address || 'Memuat alamat…';
   $('cardReportTime').textContent = timeAgo(r.createdAt);
   const st = $('cardStatus');
   st.style.background = r.status.bg;
@@ -1072,6 +1117,7 @@ async function load() {
   reports = data.map(normalize);
   render();
   fitToVisible();
+  fillAddresses();
 
   // Buka laporan tertentu lewat ?id=...
   const wanted = new URLSearchParams(location.search).get('id');
@@ -1082,7 +1128,7 @@ async function load() {
   sb.channel('laporan-lokasi')
     .on('postgres_changes', { event: '*', schema: 'public', table: CONFIG.TABLE }, async () => {
       const { data: fresh } = await sb.from(CONFIG.TABLE).select('*').order(C.createdAt, { ascending: false }).limit(300);
-      if (fresh) { reports = fresh.map(normalize); render(); }
+      if (fresh) { reports = fresh.map(normalize); render(); fillAddresses(); }
     })
     .subscribe();
 }
