@@ -16,8 +16,12 @@ async function getClient() {
     ...Object.values(mod)];
   const client = kandidat.find(c => c && typeof c.from === 'function' && c.auth);
   if (client) return client;
-  if (window.supabase && typeof window.supabase.from === 'function') return window.supabase;
-  throw new Error('Client Supabase tidak ditemukan di js/supabaseClient.js (cek nama export).');
+  for (const nama of ['supabaseClient', 'sb', 'db', 'client', 'supabase']) {
+    const c = window[nama];
+    if (c && typeof c.from === 'function' && c.auth) return c;
+  }
+  const daftar = Object.keys(mod).join(', ') || '(tidak ada export)';
+  throw new Error('Client tidak ditemukan. Export di supabaseClient.js: ' + daftar);
 }
 
 btn.addEventListener('click', async () => {
