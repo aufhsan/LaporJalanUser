@@ -56,7 +56,7 @@
         const { data: s } = await db.auth.getSession();
         if (!s || !s.session) { tampilkanSaldo(0); return; }
         const { data, error } = await db.rpc('poin_saya');
-        if (error) { console.warn('[poin]', pesanSetup, error.message); tampilkanSaldo(0); }
+        if (error) { console.error('[poin] poin_saya gagal:', error.message, '→', pesanSetup); tampilkanSaldo(0); document.querySelectorAll('.points').forEach(a => a.title = 'Gagal memuat poin: ' + error.message); }
         else tampilkanSaldo(data);
 
         if (document.querySelector('.empty-state')) {
