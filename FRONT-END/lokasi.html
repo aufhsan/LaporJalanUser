@@ -6,6 +6,8 @@
   <title>Lokasi — KotaKita</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+
   <style>
     :root {
       --navy: #092e6d;
@@ -350,7 +352,7 @@
       bottom: 0;
       left: 0;
       width: 9px;
-      background: #ad0000;
+      background: var(--bar, #ad0000);
     }
 
     .row-title {
@@ -395,43 +397,50 @@
       pointer-events: none;
     }
 
-    .map-image {
+    #map {
       position: absolute;
-      left: -1627px;
-      top: 0;
-      width: 3898px;
-      height: 2008px;
-      max-width: none;
-      display: block;
-      user-select: none;
-      pointer-events: none;
+      inset: 0;
+      z-index: 0;
+      isolation: isolate;
+      background: #e8eef7;
+      font-family: "Inter", sans-serif;
     }
 
-    .location-marker {
-      position: absolute;
-      left: 498px;
-      top: 383px;
-      width: 95px;
-      height: 95px;
-      pointer-events: none;
-      z-index: 12;
-      filter: drop-shadow(0 6px 12px rgba(9, 46, 109, 0.3));
-      animation: bounce 2s infinite ease-in-out;
+    .pin {
+      width: 40px;
+      height: 50px;
+      filter: drop-shadow(0 4px 6px rgba(9, 46, 109, 0.35));
+      transition: transform .2s;
+      transform-origin: 50% 100%;
     }
+    .pin svg { width: 100%; height: 100%; display: block; fill: #378deb; }
+    .pin.sel svg { fill: #092e6d; }
+    .pin.sel { transform: scale(1.3); animation: bounce 2s infinite ease-in-out; }
 
     @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      0%, 100% { transform: scale(1.3) translateY(0); }
+      50% { transform: scale(1.3) translateY(-8px); }
     }
 
-    .location-marker svg {
+    .map-msg {
       position: absolute;
-      left: 15.83px;
-      top: 7.91px;
-      width: 63.33px;
-      height: 79.20px;
-      display: block;
-      fill: #092e6d;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      padding: 10px 20px;
+      border-radius: 99px;
+      background: #fff;
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(9,46,109,.18);
+    }
+
+    .list-msg {
+      padding: 24px 8px;
+      color: var(--navy-light);
+      font-size: 16px;
+      text-align: center;
     }
 
     .report-card {
@@ -444,10 +453,14 @@
       overflow: hidden;
       border-radius: 31px;
       background: rgb(240, 250, 255);
-      z-index: 15;
+      z-index: 1000;
       box-shadow: 0 8px 24px rgba(9, 46, 109, 0.12);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
+    .report-card[hidden] { display: none; }
+
+    .row-chevron { display: grid; place-items: center; }
 
     .report-card:hover {
       transform: translateY(-2px);
@@ -465,6 +478,8 @@
     }
 
     .photo-placeholder {
+      background-size: cover !important;
+      background-position: center !important;
       position: absolute;
       left: 14px;
       top: 16px;
@@ -524,7 +539,8 @@
       position: absolute;
       left: 23px;
       top: 237px;
-      width: 74px;
+      min-width: 74px;
+      padding: 0 12px;
       height: 22px;
       overflow: hidden;
       border-radius: 47px;
@@ -623,9 +639,6 @@
   .page { width: 100% !important; height: auto !important; overflow: visible !important; padding: 0 12px 20px; display: flex; flex-direction: column; gap: 10px; }
   .page > h1.box { position: static !important; order: 0; width: auto !important; height: auto !important; font-size: 18px !important; line-height: 1.2 !important; margin: 4px 2px 0; }
   .map-frame { order: 1; position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: 300px !important; border-radius: 18px; }
-  .map-image { width: 1949px !important; height: 1004px !important; left: calc(50% - 1086px) !important; top: calc(38% - 215px) !important; }
-  .location-marker { width: 48px !important; height: 48px !important; left: calc(50% - 24px) !important; top: calc(38% - 42px) !important; }
-  .location-marker svg { left: 8px !important; top: 4px !important; width: 32px !important; height: 40px !important; }
   .report-card { left: 8px !important; right: 8px; bottom: 8px; top: auto !important; width: auto !important; height: auto !important; border-radius: 14px; padding: 8px; display: grid; grid-template-columns: 78px 1fr auto; gap: 2px 10px; align-items: center; }
   .photo-placeholder { position: static !important; grid-column: 1; grid-row: 1 / 4; width: 78px !important; height: 62px !important; border-radius: 10px; }
   .photo-label { font-size: 10px; }
@@ -685,7 +698,6 @@
 
     <div class="header__actions">
       <a class="points" href="Profil-Poin(Semua).html" style="text-decoration:none;color:#FFFFFF;cursor:pointer"><span class="coin">★</span><span>23 Poin</span></a>
-      </div>
       <a class="profile" href="Profil.html"><svg class="icon"><use href="#icon-profile"/></svg></a>
     </div>
   </header>
@@ -718,160 +730,36 @@
       </div>
 
       <div class="location-list" id="locationList">
-        <div class="location-row selected" data-id="1" data-title="Banjir (40 - 50cm)" data-desc="Jl. Sukabirus, Bojongsoang • 500 m" data-time="3 Jam yang lalu">
-          <div>
-            <h3 class="row-title">Banjir (40 - 50cm)</h3>
-            <p class="row-address">Jl. Sukabirus, Bojongsoang • 500 m</p>
-            <p class="row-time">3 Jam yang lalu dilaporkan</p>
-          </div>
-          <svg class="icon" aria-hidden="true">
-            <use href="#icon-chevron"/>
-          </svg>
-        </div>
-
-        <div class="location-row" data-id="2" data-title="Sampah / Limbah" data-desc="Jl. Sukabirus, Bojongsoang • 500 m" data-time="3 Jam yang lalu">
-          <div>
-            <h3 class="row-title">Sampah / Limbah</h3>
-            <p class="row-address">Jl. Sukabirus, Bojongsoang • 500 m</p>
-            <p class="row-time">3 Jam yang lalu dilaporkan</p>
-          </div>
-          <svg class="icon" aria-hidden="true">
-            <use href="#icon-chevron"/>
-          </svg>
-        </div>
-
-        <div class="location-row" data-id="3" data-title="Trotoar" data-desc="Jl. Sukabirus, Bojongsoang • 500 m" data-time="3 Jam yang lalu">
-          <div>
-            <h3 class="row-title">Trotoar</h3>
-            <p class="row-address">Jl. Sukabirus, Bojongsoang • 500 m</p>
-            <p class="row-time">3 Jam yang lalu dilaporkan</p>
-          </div>
-          <svg class="icon" aria-hidden="true">
-            <use href="#icon-chevron"/>
-          </svg>
-        </div>
-
-        <div class="location-row" data-id="4" data-title="Kerusakan Jalan" data-desc="Jl. Sukabirus, Bojongsoang • 500 m" data-time="3 Jam yang lalu">
-          <div>
-            <h3 class="row-title">Kerusakan Jalan</h3>
-            <p class="row-address">Jl. Sukabirus, Bojongsoang • 500 m</p>
-            <p class="row-time">3 Jam yang lalu dilaporkan</p>
-          </div>
-          <svg class="icon" aria-hidden="true">
-            <use href="#icon-chevron"/>
-          </svg>
-        </div>
-
-        <div class="location-row" data-id="5" data-title="Rambu Lalu lintas" data-desc="Jl. Sukabirus, Bojongsoang • 500 m" data-time="3 Jam yang lalu">
-          <div>
-            <h3 class="row-title">Rambu Lalu lintas</h3>
-            <p class="row-address">Jl. Sukabirus, Bojongsoang • 500 m</p>
-            <p class="row-time">3 Jam yang lalu dilaporkan</p>
-          </div>
-          <svg class="icon" aria-hidden="true">
-            <use href="#icon-chevron"/>
-          </svg>
-        </div>
-
-        <div class="location-row" data-id="6" data-title="Genangan Air" data-desc="Jl. Sukabirus, Bojongsoang • 500 m" data-time="3 Jam yang lalu">
-          <div>
-            <h3 class="row-title">Genangan Air</h3>
-            <p class="row-address">Jl. Sukabirus, Bojongsoang • 500 m</p>
-            <p class="row-time">3 Jam yang lalu dilaporkan</p>
-          </div>
-          <svg class="icon" aria-hidden="true">
-            <use href="#icon-chevron"/>
-          </svg>
-        </div>
+        <p class="list-msg">Memuat laporan…</p>
       </div>
     </aside>
 
     <!-- Frame Peta Interaktif -->
-    <section class="map-frame" aria-label="Peta lokasi laporan banjir">
-      <img
-        class="map-image"
-        src="https://www.figma.com/api/mcp/asset/9b9fc355-2914-4a66-8b53-51b48d9db4b7.png"
-        alt="Peta Lokasi Bandung"
-        width="3898"
-        height="2008"
-        draggable="false"
-      >
+    <section class="map-frame" aria-label="Peta lokasi laporan">
+      <div id="map"></div>
 
-      <div class="location-marker" role="img" aria-label="Lokasi laporan">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63.33408 79.20625" aria-hidden="true">
-          <path fill-rule="nonzero" d="M31.66704 0C14.21079 0 .00037 14.21042 .00037 31.66666C-.11838 57.15833 28.1837 77.58333 29.3712 78.45416C30.04412 78.92916 30.87537 79.20625 31.66704 79.20625C32.45871 79.20625 33.28996 78.96874 33.96287 78.45416C35.15037 77.58333 63.45245 57.19791 63.3337 31.66666C63.3337 14.21042 49.12329 0 31.66704 0ZM31.66704 47.5C22.91912 47.5 15.8337 40.41458 15.8337 31.66666C15.8337 22.91875 22.91912 15.83333 31.66704 15.83333C40.41496 15.83333 47.50037 22.91875 47.50037 31.66666C47.50037 40.41458 40.41496 47.5 31.66704 47.5Z"/>
-        </svg>
-      </div>
-
-      <article class="report-card" aria-labelledby="cardReportTitle">
-        <div class="photo-placeholder">
-          <span class="photo-label">Foto Laporan</span>
+      <article class="report-card" id="reportCard" aria-labelledby="cardReportTitle" hidden>
+        <div class="photo-placeholder" id="cardPhoto">
+          <span class="photo-label" id="cardPhotoLabel">Foto Laporan</span>
         </div>
 
-        <h2 class="report-title" id="cardReportTitle">
-          Banjir (40-50 cm)
-        </h2>
+        <h2 class="report-title" id="cardReportTitle"></h2>
 
-        <p class="report-description" id="cardReportDesc">
-          Jl. Sukabirus, Bojongsoang<br>
-          <span id="cardReportTime">3 Jam yang lalu</span>
+        <p class="report-description">
+          <span id="cardReportDesc"></span><br>
+          <span id="cardReportTime"></span>
         </p>
 
-        <div class="report-status">
-          <span class="status-label">Diproses</span>
+        <div class="report-status" id="cardStatus">
+          <span class="status-label" id="cardStatusLabel"></span>
         </div>
 
-        <a href="detailLaporan.html" class="report-detail">Lihat Detail</a>
+        <a href="detailLaporan.html" class="report-detail" id="cardDetail">Lihat Detail</a>
       </article>
     </section>
   </main>
 
-  <script>
-    // Interaktivitas Pilih Item Laporan
-    const rows = document.querySelectorAll('.location-row');
-    const cardTitle = document.getElementById('cardReportTitle');
-    const cardDesc = document.getElementById('cardReportDesc');
-
-    rows.forEach(row => {
-      row.addEventListener('click', () => {
-        rows.forEach(r => r.classList.remove('selected'));
-        row.classList.add('selected');
-
-        const title = row.getAttribute('data-title');
-        const desc = row.getAttribute('data-desc');
-        const time = row.getAttribute('data-time');
-
-        if (title) cardTitle.textContent = title;
-        if (desc && time) {
-          cardDesc.innerHTML = `${desc.split('•')[0].trim()}<br>${time}`;
-        }
-      });
-    });
-
-    // Interaktivitas Filter (Semua, Terdekat, Terbaru)
-    const filterBtns = document.querySelectorAll('.filter');
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-
-    // Interaktivitas Pencarian
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      rows.forEach(row => {
-        const title = row.querySelector('.row-title').textContent.toLowerCase();
-        const address = row.querySelector('.row-address').textContent.toLowerCase();
-        if (title.includes(query) || address.includes(query)) {
-          row.style.display = 'block';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    });
-  </script>
+  
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -909,11 +797,297 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.location-card__edit-btn').forEach(btn => btn.addEventListener('click', () => go('lokasi.html')));
 });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-document.querySelectorAll('.location-row, .report-card, .location-marker').forEach(item => {
- item.style.cursor='pointer'; item.setAttribute('tabindex','0');
- item.addEventListener('click',e=>{if(!e.target.closest('a'))window.location.href='detailLaporan.html';});
- item.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();window.location.href='detailLaporan.html';}});
+/* =====================================================
+   KONFIGURASI SUPABASE — sesuaikan dengan project Anda
+   ===================================================== */
+const CONFIG = {
+  SUPABASE_URL: 'https://XXXXXXXX.supabase.co',
+  SUPABASE_ANON_KEY: 'ISI_ANON_PUBLIC_KEY',
+  TABLE: 'laporan',          // nama tabel
+  BUCKET: 'laporan',         // bucket Storage (dipakai jika foto_url hanya berupa path)
+  DEFAULT_CENTER: [-6.9175, 107.6191], // Bandung
+  // Pemetaan nama kolom di tabel Anda
+  COLS: {
+    id:        'id',
+    title:     'judul',       // mis. "Banjir (40 - 50cm)"
+    address:   'alamat',
+    lat:       'latitude',
+    lng:       'longitude',
+    status:    'status',      // menunggu | diproses | selesai | ditolak
+    photo:     'foto_url',
+    createdAt: 'created_at'
+  }
+};
+
+const C = CONFIG.COLS;
+const STATUS = {
+  menunggu: { label: 'Menunggu', bg: '#ffe0e0', fg: '#8a0000', bar: '#ad0000' },
+  diproses: { label: 'Diproses', bg: '#ffd9a8', fg: '#7a4000', bar: '#e08a00' },
+  selesai:  { label: 'Selesai',  bg: '#c9f0d4', fg: '#0b5a2a', bar: '#1f9d55' },
+  ditolak:  { label: 'Ditolak',  bg: '#e4e4e4', fg: '#444',    bar: '#8a8a8a' }
+};
+const PIN_SVG = '<svg viewBox="0 0 63.33 79.21"><path fill-rule="nonzero" d="M31.67 0C14.21 0 0 14.21 0 31.67c-.12 25.49 28.18 45.91 29.37 46.79a3.1 3.1 0 0 0 4.6 0c1.19-.87 29.49-21.26 29.37-46.79C63.33 14.21 49.12 0 31.67 0Zm0 47.5a15.83 15.83 0 1 1 0-31.67 15.83 15.83 0 0 1 0 31.67Z"/></svg>';
+
+const $ = (id) => document.getElementById(id);
+const listEl = $('locationList');
+const cardEl = $('reportCard');
+
+let sb = null;
+let reports = [];
+let selectedId = null;
+let activeFilter = 'all';
+let query = '';
+let userPos = null;
+const markers = new Map();
+
+/* ---------- Helpers ---------- */
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60) return 'Baru saja';
+  const m = Math.floor(s / 60); if (m < 60) return `${m} Menit yang lalu`;
+  const h = Math.floor(m / 60); if (h < 24) return `${h} Jam yang lalu`;
+  const d = Math.floor(h / 24); if (d < 30) return `${d} Hari yang lalu`;
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function distKm(a, b) {
+  const R = 6371, rad = Math.PI / 180;
+  const dLat = (b[0] - a[0]) * rad, dLng = (b[1] - a[1]) * rad;
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+const fmtDist = (km) => km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+
+function photoUrl(v) {
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  return sb.storage.from(CONFIG.BUCKET).getPublicUrl(v).data.publicUrl;
+}
+
+function normalize(row) {
+  const st = String(row[C.status] || 'menunggu').toLowerCase();
+  const lat = parseFloat(row[C.lat]), lng = parseFloat(row[C.lng]);
+  const o = {
+    id: row[C.id],
+    title: row[C.title] || 'Laporan',
+    address: row[C.address] || '',
+    lat, lng,
+    hasPos: Number.isFinite(lat) && Number.isFinite(lng),
+    statusKey: st,
+    status: STATUS[st] || { label: row[C.status] || '-', bg: '#e4e4e4', fg: '#444', bar: '#8a8a8a' },
+    photo: photoUrl(row[C.photo]),
+    createdAt: row[C.createdAt]
+  };
+  o.dist = (userPos && o.hasPos) ? distKm(userPos, [lat, lng]) : null;
+  return o;
+}
+
+/* ---------- Peta ---------- */
+const map = L.map('map', { zoomControl: true }).setView(CONFIG.DEFAULT_CENTER, 13);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+const markerLayer = L.layerGroup().addTo(map);
+
+function pinIcon(selected) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="pin${selected ? ' sel' : ''}">${PIN_SVG}</div>`,
+    iconSize: [40, 50],
+    iconAnchor: [20, 50]
+  });
+}
+
+function mapMsg(text) {
+  let el = document.querySelector('.map-msg');
+  if (!text) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.className = 'map-msg'; document.querySelector('.map-frame').appendChild(el); }
+  el.textContent = text;
+}
+
+/* ---------- Data tampil (filter + cari + urut) ---------- */
+function visibleReports() {
+  const q = query.trim().toLowerCase();
+  let out = reports.filter((r) => !q || r.title.toLowerCase().includes(q) || r.address.toLowerCase().includes(q));
+  if (activeFilter === 'nearest') {
+    out = out.filter((r) => r.dist != null).sort((a, b) => a.dist - b.dist);
+  } else {
+    out = out.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+  return out;
+}
+
+function render() {
+  const data = visibleReports();
+
+  // Daftar
+  if (!data.length) {
+    listEl.innerHTML = `<p class="list-msg">${reports.length ? 'Tidak ada laporan yang cocok.' : 'Belum ada laporan.'}</p>`;
+  } else {
+    listEl.innerHTML = data.map((r) => {
+      const dist = r.dist != null ? ` • ${fmtDist(r.dist)}` : '';
+      return `
+      <div class="location-row${r.id === selectedId ? ' selected' : ''}" data-id="${esc(r.id)}" style="--bar:${r.status.bar}">
+        <div>
+          <h3 class="row-title">${esc(r.title)}</h3>
+          <p class="row-address">${esc(r.address)}${dist}</p>
+          <p class="row-time">${esc(timeAgo(r.createdAt))}${r.createdAt ? ' dilaporkan' : ''}</p>
+        </div>
+        <a class="row-chevron" href="detailLaporan.html?id=${encodeURIComponent(r.id)}" aria-label="Lihat detail laporan">
+          <svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg>
+        </a>
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('.location-row').forEach((row) => {
+      row.querySelector('.row-chevron').addEventListener('click', (e) => e.stopPropagation());
+    });
+  }
+
+  // Marker
+  markerLayer.clearLayers();
+  markers.clear();
+  data.filter((r) => r.hasPos).forEach((r) => {
+    const m = L.marker([r.lat, r.lng], { icon: pinIcon(r.id === selectedId), title: r.title })
+      .on('click', () => select(r.id, { scroll: true }));
+    m.addTo(markerLayer);
+    markers.set(r.id, m);
+  });
+
+  // Jika item terpilih tidak lagi tampil, pilih yang pertama
+  if (data.length && !data.some((r) => r.id === selectedId)) {
+    select(data[0].id, { pan: false });
+  } else if (!data.length) {
+    selectedId = null;
+    cardEl.hidden = true;
+  }
+}
+
+/* ---------- Pilih laporan ---------- */
+function select(id, opts = {}) {
+  const r = reports.find((x) => x.id === id);
+  if (!r) return;
+  selectedId = id;
+
+  listEl.querySelectorAll('.location-row').forEach((row) => {
+    const on = row.dataset.id === String(id);
+    row.classList.toggle('selected', on);
+    if (on && opts.scroll) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
+  markers.forEach((m, mid) => m.setIcon(pinIcon(mid === id)));
+  if (markers.has(id)) markers.get(id).setZIndexOffset(1000);
+
+  // Card
+  cardEl.hidden = false;
+  $('cardReportTitle').textContent = r.title;
+  $('cardReportDesc').textContent = r.address || '-';
+  $('cardReportTime').textContent = timeAgo(r.createdAt);
+  const st = $('cardStatus');
+  st.style.background = r.status.bg;
+  st.style.color = r.status.fg;
+  $('cardStatusLabel').textContent = r.status.label;
+  const ph = $('cardPhoto');
+  ph.style.backgroundImage = r.photo ? `url("${r.photo.replace(/"/g, '%22')}")` : '';
+  $('cardPhotoLabel').style.display = r.photo ? 'none' : '';
+  $('cardDetail').href = `detailLaporan.html?id=${encodeURIComponent(r.id)}`;
+
+  if (opts.pan !== false && r.hasPos) map.flyTo([r.lat, r.lng], Math.max(map.getZoom(), 16), { duration: 0.6 });
+}
+
+/* ---------- Event UI ---------- */
+listEl.addEventListener('click', (e) => {
+  const row = e.target.closest('.location-row');
+  if (!row) return;
+  const r = reports.find((x) => String(x.id) === row.dataset.id);
+  if (r) select(r.id);
 });
+
+$('searchInput').addEventListener('input', (e) => { query = e.target.value; render(); });
+
+document.querySelectorAll('.filter').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    if (activeFilter === 'nearest' && !userPos) {
+      locate().then(() => { render(); fitToVisible(); });
+    } else {
+      render(); fitToVisible();
+    }
+  });
+});
+
+$('cardReportTitle').closest('.report-card').addEventListener('click', (e) => {
+  if (e.target.closest('a')) return;
+  const r = reports.find((x) => x.id === selectedId);
+  if (r) window.location.href = `detailLaporan.html?id=${encodeURIComponent(r.id)}`;
+});
+
+function fitToVisible() {
+  const pts = visibleReports().filter((r) => r.hasPos).map((r) => [r.lat, r.lng]);
+  if (pts.length > 1) map.fitBounds(pts, { padding: [60, 60], maxZoom: 16 });
+  else if (pts.length === 1) map.setView(pts[0], 16);
+}
+
+/* ---------- Lokasi pengguna (untuk filter "Terdekat") ---------- */
+function locate() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve();
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userPos = [pos.coords.latitude, pos.coords.longitude];
+        reports.forEach((r) => { r.dist = r.hasPos ? distKm(userPos, [r.lat, r.lng]) : null; });
+        resolve();
+      },
+      () => { mapMsg('Izin lokasi ditolak — "Terdekat" tidak tersedia'); setTimeout(() => mapMsg(''), 3500); resolve(); },
+      { enableHighAccuracy: false, timeout: 8000 }
+    );
+  });
+}
+
+/* ---------- Ambil data dari Supabase ---------- */
+async function load() {
+  if (CONFIG.SUPABASE_URL.includes('XXXXXXXX')) {
+    listEl.innerHTML = '<p class="list-msg">Isi SUPABASE_URL & SUPABASE_ANON_KEY di bagian CONFIG pada file ini.</p>';
+    return;
+  }
+  sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+  const { data, error } = await sb
+    .from(CONFIG.TABLE)
+    .select('*')
+    .order(C.createdAt, { ascending: false })
+    .limit(300);
+
+  if (error) {
+    console.error(error);
+    listEl.innerHTML = `<p class="list-msg">Gagal memuat data: ${esc(error.message)}</p>`;
+    return;
+  }
+
+  reports = data.map(normalize);
+  render();
+  fitToVisible();
+
+  // Buka laporan tertentu lewat ?id=...
+  const wanted = new URLSearchParams(location.search).get('id');
+  const hit = wanted && reports.find((r) => String(r.id) === wanted);
+  if (hit) select(hit.id, { scroll: true });
+
+  // Realtime: laporan baru/berubah langsung muncul
+  sb.channel('laporan-lokasi')
+    .on('postgres_changes', { event: '*', schema: 'public', table: CONFIG.TABLE }, async () => {
+      const { data: fresh } = await sb.from(CONFIG.TABLE).select('*').order(C.createdAt, { ascending: false }).limit(300);
+      if (fresh) { reports = fresh.map(normalize); render(); }
+    })
+    .subscribe();
+}
+
+load();
+
 </script></body>
 </html>
