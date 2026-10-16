@@ -444,6 +444,23 @@
       box-shadow: 0 6px 20px rgba(9,46,109,.18);
     }
 
+    .radius-info {
+      position: absolute;
+      top: 20px; right: 20px;
+      z-index: 1000;
+      max-width: 340px;
+      padding: 10px 16px;
+      border-radius: 18px;
+      background: #fff;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      box-shadow: 0 6px 20px rgba(9,46,109,.18);
+    }
+    .radius-info small { display: block; font-weight: 500; color: var(--navy-light); }
+    .radius-info a { color: #3a6dc2; text-decoration: underline; }
+
     .list-msg {
       padding: 24px 8px;
       color: var(--navy-light);
@@ -810,6 +827,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabaseClient.js"></script>
 <script src="js/laporanData.js"></script>
+<script src="js/radiusLokasi.js"></script>
 <script>
 /* Memakai helper yang sama dengan halaman lain: window.db (supabaseClient.js) & window.KKL (laporanData.js) */
 const K = window.KKL;
@@ -832,7 +850,11 @@ let reports = [];
 let selectedId = null;
 let activeFilter = 'all';
 let query = '';
-let userPos = null;
+let userPos = null;      // posisi pengguna untuk jarak di daftar ('Terdekat')
+let pusat = null;        // titik pusat radius
+let pusatAkurat = false;
+let radiusKm = 4;
+let lingkaran = null;
 const markers = new Map();
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -868,7 +890,26 @@ function decorate(n, i) {
   });
 }
 function hitungJarak() {
-  reports.forEach((r) => { r.dist = (userPos && r.hasPos) ? distKm(userPos, [r.lat, r.lng]) : null; });
+  const asal = userPos || (pusatAkurat ? pusat : null);
+  reports.forEach((r) => { r.dist = (asal && r.hasPos) ? distKm(asal, [r.lat, r.lng]) : null; });
+}
+
+/* ---------- Radius lokasi laporan ---------- */
+function terapkanRadius() {
+  reports.forEach((r) => {
+    r.dalamRadius = (pusat && r.hasPos) ? KKR.dalamRadius(pusat, [r.lat, r.lng], radiusKm) : false;
+  });
+  if (!lingkaran) lingkaran = KKR.gambarLingkaran(map, pusat, radiusKm);
+  else lingkaran.update(pusat, radiusKm);
+  hitungJarak();
+}
+
+function infoRadius() {
+  let el = document.querySelector('.radius-info');
+  if (!el) { el = document.createElement('div'); el.className = 'radius-info'; document.querySelector('.map-frame').appendChild(el); }
+  const jml = reports.filter((r) => r.dalamRadius).length;
+  el.innerHTML = `Radius ${radiusKm} km • ${jml} laporan`
+    + `<small>${pusatAkurat ? 'dari lokasi Anda' : 'dari pusat kota (izin lokasi tidak aktif)'} • <a href="Profil-Akun.html">Ubah</a></small>`;
 }
 
 /* ---------- Peta ---------- */
@@ -913,7 +954,8 @@ function mapMsg(text) {
 /* ---------- Filter / cari / urut ---------- */
 function visibleReports() {
   const q = query.trim().toLowerCase();
-  let out = reports.filter((r) => !q || r.title.toLowerCase().includes(q) || r.addr.toLowerCase().includes(q) || r.kode.toLowerCase().includes(q));
+  let out = reports.filter((r) => r.dalamRadius !== false)
+    .filter((r) => !q || r.title.toLowerCase().includes(q) || r.addr.toLowerCase().includes(q) || r.kode.toLowerCase().includes(q));
   if (activeFilter === 'nearest') out = out.filter((r) => r.dist != null).sort((a, b) => a.dist - b.dist);
   else out = out.sort(K.terbaruDulu);
   return out;
@@ -1007,9 +1049,8 @@ cardEl.addEventListener('click', (e) => {
 });
 
 function fitToVisible() {
-  const pts = visibleReports().filter((r) => r.hasPos).map((r) => [r.lat, r.lng]);
-  if (pts.length > 1) map.fitBounds(pts, { padding: [60, 60], maxZoom: 16 });
-  else if (pts.length === 1) map.setView(pts[0], 16);
+  if (lingkaran) map.fitBounds(lingkaran.lingkaran.getBounds(), { padding: [30, 30] });
+  else map.setView(pusat || DEFAULT_CENTER, 13);
 }
 
 function locate() {
@@ -1033,6 +1074,13 @@ function locate() {
   if (!sesi) return;
   K.buka();
 
+  // radius dari profil + posisi pengguna (paralel dengan data laporan)
+  const [rk, lokasi] = await Promise.all([KKR.muatRadius(sesi.user.id), KKR.posisiPengguna()]);
+  radiusKm = rk;
+  pusat = lokasi.pos;
+  pusatAkurat = lokasi.akurat;
+  if (pusatAkurat) userPos = pusat;
+
   try {
     reports = (await K.ambilPublik(300, sesi.user.id)).map(decorate);
   } catch (err) {
@@ -1040,11 +1088,17 @@ function locate() {
     listEl.innerHTML = `<p class="list-msg">${esc(K.pesanGalat(err))}</p>`;
     return;
   }
+  terapkanRadius();
+  infoRadius();
   render();
   fitToVisible();
 
   const wanted = new URLSearchParams(location.search).get('kode');
-  if (wanted && reports.some((r) => r.id === wanted)) select(wanted, { scroll: true });
+  if (wanted) {
+    const w = reports.find((r) => r.id === wanted);
+    if (w && !w.dalamRadius) { w.dalamRadius = true; render(); }   // laporan yang dibuka lewat link tetap ditampilkan
+    if (w) select(wanted, { scroll: true });
+  }
 })();
 
 </script></body>
