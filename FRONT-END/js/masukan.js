@@ -9,19 +9,20 @@ function tampil(teks, ok) {
   status.style.color = ok ? '#2fa866' : '#d63a3a';
 }
 
-// Ambil client Supabase apa pun nama export-nya di supabaseClient.js
-async function getClient() {
-  const mod = await import('./supabaseClient.js');
-  const kandidat = [mod.supabase, mod.default, mod.supabaseClient, mod.client, mod.sb,
-    ...Object.values(mod)];
-  const client = kandidat.find(c => c && typeof c.from === 'function' && c.auth);
-  if (client) return client;
-  for (const nama of ['supabaseClient', 'sb', 'db', 'client', 'supabase']) {
-    const c = window[nama];
-    if (c && typeof c.from === 'function' && c.auth) return c;
+// Cari client Supabase yang dibuat js/supabaseClient.js (script biasa, bukan module)
+function getClient() {
+  const ok = c => c && typeof c.from === 'function' && c.auth;
+  // const/let di script biasa tidak masuk window, jadi dicek lewat nama langsung
+  const cobaNama = [
+    () => supabaseClient, () => sb, () => db, () => client, () => supabaseDb, () => _supabase
+  ];
+  for (const f of cobaNama) {
+    try { const c = f(); if (ok(c)) return c; } catch (e) { /* belum ada */ }
   }
-  const daftar = Object.keys(mod).join(', ') || '(tidak ada export)';
-  throw new Error('Client tidak ditemukan. Export di supabaseClient.js: ' + daftar);
+  for (const k of Object.keys(window)) {
+    try { if (k !== 'supabase' && ok(window[k])) return window[k]; } catch (e) {}
+  }
+  throw new Error('Client belum ditemukan. Pastikan CDN supabase-js dan js/supabaseClient.js dimuat sebelum masukan.js.');
 }
 
 btn.addEventListener('click', async () => {
@@ -34,7 +35,7 @@ btn.addEventListener('click', async () => {
   tampil('', true);
 
   try {
-    const supabase = await getClient();
+    const supabase = getClient();
     const { data: { session } } = await supabase.auth.getSession();
 
     const { error } = await supabase.from('masukan').insert({
