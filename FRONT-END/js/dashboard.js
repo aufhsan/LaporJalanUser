@@ -29,6 +29,7 @@
     const WARNA_TINGKAT = { ringan: '#f2b705', sedang: '#f08c00', parah: '#e03131' };
     const WARNA_SELESAI = '#2f9e44', WARNA_DEFAULT = '#ad0000';
 
+    const KKR = window.KKR;                          // radiusLokasi.js (opsional)
     const $ = id => document.getElementById(id);
     const boxIsu = $('daftarIsu');
     const boxTerbaru = $('daftarLaporan');
@@ -38,7 +39,7 @@
 
     // anchor = posisi GPS user (dipakai mengurutkan "Isu Terdekat")
     // pusat  = titik kota asal (hanya cadangan untuk peta & jarak perkiraan)
-    const state = { laporan: [], anchor: null, pusat: null, kata: '', siap: false };
+    const state = { laporan: [], anchor: null, pusat: null, kata: '', siap: false, radius: null };
 
     const bukaTampilan = () => { if (guard) guard.remove(); };
     setTimeout(bukaTampilan, 4000);                  // jaring pengaman
@@ -95,6 +96,21 @@
         || (Number.isFinite(r.latitude) && Number.isFinite(r.longitude)
             ? `${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}` : 'Lokasi tidak diketahui');
 
+    /* ---------- Radius lokasi laporan (diatur di Profil → Akun) ----------
+       Pusat radius = posisi GPS user, atau pusat kota asal bila GPS mati.
+       Bila keduanya tidak ada, radius tidak diterapkan (tidak ada titik acuan yang nyata). */
+    function pusatRadius() {
+        if (state.anchor) return { lat: state.anchor.lat, lon: state.anchor.lon };
+        if (state.pusat) return { lat: state.pusat.lat, lon: state.pusat.lon };
+        return null;
+    }
+    const radiusAktif = () => !!(KKR && state.radius && pusatRadius());
+    function dalamRadius(r) {
+        if (!radiusAktif()) return true;
+        if (!Number.isFinite(r.latitude) || !Number.isFinite(r.longitude)) return false;
+        return jarakKm(pusatRadius(), r) <= state.radius;
+    }
+
     const cocok = r => !state.kata
         || [r.alamat, r.kategori, r.deskripsi].join(' ').toLowerCase().includes(state.kata);
 
@@ -125,24 +141,27 @@
     /* ---------- Render ---------- */
     function renderIsu() {
         if (!state.siap) return;
-        let daftar = state.laporan.filter(r => r.status !== 'selesai' && cocok(r));
+        let daftar = state.laporan.filter(r => r.status !== 'selesai' && cocok(r) && dalamRadius(r));
 
         if (state.anchor) {
             daftar = daftar
                 .filter(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))
                 .map(r => ({ r, km: jarakKm(state.anchor, r) }))
                 .sort((a, b) => a.km - b.km);
-            infoIsu.textContent = 'Terdekat dari lokasi Anda';
+            infoIsu.textContent = 'Terdekat dari lokasi Anda' + (radiusAktif() ? ` • radius ${state.radius} km` : '');
         } else {
             daftar = daftar
                 .sort((a, b) => new Date(b.waktu) - new Date(a.waktu))
                 .map(r => ({ r, km: null }));
-            infoIsu.textContent = 'Menampilkan yang terbaru. Izinkan akses lokasi untuk mengurutkan berdasarkan jarak.';
+            infoIsu.textContent = radiusAktif()
+                ? `Menampilkan yang terbaru dalam radius ${state.radius} km dari pusat kota Anda.`
+                : 'Menampilkan yang terbaru. Izinkan akses lokasi untuk mengurutkan berdasarkan jarak dan menerapkan radius.';
         }
         daftar = daftar.slice(0, BATAS_ISU);
 
         if (!daftar.length) {
-            pesan(boxIsu, state.kata ? 'Tidak ada isu yang cocok dengan pencarian.' : 'Belum ada isu aktif.');
+            pesan(boxIsu, state.kata ? 'Tidak ada isu yang cocok dengan pencarian.'
+                : radiusAktif() ? `Tidak ada isu aktif dalam radius ${state.radius} km.` : 'Belum ada isu aktif.');
             return;
         }
 
@@ -167,12 +186,13 @@
     function renderTerbaru() {
         if (!state.siap) return;
         const daftar = state.laporan
-            .filter(cocok)
+            .filter(r => cocok(r) && dalamRadius(r))
             .sort((a, b) => new Date(b.waktu) - new Date(a.waktu))
             .slice(0, BATAS_TERBARU);
 
         if (!daftar.length) {
-            pesan(boxTerbaru, state.kata ? 'Tidak ada laporan yang cocok dengan pencarian.' : 'Belum ada laporan.');
+            pesan(boxTerbaru, state.kata ? 'Tidak ada laporan yang cocok dengan pencarian.'
+                : radiusAktif() ? `Tidak ada laporan dalam radius ${state.radius} km.` : 'Belum ada laporan.');
             return;
         }
 
@@ -223,7 +243,7 @@
     }
 
     /* ---------- Peta (Leaflet) ---------- */
-    const peta = { map: null, layer: null, user: null, catatanEl: null };
+    const peta = { map: null, layer: null, user: null, catatanEl: null, lingkaran: null };
 
     function ikonPin(warna) {
         return L.divIcon({
@@ -290,12 +310,29 @@
         if (!peta.map || !state.siap) return;
         peta.layer.clearLayers();
         state.laporan
-            .filter(r => koordinatOk(r.latitude, r.longitude) && cocok(r))
+            .filter(r => koordinatOk(r.latitude, r.longitude) && cocok(r) && dalamRadius(r))
             .forEach(r => {
                 L.marker([r.latitude, r.longitude], { icon: ikonPin(warnaLaporan(r)), title: judulLaporan(r), riseOnHover: true })
                     .bindPopup(() => isiPopup(r), { maxWidth: 280 })
                     .addTo(peta.layer);
             });
+    }
+
+    // Gambar/perbarui lingkaran radius, lalu render ulang daftar & pin sesuai radius.
+    function perbaruiRadius(fit) {
+        const p = pusatRadius();
+        if (peta.map && KKR) {
+            if (p && state.radius) {
+                const ll = [p.lat, p.lon];
+                if (!peta.lingkaran) peta.lingkaran = KKR.gambarLingkaran(peta.map, ll, state.radius, { titikPusat: false });
+                else peta.lingkaran.update(ll, state.radius);
+                if (fit) peta.map.fitBounds(peta.lingkaran.lingkaran.getBounds(), { padding: [20, 20] });
+            } else if (peta.lingkaran) {
+                peta.lingkaran.hapus();
+                peta.lingkaran = null;
+            }
+        }
+        renderSemua();
     }
 
     function catat(teks) {
@@ -411,14 +448,14 @@
 
     // GPS → (ditolak) kota asal di profiles → (gagal) Bandung
     async function tentukanPusat(sesi) {
-        if (!peta.map) { const p = await ambilPosisi(); if (p) { state.anchor = p; renderIsu(); } return; }
+        if (!peta.map) { const p = await ambilPosisi(); if (p) { state.anchor = p; perbaruiRadius(false); } return; }
 
         const pos = await ambilPosisi();
         if (pos) {
             state.anchor = pos;
-            renderIsu();                              // "Isu Terdekat" kini urut berdasarkan jarak
             letakkanUser(pos.lat, pos.lon, false);
             peta.map.setView([pos.lat, pos.lon], ZOOM_USER);
+            perbaruiRadius(true);                     // lingkaran radius + "Isu Terdekat" urut jarak
             catat('');
             return;
         }
@@ -429,6 +466,7 @@
             state.pusat = { lat: p.lat, lon: p.lon, nama: kota };
             letakkanUser(p.lat, p.lon, true, kota);
             peta.map.setView([p.lat, p.lon], ZOOM_KOTA);
+            perbaruiRadius(true);
             catat(`Lokasi tidak aktif. Peta berpusat di kota asal Anda: ${kota}.`);
         } else {
             catat(kota
@@ -462,6 +500,13 @@
         db.auth.onAuthStateChange(event => {
             if (WAJIB_LOGIN && event === 'SIGNED_OUT') window.location.replace(HALAMAN_LOGIN);
         });
+
+        if (KKR) {
+            state.radius = KKR.radiusCache() || KKR.DEFAULT;          // langsung dari cache
+            KKR.muatRadius(sesi.user.id).then(km => {                 // lalu sinkron dengan profil
+                if (km !== state.radius) { state.radius = km; perbaruiRadius(true); }
+            });
+        }
 
         initPeta();
         muat();
