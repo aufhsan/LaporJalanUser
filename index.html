@@ -1,2403 +1,1115 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KotaKita - Lapor Jalan</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f6f9; color: #333; }
-        .halaman { display: none; }
-        .halaman.aktif { display: block; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — KotaKita</title>
 
-        /* ===== Halaman autentikasi ===== */
-        .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(160deg, #efe7fb 0%, #f4f6f9 55%); }
-        .auth-card { background: white; width: 100%; max-width: 420px; padding: 28px 24px; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-        .brand { text-align: center; font-size: 15px; color: #6f42c1; font-weight: bold; margin-bottom: 4px; }
-        .auth-card h1 { margin: 0 0 6px; font-size: 24px; text-align: center; }
-        .sub { text-align: center; color: #777; font-size: 14px; margin: 0 0 20px; }
-        .field { margin-bottom: 14px; }
-        .field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 5px; }
-        .field input, .field select { width: 100%; padding: 12px; border: 1.5px solid #ccd0d5; border-radius: 8px; font-size: 15px; font-family: inherit; background: white; }
-        .field input:focus { outline: none; border-color: #6f42c1; }
-        .field.salah input { border-color: #dc3545; }
-        .err { color: #dc3545; font-size: 12.5px; margin-top: 4px; min-height: 0; }
-        .ok-teks { color: #2f9e44; font-size: 12.5px; margin-top: 4px; }
-        .hint { color: #888; font-size: 12px; margin-top: 4px; }
-        .pw-wrap { position: relative; }
-        .pw-wrap input { padding-right: 56px; }
-        .pw-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #6f42c1; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px; }
-        .btn { background: #6f42c1; color: white; padding: 13px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: 0.2s; }
-        .btn:hover { filter: brightness(1.08); }
-        .btn:disabled { background: #ccc; cursor: not-allowed; filter: none; }
-        .btn-success { background: #28a745; }
-        .btn-danger { background: #dc3545; }
-        .btn-warning { background: #fd7e14; }
-        .btn-navy { background: #0a2463; }
-        .btn-kecil { width: auto; padding: 8px 14px; font-size: 14px; }
-        .tautan { text-align: center; margin-top: 16px; font-size: 14px; }
-        .tautan a, a.lupa { color: #6f42c1; font-weight: 600; text-decoration: none; cursor: pointer; }
-        a.lupa { font-size: 13px; float: right; }
-        .notice { padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; display: none; line-height: 1.45; }
-        .notice.ok { display: block; background: #d3f9d8; color: #1b5e20; }
-        .notice.err { display: block; background: #ffe3e3; color: #a61e1e; }
-        .notice.info { display: block; background: #e7f5ff; color: #1864ab; }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        /* ===== Halaman dalam (Upload / Laporan) ===== */
-        .tabisi { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
-        .tabisi.aktif { display: block; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .card .btn { margin: 10px 0; }
-        .lbl { font-weight: bold; font-size: 14px; display: block; margin-bottom: 6px; }
-        #inKode { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 15px; }
-        .baris-cek { display: flex; gap: 8px; text-align: left; margin-top: 8px; }
-        .baris-cek input { flex: 1; text-transform: uppercase; }
-        #hasilCek { margin-top: 16px; text-align: left; display: none; }
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 14px; font-size: 13px; font-weight: bold; color: white; }
-        .badge.baru { background: #868e96; } .badge.diproses { background: #1c7ed6; } .badge.selesai { background: #2f9e44; }
-        .badge.ringan { background: #f2b705; color: #333; } .badge.sedang { background: #ff922b; } .badge.parah { background: #e03131; }
-        .hasil-baris { margin: 8px 0; font-size: 14px; line-height: 1.5; }
-        .catatan { background: #fff9db; border-left: 4px solid #fab005; padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 14px; text-align: left; }
-        .item-laporan { display: flex; gap: 12px; text-align: left; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .item-laporan:last-child { border-bottom: none; }
-        .item-laporan img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-        .item-laporan .meta { font-size: 13px; color: #777; margin: 4px 0; }
-        .item-laporan .kode { font-family: monospace; font-weight: bold; }
-        .garis { border: none; border-top: 1px solid #eee; margin: 22px 0; }
+  <!-- Leaflet (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 
-        [hidden] { display: none !important; }
+  <style>
+    :root {
+      --navy: #092e6d;
+      --text: #131b2e;
+      --muted: #5c5c5c;
+      --danger: #ad0000;
+    }
 
-        /* ===== KotaKita: tema, navbar ===== */
-        body.tema-kk { background: #e6eefb; color: #1d2a44; }
-        body.tema-kk .card { border-radius: 16px; box-shadow: 0 4px 18px rgba(10,36,99,0.08); }
-        body.tema-kk .btn:not(.btn-success):not(.btn-danger):not(.btn-warning) { background: #0a2463; }
-        .kk-nav { position: sticky; top: 0; z-index: 1000; background: #fff; box-shadow: 0 2px 14px rgba(10,36,99,0.10); display: none; align-items: center; gap: 14px; padding: 10px 22px; flex-wrap: wrap; }
-        .kk-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #0a2463; font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
-        .kk-logo svg { width: 28px; height: 28px; fill: #0a2463; }
-        .kk-logo b { color: #3a6fd8; }
-        .kk-kota { position: relative; }
-        .kk-kota-btn { display: flex; align-items: center; gap: 6px; background: #eef3fc; border: 1.5px solid #d3def5; color: #0a2463; font-weight: 600; font-size: 14px; padding: 9px 14px; border-radius: 22px; cursor: pointer; max-width: 230px; }
-        .kk-kota-btn #kotaLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .kk-dropdown { position: absolute; top: calc(100% + 8px); background: #fff; border-radius: 14px; box-shadow: 0 10px 34px rgba(10,36,99,0.20); border: 1px solid #e3eaf8; z-index: 1100; }
-        #kotaPanel { left: 0; width: 320px; max-width: 86vw; padding: 10px; }
-        #kotaCari { width: 100%; padding: 10px 12px; border: 1.5px solid #d3def5; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 8px; }
-        #kotaCari:focus, #kkCari:focus { outline: none; border-color: #0a2463; }
-        #kotaList { max-height: 300px; overflow-y: auto; }
-        .kota-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; color: #1d2a44; font-family: inherit; }
-        .kota-item:hover, .kota-item.fokus { background: #eef3fc; }
-        .kota-item small { color: #7b88a6; font-size: 12px; white-space: nowrap; }
-        .kk-info { color: #6b7898; font-size: 13.5px; padding: 12px 6px; line-height: 1.5; }
-        .kk-menu { display: flex; gap: 4px; margin: 0 auto; }
-        .kk-menu a { text-decoration: none; color: #4a5b7c; font-weight: 600; font-size: 15px; padding: 9px 16px; border-radius: 20px; }
-        .kk-menu a:hover { background: #eef3fc; color: #0a2463; }
-        .kk-menu a.aktif { background: #0a2463; color: #fff; }
-        .kk-avatar-wrap { position: relative; }
-        .kk-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid #d3def5; background: #0a2463; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; overflow: hidden; padding: 0; display: flex; align-items: center; justify-content: center; }
-        .kk-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        #avatarMenu { right: 0; width: 230px; padding: 8px; }
-        #avatarMenu .who { padding: 8px 10px 10px; border-bottom: 1px solid #eef1f8; margin-bottom: 6px; display: flex; flex-direction: column; }
-        #avatarMenu .who span { color: #7b88a6; font-size: 13px; }
-        #avatarMenu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-family: inherit; color: #1d2a44; }
-        #avatarMenu button:hover { background: #eef3fc; }
-        @media (max-width: 760px) {
-            .kk-nav { padding: 10px 14px; gap: 10px; }
-            .kk-kota { order: 2; margin-left: auto; }
-            .kk-avatar-wrap { order: 3; }
-            .kk-menu { order: 4; width: 100%; justify-content: space-between; margin: 0; }
-            .kk-menu a { padding: 8px 10px; font-size: 14px; flex: 1; text-align: center; }
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        /* ===== KotaKita: konten ===== */
-        .kk-main { max-width: 1240px; margin: 0 auto; padding: 22px; }
-        .kk-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 22px; align-items: stretch; }
-        .kk-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 18px rgba(10,36,99,0.08); padding: 18px; }
-        .kk-mapcard { display: flex; flex-direction: column; min-width: 0; }
-        .kk-searchbar { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
-        .kk-search { position: relative; flex: 1; display: flex; align-items: center; background: #f3f6fd; border: 1.5px solid #d3def5; border-radius: 12px; padding: 0 10px; }
-        .kk-search:focus-within { border-color: #0a2463; background: #fff; }
-        #kkCari { flex: 1; border: none; background: transparent; padding: 12px 6px; font-size: 15px; font-family: inherit; min-width: 0; }
-        #kkCari:focus { outline: none; }
-        #kkCariHapus { border: none; background: none; color: #7b88a6; cursor: pointer; font-size: 15px; padding: 4px 6px; }
-        .kk-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(10,36,99,0.20); border: 1px solid #e3eaf8; z-index: 900; max-height: 300px; overflow-y: auto; padding: 6px; }
-        .kk-suggest .sg { display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-family: inherit; }
-        .kk-suggest .sg:hover, .kk-suggest .sg.fokus { background: #eef3fc; }
-        .kk-suggest .sg b { display: block; font-size: 14px; color: #1d2a44; }
-        .kk-suggest .sg span { font-size: 12px; color: #7b88a6; }
-        .kk-chip { background: #eef3fc; color: #0a2463; border: 1.5px solid #d3def5; padding: 11px 14px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; font-family: inherit; }
-        .kk-chip:hover { background: #dfe9fb; }
-        .kk-note { font-size: 13px; color: #b45309; min-height: 0; margin-bottom: 6px; }
-        .kk-note:empty { display: none; }
-        #kkMap { height: 470px; width: 100%; border-radius: 12px; z-index: 1; }
-        .kk-legenda { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #4a5b7c; margin-top: 10px; }
-        .kk-legenda i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
-        .pin { width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.5); position: relative; }
-        .pin::after { content: ''; position: absolute; width: 8px; height: 8px; background: white; border-radius: 50%; top: 6px; left: 6px; }
-        .pin.anchor { background: #0a2463; border-radius: 50%; transform: none; width: 18px; height: 18px; }
-        .pin.anchor::after { display: none; }
-        .kk-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-        .kk-head h2 { margin: 0; font-size: 19px; color: #0a2463; }
-        .kk-head .sub { font-size: 12.5px; color: #7b88a6; margin-top: 3px; }
-        #btnRefresh { border: 1.5px solid #d3def5; background: #eef3fc; color: #0a2463; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 17px; }
-        .isu-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff; border: 1px solid #e8eef9; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; font-family: inherit; transition: 0.15s; }
-        .isu-item:hover { border-color: #b9ccf1; box-shadow: 0 3px 12px rgba(10,36,99,0.10); transform: translateY(-1px); }
-        .dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(0,0,0,0.06); }
-        .dot.ringan { background: #f2b705; box-shadow: 0 0 0 4px rgba(242,183,5,0.20); }
-        .dot.sedang { background: #ff922b; box-shadow: 0 0 0 4px rgba(255,146,43,0.22); }
-        .dot.parah  { background: #e03131; box-shadow: 0 0 0 4px rgba(224,49,49,0.20); }
-        .dot.none   { background: #adb5bd; }
-        .isu-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-        .isu-judul { font-weight: 700; font-size: 14.5px; color: #1d2a44; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .isu-lok { font-size: 12.5px; color: #5c6b8c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .isu-waktu { font-size: 12px; color: #8a96b2; }
-        .isu-panah { color: #0a2463; font-size: 24px; line-height: 1; }
-        .kk-terbaru { margin-top: 26px; }
-        .kk-terbaru-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .tb-card { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 3; background: #0a2463; box-shadow: 0 4px 18px rgba(10,36,99,0.14); cursor: pointer; transition: 0.2s; }
-        .tb-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(10,36,99,0.22); }
-        .tb-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        .tb-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(4,12,38,0.92) 0%, rgba(4,12,38,0.55) 42%, rgba(4,12,38,0.05) 78%); }
-        .tb-badge { position: absolute; top: 12px; left: 12px; }
-        .tb-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; color: #fff; }
-        .tb-lok { font-weight: 700; font-size: 15px; margin-bottom: 5px; }
-        .tb-desk { font-size: 13.5px; line-height: 1.4; opacity: 0.92; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }        .tb-waktu { font-size: 12px; opacity: 0.8; }
-        @media (max-width: 1000px) { .kk-grid { grid-template-columns: 1fr; } .kk-terbaru-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px) { .kk-main { padding: 14px; } .kk-terbaru-grid { grid-template-columns: 1fr; } #kkMap { height: 340px; } .kk-searchbar { flex-wrap: wrap; } }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(
+        90deg,
+        #ffffff 0%,
+        #d5e1f4 57.2%,
+        #a8bfe7 100%
+      );
+      -webkit-font-smoothing: antialiased;
+      zoom: 0.67; /* Disamakan dengan detailLaporan2-5.html */
+    }
 
-        /* ===== Upload Laporan / Konfirmasi / Detail ===== */
-        .up-wrap, .dt-wrap { max-width: 760px; margin: 0 auto; padding: 22px; }
-        .up-head h1 { margin: 0 0 4px; font-size: 26px; color: #0a2463; }
-        .up-head p { margin: 0 0 18px; color: #5c6b8c; font-size: 14.5px; line-height: 1.5; }
-        .up-card { margin-bottom: 16px; text-align: left; }
-        .up-card.salah { box-shadow: 0 0 0 2px #e03131, 0 4px 18px rgba(10,36,99,0.08); }
-        .up-judul { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 16px; color: #0a2463; }
-        .up-no { width: 26px; height: 26px; border-radius: 50%; background: #0a2463; color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .up-foto-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .up-btn-foto { padding: 18px 10px; border: 2px dashed #b9ccf1; background: #f3f6fd; color: #0a2463; border-radius: 14px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; }
-        .up-btn-foto:hover { background: #e4edfc; border-color: #3a6fd8; }
-        .up-preview { position: relative; margin-top: 12px; }
-        .up-preview img { width: 100%; max-height: 340px; object-fit: cover; border-radius: 12px; display: block; background: #dfe9fb; }
-        .up-preview button { position: absolute; top: 10px; right: 10px; background: rgba(10,36,99,0.88); color: #fff; border: none; border-radius: 20px; padding: 7px 13px; cursor: pointer; font-size: 13px; font-family: inherit; }
-        .up-lok-aksi { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-        #upMap { height: 300px; width: 100%; border-radius: 12px; z-index: 1; background: #dfe9fb; }
-        .up-label { display: block; font-weight: 700; font-size: 14px; color: #1d2a44; margin: 14px 0 6px; }
-        .up-input { width: 100%; padding: 12px; border: 1.5px solid #d3def5; border-radius: 10px; font-family: inherit; font-size: 15px; background: #fff; color: #1d2a44; }
-        textarea.up-input { resize: vertical; }
-        .up-input:focus { outline: none; border-color: #0a2463; }
-        .up-hint { font-size: 12.5px; color: #7b88a6; margin-top: 6px; line-height: 1.45; }
-        .up-hint a { color: #3a6fd8; font-weight: 600; text-decoration: none; }
-        .up-err { color: #c92a2a; font-size: 13px; margin-top: 8px; }
-        .up-err:empty { display: none; }
-        .up-hitung { text-align: right; font-size: 12.5px; color: #7b88a6; margin-top: 4px; }
-        .up-kat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .up-kat button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 6px; border: 2px solid #d3def5; background: #fff; color: #1d2a44; border-radius: 14px; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; }
-        .up-kat button .ik { font-size: 26px; line-height: 1; }
-        .up-kat button:hover { border-color: #3a6fd8; }
-        .up-kat button[aria-pressed="true"] { border-color: #0a2463; background: #0a2463; color: #fff; }
-        .up-sev { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .up-sev button { padding: 15px 6px; border: 3px solid transparent; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; font-family: inherit; opacity: 0.55; transition: 0.15s; }
-        .up-sev button[data-v="ringan"] { background: #ffd43b; color: #4a3b00; }
-        .up-sev button[data-v="sedang"] { background: #ff922b; color: #fff; }
-        .up-sev button[data-v="parah"] { background: #e03131; color: #fff; }
-        .up-sev button[aria-pressed="true"] { opacity: 1; border-color: #0a2463; transform: scale(1.03); }
-        .up-konfirmasi { width: 100%; background: #0a2463; color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 800; cursor: pointer; font-family: inherit; box-shadow: 0 6px 18px rgba(10,36,99,0.25); }
-        .up-konfirmasi:hover { filter: brightness(1.12); }
-        .up-konfirmasi:disabled { background: #9fb0d3; cursor: not-allowed; box-shadow: none; filter: none; }
-        .kf-wrap { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 22px; }
-        .kf-card { width: 100%; max-width: 460px; text-align: center; padding: 34px 26px; }
-        .kf-ikon { width: 104px; height: 104px; border-radius: 50%; background: #e7f6ec; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: kf-pop 0.45s ease-out; }
-        .kf-ikon svg { width: 64px; height: 64px; }
-        @keyframes kf-pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
-        .kf-card h1 { color: #0a2463; margin: 0 0 8px; font-size: 27px; }
-        .kf-card p { color: #5c6b8c; font-size: 14.5px; line-height: 1.5; margin: 0 0 16px; }
-        .kf-kode { display: inline-block; background: #eef3fc; border: 1.5px dashed #b9ccf1; color: #0a2463; font-family: monospace; font-weight: 800; font-size: 17px; letter-spacing: 1.5px; padding: 9px 16px; border-radius: 10px; margin: 0 0 24px; word-break: break-all; }
-        .kf-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .kf-aksi button { padding: 14px 8px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit; border: 2px solid #0a2463; }
-        .kf-aksi .primer { background: #0a2463; color: #fff; }
-        .kf-aksi .sekunder { background: #fff; color: #0a2463; }
-        .dt-card-wrap { text-align: left; }
-        .dt-wrap .kk-card { text-align: left; }
-        .dt-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-        .dt-top h1 { margin: 0; font-size: 23px; color: #0a2463; }
-        .dt-status { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 24px; font-weight: 800; font-size: 14.5px; }
-        .dt-status.baru { background: #e7f0ff; color: #0a2463; }
-        .dt-status.diproses { background: #fff3d6; color: #8a5a00; }
-        .dt-status.selesai { background: #dff5e6; color: #1b6b34; }
-        .dt-foto { width: 100%; max-height: 420px; object-fit: cover; border-radius: 14px; margin: 16px 0; background: #dfe9fb; display: block; }
-        .dt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .dt-penuh { grid-column: 1 / -1; }
-        .dt-item .k { font-size: 12px; color: #7b88a6; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .dt-item .v { font-size: 15.5px; color: #1d2a44; font-weight: 600; word-break: break-word; }
-        .dt-item .dt-desk { font-weight: 500; line-height: 1.55; white-space: pre-wrap; }
-        .dt-kep { display: inline-flex; align-items: center; gap: 9px; }
-        .lihat-detail { display: inline-block; margin-top: 6px; font-size: 13.5px; font-weight: 700; color: #0a2463; text-decoration: none; }
-        .lihat-detail:hover { text-decoration: underline; }
-        @media (max-width: 640px) { .up-wrap, .dt-wrap { padding: 14px; } .up-kat { grid-template-columns: repeat(2, 1fr); } .dt-grid { grid-template-columns: 1fr; } .kf-aksi { grid-template-columns: 1fr; } #upMap { height: 260px; } }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-        /* ===== Welcome, Tamu, Profil, Akun ===== */
-        .wl-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(160deg, #0a2463 0%, #1c4fb8 55%, #3a6fd8 100%); color: #fff; text-align: center; }
-        .wl-card { max-width: 380px; width: 100%; }
-        .wl-logo { width: 92px; height: 92px; margin: 0 auto 18px; border-radius: 26px; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
-        .wl-logo svg { width: 54px; height: 54px; fill: #0a2463; }
-        .wl-card h1 { margin: 0 0 8px; font-size: 40px; letter-spacing: -.5px; }
-        .wl-card h1 b { color: #9ec0ff; }
-        .wl-card p { margin: 0 0 34px; opacity: .92; line-height: 1.5; font-size: 15.5px; }
-        .wl-btn { display: block; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 12px; }
-        .wl-btn.mulai { background: #fff; color: #0a2463; border: 2px solid #fff; }
-        .wl-btn.masuk { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.8); }
-        .gst-banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #fff; border-left: 5px solid #3a6fd8; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(10,36,99,.08); font-size: 14px; }
-        .gst-banner .acts { display: flex; gap: 8px; }
-        .gst-banner .btn { margin: 0; text-decoration: none; text-align: center; }
-        .pf-wrap { max-width: 560px; margin: 0 auto; padding: 22px; }
-        .pf-back { display: inline-block; margin-bottom: 12px; color: #0a2463; font-weight: 700; text-decoration: none; }
-        .pf-hero { background: linear-gradient(160deg, #0a2463, #3a6fd8); color: #fff; text-align: center; padding: 26px 18px; }
-        .pf-av { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 12px; border: 4px solid rgba(255,255,255,.6); background: #fff; color: #0a2463; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pf-av img, .ak-av img { width: 100%; height: 100%; object-fit: cover; }
-        .pf-hero h2 { margin: 0 0 4px; }
-        .pf-hero small { display: block; opacity: .88; margin-top: 3px; font-size: 13.5px; }
-        .pf-stat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0 6px; text-align: center; }
-        .pf-stat div { background: #fff; border-radius: 12px; padding: 12px 4px; box-shadow: 0 4px 18px rgba(10,36,99,.08); }
-        .pf-stat b { display: block; font-size: 22px; color: #0a2463; }
-        .pf-stat span { font-size: 12px; color: #7b88a6; }
-        .pf-menu { padding: 4px 0; margin-top: 14px; }
-        .pf-item { display: flex; justify-content: space-between; padding: 15px 18px; text-decoration: none; color: #1d2a44; font-weight: 600; border-bottom: 1px solid #eef1f8; }
-        .pf-item:last-child { border-bottom: none; }
-        .pf-item:hover { background: #f3f6fd; }
-        .ak-judul { margin: 0 0 14px; color: #0a2463; font-size: 22px; }
-        .ak-avbox { position: relative; width: 120px; height: 120px; margin: 0 auto 18px; }
-        .ak-av { width: 120px; height: 120px; border-radius: 50%; background: #0a2463; color: #fff; font-size: 38px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; box-shadow: 0 6px 20px rgba(10,36,99,.18); }
-        .ak-cam { position: absolute; right: 0; bottom: 0; width: 38px; height: 38px; border-radius: 50%; background: #0a2463; border: 3px solid #fff; color: #fff; cursor: pointer; padding: 0; font-size: 16px; }
-        .ak-in { position: relative; }
-        .ak-in input { padding-right: 48px; }
-        .field input[readonly] { background: #f3f6fd; color: #4a5b7c; }
-        .ak-edit { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #0a2463; cursor: pointer; padding: 7px; border-radius: 8px; display: flex; }
-        .ak-edit.on { background: #dfe9fb; }
-        .rk-item { display: block; padding: 12px 0; border-bottom: 1px solid #eef1f8; text-decoration: none; color: #1d2a44; }
-        .rk-item:last-child { border-bottom: none; }
-        .rk-item small { display: block; color: #7b88a6; margin-top: 4px; font-size: 12.5px; }
-        .pr-baris { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #eef1f8; cursor: pointer; }
-        .pr-baris small { display: block; color: #7b88a6; margin-top: 3px; }
-        .pr-baris input { width: 22px; height: 22px; accent-color: #0a2463; flex-shrink: 0; }
-        .info-teks { font-size: 14.5px; line-height: 1.6; color: #34425f; }
-        @media (max-width: 640px) { .pf-wrap { padding: 14px; } .pf-stat { grid-template-columns: repeat(2, 1fr); } }
-    </style>
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .icon {
+      display: block;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .svg-definitions {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    /* HEADER NAVBAR GLASSMORPHISM (Sama dengan detailLaporan2-5.html) */
+    .header {
+      position: fixed;
+      top: 15px;
+      left: 17px;
+      right: 17px;
+      z-index: 1000;
+      min-height: 96px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(177,201,242,0.3));
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 32px rgba(9,46,109,0.12);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      color: var(--navy);
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .city-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--navy);
+      border-radius: 58px;
+      background: rgba(247, 251, 253, 0.4);
+      color: var(--navy);
+      font-size: 18px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .city-picker .icon-arrow {
+      transform: rotate(90deg);
+      width: 18px;
+      height: 18px;
+    }
+
+    .navigation {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-left: auto;
+    }
+
+    .navigation a {
+      position: relative;
+      padding: 12px 0;
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .navigation a.active {
+      font-weight: 600;
+    }
+
+    .navigation a.active::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -2px;
+      left: 0;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--navy);
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: 20px;
+    }
+
+    .points {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 58px;
+      background: linear-gradient(135deg, #3280f3, #0c336c);
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .coin {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #ffe588;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffdf6d, #ffb300);
+      color: #7a4b00;
+      font-size: 14px;
+      font-weight: 900;
+    }
+.profile {
+      display: grid;
+      place-items: center;
+      width: 49px;
+      height: 49px;
+      border-radius: 50%;
+      background: #b2d1ff;
+      color: var(--navy);
+      flex-shrink: 0;
+    }
+
+    /* MAIN DASHBOARD CONTENT */
+    .dashboard {
+      width: min(1508px, calc(100% - 64px));
+      margin: 140px auto 32px; /* Top margin disesuaikan agar tidak tertutup header fixed */
+    }
+
+    .dashboard__top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 46px;
+      align-items: start;
+    }
+
+    .section-title {
+      margin: 0 0 24px;
+      color: var(--navy);
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 58px;
+      padding: 0 25px;
+      border-radius: 45px;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.17);
+    }
+
+    .search .icon {
+      width: 21px;
+      height: 21px;
+      color: #111111;
+    }
+
+    .search input {
+      width: 100%;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .search input::placeholder {
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Search bar Beranda — struktur dan gaya dari LaporJalanUser.html */
+    .kk-searchbar { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .kk-search { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid #d3def5; border-radius: 45px; padding: 0 14px; box-shadow: 0 2px 5px rgba(0,0,0,.17); }
+    .kk-search:focus-within { border-color: var(--navy); background: #fff; }
+    .kk-search .icon { width: 21px; height: 21px; color: #111; flex-shrink: 0; }
+    #cariLokasi { flex: 1; width: 100%; min-width: 0; border: 0; outline: none; background: transparent; color: var(--text); padding: 12px 6px; font-family: inherit; font-size: 16px; font-weight: 500; }
+    #cariLokasi::placeholder { color: rgba(0,0,0,.5); }
+    #kkCariHapus { border: 0; background: transparent; color: #7b88a6; cursor: pointer; font-size: 15px; padding: 4px 6px; flex-shrink: 0; }
+    .kk-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 900; max-height: 300px; overflow-y: auto; padding: 6px; background: #fff; border: 1px solid #e3eaf8; border-radius: 12px; box-shadow: 0 10px 30px rgba(10,36,99,.20); }
+    .kk-suggest .sg { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; text-align: left; font-family: inherit; cursor: pointer; }
+    .kk-suggest .sg:hover, .kk-suggest .sg.fokus { background: #eef3fc; }
+    .kk-suggest .sg b { display: block; color: #1d2a44; font-size: 14px; }
+    .kk-suggest .sg span { color: #7b88a6; font-size: 12px; }
+
+    /* Dropdown kota Indonesia */
+    .kk-city-wrap { position: relative; flex: 0 0 auto; }
+    .kk-city-arrow { margin-left: 2px; font-size: 13px; }
+    .kk-city-panel {
+      position: absolute; top: calc(100% + 12px); left: 0; z-index: 2000;
+      width: min(430px, calc(100vw - 32px)); padding: 16px;
+      border: 1px solid #e3eaf8; border-radius: 18px; background: #fff;
+      box-shadow: 0 16px 40px rgba(9,46,109,.20); color: var(--text);
+    }
+    .kk-city-panel[hidden], .kk-suggest[hidden] { display: none !important; }
+    .kk-city-label { display: block; margin-bottom: 8px; color: var(--navy); font-size: 13px; font-weight: 700; }
+    #kotaCari { width: 100%; padding: 11px 13px; border: 1px solid #d3def5; border-radius: 11px; outline: none; }
+    #kotaCari:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(9,46,109,.08); }
+    .kk-city-list-head, .kk-city-option {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center;
+    }
+    .kk-city-list-head { padding: 12px 10px 7px; color: #77839a; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .kk-city-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; max-height: 280px; overflow-y: auto; }
+    .kk-city-option {
+      width: 100%; padding: 10px; border: 0; border-radius: 10px; background: #fff;
+      color: var(--text); text-align: left; cursor: pointer; font-size: 12px;
+    }
+    .kk-city-option:hover, .kk-city-option:focus-visible { outline: none; background: #eef3fc; }
+    .kk-city-option strong { font-size: 13px; font-weight: 600; }
+    .kk-city-option span { color: #65718a; }
+    .kk-city-empty { margin: 12px 4px 2px; color: #65718a; font-size: 13px; }
+    .kk-searchbar { display: flex; gap: 10px; align-items: stretch; margin-bottom: 8px; }
+    .kk-search { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 58px; background: #fff; border: 1.5px solid #d3def5; border-radius: 45px; padding: 0 14px; box-shadow: 0 2px 5px rgba(0,0,0,.17); }
+    .kk-search:focus-within { border-color: var(--navy); }
+    .kk-search .icon { width: 21px; height: 21px; color: #111; flex-shrink: 0; }
+    #kkCari { flex: 1; width: 100%; min-width: 0; border: 0; outline: none; background: transparent; color: var(--text); padding: 12px 6px; font-family: inherit; font-size: 16px; font-weight: 500; }
+    #kkCari::placeholder { color: rgba(0,0,0,.5); }
+    #kkCariHapus { border: 0; background: transparent; color: #7b88a6; cursor: pointer; font-size: 16px; padding: 4px 6px; flex-shrink: 0; }
+    .kk-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 1200; max-height: 300px; overflow-y: auto; padding: 6px; background: #fff; border: 1px solid #e3eaf8; border-radius: 14px; box-shadow: 0 10px 30px rgba(10,36,99,.20); }
+    .kk-suggest .sg { display: block; width: 100%; padding: 10px; border: 0; border-radius: 9px; background: transparent; text-align: left; font-family: inherit; cursor: pointer; }
+    .kk-suggest .sg:hover, .kk-suggest .sg:focus-visible { outline: none; background: #eef3fc; }
+    .kk-suggest .sg b { display: block; color: #1d2a44; font-size: 13px; }
+    .kk-suggest .sg span { display: block; margin-top: 3px; color: #7b88a6; font-size: 11px; }
+    .kk-chip { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 7px; padding: 0 15px; border: 1.5px solid #d3def5; border-radius: 14px; background: #eef3fc; color: var(--navy); font-family: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .kk-chip:hover { background: #dfe9fb; }
+    .kk-gps-icon { width: 17px; height: 17px; flex-shrink: 0; }
+    @media (max-width: 767px) {
+      .kk-city-panel { left: auto; right: 0; width: min(390px, calc(100vw - 24px)); padding: 12px; }
+      .kk-searchbar { gap: 7px; }
+      .kk-search { height: 40px !important; min-height: 40px; padding: 0 10px !important; gap: 5px !important; }
+      #kkCari { padding: 8px 3px; font-size: 12px !important; }
+      .kk-search .icon { width: 16px !important; height: 16px !important; }
+      .kk-chip { padding: 0 9px; border-radius: 11px; gap: 4px; font-size: 11px; }
+      .kk-gps-icon { width: 14px; height: 14px; }
+    }
+    .map {
+      height: 539px;
+      margin-top: 35px;
+      overflow: hidden;
+      border-radius: 45px;
+      background: #ffffff;
+      box-shadow: 0 3px 23px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Peta Leaflet */
+    #map {
+      isolation: isolate;          /* z-index internal Leaflet tidak menimpa header fixed */
+      font-family: "Inter", Arial, sans-serif;
+    }
+
+    .kk-pin { background: none; border: 0; }
+    .kk-pin svg { display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35)); }
+
+    .kk-me {
+      display: block;
+      width: 22px;
+      height: 22px;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      background: #1c6ef2;
+      box-shadow: 0 0 0 0 rgba(28, 110, 242, 0.5), 0 1px 4px rgba(0, 0, 0, 0.4);
+      animation: kk-pulse 2s infinite;
+    }
+    .kk-me--kota { background: #7048e8; animation: none; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); }
+    @keyframes kk-pulse {
+      70%  { box-shadow: 0 0 0 14px rgba(28, 110, 242, 0), 0 1px 4px rgba(0, 0, 0, 0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(28, 110, 242, 0), 0 1px 4px rgba(0, 0, 0, 0.4); }
+    }
+
+    .kk-map-note {
+      max-width: 260px;
+      margin: 0 0 12px 12px !important;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .kk-map-note[hidden] { display: none; }
+
+    .leaflet-popup-content-wrapper { border-radius: 16px; }
+    .leaflet-popup-content { margin: 14px 16px; font-family: "Inter", Arial, sans-serif; }
+    .kk-pop__title { margin: 0 0 8px; color: var(--navy); font-size: 16px; font-weight: 600; line-height: 1.3; }
+    .kk-pop__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .kk-badge { padding: 2px 10px; border-radius: 20px; background: #e9ecef; color: #343a40; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+    .kk-badge--ok { background: #d3f9d8; color: #2b8a3e; }
+    .kk-badge--aktif { background: #dbe4ff; color: #364fc7; }
+    .kk-badge--ringan { background: #fff3bf; color: #8a6d00; }
+    .kk-badge--sedang { background: #ffe8cc; color: #d9480f; }
+    .kk-badge--parah { background: #ffe3e3; color: #c92a2a; }
+    .kk-pop__desc { margin: 0 0 8px; color: var(--text); font-size: 13px; line-height: 1.45; }
+    .kk-pop__row { margin: 0 0 4px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .kk-pop__row strong { color: var(--text); }
+    .kk-pop__btn { margin-top: 8px; padding: 7px 14px; border: 0; border-radius: 20px; background: var(--navy); color: #ffffff; font-size: 13px; font-weight: 600; }
+    .kk-pop__btn:hover { background: #0c3d8f; }
+
+    /* ISU TERDEKAT */
+    .issues {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 632px;
+      padding: 34px 30px;
+      border-radius: 45px;
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    .issue {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 97px;
+      padding: 18px 20px 18px 24px;
+      overflow: hidden;
+      border: 1px solid #e2e2e2;
+      border-radius: 25px;
+      background: #f7f7f7;
+    }
+
+    .issue::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 9px;
+      background: var(--danger);
+    }
+
+    .issue__title {
+      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .issue__location,
+    .issue__time {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .issue .icon {
+      color: rgba(19, 27, 46, 0.48);
+    }
+
+    /* LAPORAN TERBARU */
+    .latest {
+      margin-top: 39px;
+    }
+
+    .reports {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 31px;
+    }
+
+    .report {
+      position: relative;
+      min-height: 269px;
+      overflow: hidden;
+      border-radius: 35px;
+      background: #687482;
+      color: #ffffff;
+    }
+
+    .report__image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .report::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 35%,
+        rgba(0, 0, 0, 0.75) 100%
+      );
+    }
+
+    .report__content {
+      position: absolute;
+      z-index: 1;
+      right: 24px;
+      bottom: 23px;
+      left: 24px;
+    }
+
+    .report__title {
+      margin: 0 0 4px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .report__description {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1400px) {
+      .navigation {
+        gap: 20px;
+      }
+      .navigation a {
+        font-size: 17px;
+      }
+      .brand {
+        font-size: 26px;
+      }
+      .dashboard__top {
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .header {
+        flex-wrap: wrap;
+      }
+
+      .navigation {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin: 10px 0 0;
+      }
+
+      .dashboard__top {
+        grid-template-columns: 1fr;
+      }
+
+      .map {
+        height: 400px;
+      }
+
+      .issues {
+        min-height: auto;
+      }
+
+      .reports {
+        grid-template-columns: 1fr;
+      }
+    }
+  
+
+/* Responsive mobile layout — desktop styles remain unchanged */
+@media (max-width: 767px) {
+  html { overflow-x: hidden; }
+  body { zoom: 1 !important; overflow-x: hidden; }
+  .header {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+    border-radius: 16px !important;
+  }
+  .header > .brand { order: 1 !important; flex: 0 1 auto !important; min-width: 0; gap: 5px !important; font-size: clamp(16px, 4.5vw, 21px) !important; white-space: nowrap; }
+  .header > .brand svg { width: 22px !important; height: 30px !important; }
+  .header > .city-picker { order: 2 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 4px !important; font-size: 12px !important; white-space: nowrap; }
+  .header > .city-picker .icon { width: 16px !important; height: 16px !important; }
+  .header > .header__actions { display: contents !important; }
+  .header .points { order: 3 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 5px !important; font-size: 12px !important; white-space: nowrap; }
+  .header .points .coin { width: 17px !important; height: 17px !important; font-size: 10px !important; }
+  .header > .profile { order: 4 !important; display: inline-flex !important; flex: 0 0 34px !important; width: 34px !important; height: 34px !important; align-items: center !important; justify-content: center !important; margin: 0 !important; }
+  .header > .profile .icon { width: 22px !important; height: 22px !important; }
+  .header > .navigation { order: 5 !important; flex: 0 0 100% !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 2px 0 0 !important; display: flex !important; flex-flow: row nowrap !important; align-items: center !important; justify-content: space-between !important; gap: clamp(6px, 2.5vw, 14px) !important; overflow-x: auto !important; scrollbar-width: none; }
+  .header > .navigation::-webkit-scrollbar { display: none; }
+  .header > .navigation a { flex: 0 0 auto !important; font-size: clamp(10px, 2.8vw, 13px) !important; line-height: 1.3 !important; padding: 7px 0 !important; white-space: nowrap !important; }
+  .header > .navigation a.active::after { height: 2px !important; bottom: 0 !important; }
+  body { padding-top: 112px; }
+  img, video, iframe, canvas, svg { max-width: 100%; }
+  main, .main-content, .main-content, .content, .page-content, .container, .wrapper, .dashboard-content, .content-wrapper {
+    max-width: 100% !important;
+  }
+  main, .main-content, .content, .page-content, .dashboard-content, .content-wrapper { width: auto; }
+  .main-content, .content, .page-content, .dashboard-content, .content-wrapper { margin-left: 12px !important; margin-right: 12px !important; }
+  input, select, textarea { max-width: 100%; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+}
+@media (max-width: 420px) {
+  .header { padding: 8px 9px !important; column-gap: 5px !important; }
+  .header > .brand { gap: 3px !important; font-size: 16px !important; }
+  .header > .city-picker { padding: 0 7px !important; }
+  .header .points { padding: 0 7px !important; }
+  .header > .navigation { gap: 7px !important; }
+  .header > .navigation a { font-size: 10px !important; }
+}
+/* >>> MOBILE-OPT >>> */
+@media (max-width: 767px) {
+  body { padding-top: 100px; }
+  .dashboard { width: auto !important; margin: 0 12px 20px !important; }
+  .dashboard__top { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .section-title { font-size: 16px !important; margin: 0 0 10px !important; }
+  .search { height: 40px !important; padding: 0 14px !important; gap: 8px !important; }
+  .search .icon { width: 16px !important; height: 16px !important; }
+  .search input { font-size: 13px !important; }
+  .map { height: 200px !important; margin-top: 12px !important; border-radius: 18px !important; }
+  .issues { min-height: 0 !important; padding: 12px !important; gap: 8px !important; border-radius: 18px !important; }
+  .issue { min-height: 0 !important; padding: 10px 12px 10px 16px !important; border-radius: 14px !important; gap: 8px !important; }
+  .issue::before { width: 6px !important; }
+  .issue__title { font-size: 14px !important; margin: 0 0 2px !important; }
+  .issue__location, .issue__time { font-size: 11px !important; line-height: 1.35; }
+  .issue .icon { width: 18px !important; height: 18px !important; }
+  .latest { margin-top: 20px !important; }
+  .reports { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .report { min-height: 140px !important; border-radius: 16px !important; }
+  .report__content { left: 14px !important; right: 14px !important; bottom: 12px !important; }
+  .report__title { font-size: 15px !important; margin: 0 0 2px !important; }
+  .report__description { font-size: 12px !important; }
+}
+/* <<< MOBILE-OPT <<< */
+
+    /* Data laporan dari Supabase */
+    .kk-info { margin: 0; padding: 16px; color: var(--muted); font-size: 14px; text-align: center; }
+    .kk-info--err { color: #b42318; }
+    .kk-sub { margin: -8px 0 12px; color: var(--muted); font-size: 13px; }
+    .reports .kk-info { grid-column: 1 / -1; }
+    .issue, .report { cursor: pointer; }
+    .issue[data-tingkat="ringan"]::before { background: #f2b705; }
+    .issue[data-tingkat="sedang"]::before { background: #f08c00; }
+    .issue[data-tingkat="parah"]::before { background: #e03131; }
+    .issue:focus-visible, .report:focus-visible { outline: 3px solid #27afa5; outline-offset: 3px; }
+</style>
+  <style id="kk-guard">html{visibility:hidden}</style>
+
+<style id="kk-location-feature-styles">
+.kk-map-dot { display:block; width:20px; height:20px; border:3px solid #fff; border-radius:50%; background:#7048e8; box-shadow:0 2px 7px rgba(0,0,0,.35); }
+.kk-map-dot-gps { background:#1c6ef2; animation:kk-gps-pulse 1.8s infinite; }
+@keyframes kk-gps-pulse { 70% { box-shadow:0 0 0 12px rgba(28,110,242,0),0 2px 7px rgba(0,0,0,.35); } 100% { box-shadow:0 0 0 0 rgba(28,110,242,0),0 2px 7px rgba(0,0,0,.35); } }
+.kk-search-marker { background:transparent; border:0; }
+@media(max-width:767px) {
+  .kk-city-wrap { min-width:0; }
+  .kk-city-list-head, .kk-city-option { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+}
+</style>
+
 </head>
+
 <body>
+  <!-- DEFINISI SVGs -->
+  <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <circle cx="10.8" cy="10.8" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/>
+        <path d="m16.4 16.4 4.3 4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </symbol>
 
-<!-- ================= NAVBAR KOTAKITA (halaman user setelah login) ================= -->
-<header id="navbar" class="kk-nav">
-  <a class="kk-logo" href="#/dashboard" aria-label="KotaKita">
-    <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
-    <span>Kota<b>Kita</b></span>
-  </a>
+      <symbol id="icon-chevron" viewBox="0 0 24 24">
+        <path d="m9 4 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
 
-  <div class="kk-kota" id="kkKotaWrap">
-    <button type="button" id="kotaBtn" class="kk-kota-btn" aria-haspopup="listbox" aria-expanded="false">
-      <span>📍</span><span id="kotaLabel">Pilih kota</span><span>▾</span>
-    </button>
-    <div class="kk-dropdown" id="kotaPanel" hidden>
-      <input type="text" id="kotaCari" placeholder="Cari kota, mis. bandung / bdg / surabya" autocomplete="off" spellcheck="false">
-      <div id="kotaList" role="listbox"></div>
-    </div>
-  </div>
+      <symbol id="icon-pin" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+      </symbol>
 
-  <nav class="kk-menu" id="kkMenu">
-    <a href="#/dashboard" data-m="beranda">Beranda</a>
-    <a href="#/dashboard" data-m="lokasi">Lokasi</a>
-    <a href="#/upload" data-m="upload">Upload</a>
-    <a href="#/laporan" data-m="laporan">Laporan</a>
-    <a href="#/profil" data-m="profil">Profil</a>
-  </nav>
+      <symbol id="icon-profile" viewBox="0 0 24 24">
+        <circle cx="12" cy="7" r="4" fill="currentColor"/>
+        <path d="M4 21v-2a8 8 0 0 1 16 0v2Z" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
 
-  <div class="kk-avatar-wrap">
-    <button type="button" class="kk-avatar" id="avatarBtn" aria-haspopup="menu" aria-label="Menu akun">?</button>
-    <div class="kk-dropdown" id="avatarMenu" hidden>
-      <div class="who"><b id="umNama">-</b><span id="umUser"></span></div>
-      <button type="button" id="umProfil">👤 Profil saya</button>
-      <button type="button" id="umKeluar">🚪 Keluar</button>
-      <button type="button" id="umMasuk" hidden>🔑 Masuk</button>
-      <button type="button" id="umDaftar" hidden>📝 Daftar</button>
-    </div>
-  </div>
-</header>
+  <!-- NAVBAR GLASSMORPHISM -->
+  <header class="header">
+    <a class="brand" href="welcome.html" aria-label="KotaKita">
+      <svg width="37" height="50" viewBox="0 0 40 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#092e6d" fill-rule="evenodd" d="M18 0C10 0 4 6 4 14c0 8 14 21 14 21s14-13 14-21C32 6 26 0 18 0Zm0 8a6 6 0 1 1 0 12 6 6 0 1 1 0-12Z"/>
+        <path fill="#378deb" d="M0 33l10-4v19L0 51Zm28-7 12-6v25l-12 4Z"/>
+        <path fill="#4da6cc" d="m13 40 12-11v17l-12 7Z"/>
+        <path fill="#27afa5" d="M2 52c15 3 24-15 38-13-1 12-14 19-38 13Z"/>
+      </svg>
+      <span>KotaKita</span>
+    </a>
 
-<!-- ================= WELCOME ================= -->
-<section class="halaman" id="r-welcome">
-  <div class="wl-wrap"><div class="wl-card">
-    <div class="wl-logo"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></div>
-    <h1>Kota<b>Kita</b></h1>
-    <p>Laporkan jalan rusak, pantau penanganannya, dan bersama wujudkan kota yang lebih nyaman.</p>
-    <button type="button" class="wl-btn mulai" id="wlMulai">Mulai</button>
-    <button type="button" class="wl-btn masuk" id="wlMasuk">Masuk</button>
-  </div></div>
-</section>
-
-<!-- ================= PROFIL GUEST ================= -->
-<section class="halaman" id="r-profil-guest"><div class="pf-wrap">
-  <div class="kk-card" style="text-align:left">
-    <div class="pf-av" style="background:#eef3fc">👤</div>
-    <h2 style="text-align:center;color:#0a2463;margin:0 0 4px">Masuk ke KotaKita</h2>
-    <p class="sub">Anda sedang menjelajah sebagai tamu.</p>
-    <div class="notice" id="notPg"></div>
-    <form id="formProfilGuest" novalidate>
-      <div class="field" data-f="username"><label for="pgUser">Username</label>
-        <input id="pgUser" type="text" autocomplete="username" autocapitalize="none" spellcheck="false"><div class="err"></div></div>
-      <div class="field" data-f="password"><label for="pgPass">Kata Sandi <a class="lupa" href="#/lupa">Lupa Kata Sandi?</a></label>
-        <div class="pw-wrap"><input id="pgPass" type="password" autocomplete="current-password" maxlength="72"><button type="button" class="pw-toggle" data-target="pgPass">Lihat</button></div><div class="err"></div></div>
-      <button class="btn" id="btnPgMasuk" type="submit">Masuk</button>
-    </form>
-    <div class="tautan">Belum punya akun? <a href="#/register">Daftar</a></div>
-    <div class="hint" id="pgDemo" style="text-align:center;margin-top:12px">Akun simulasi: <b>demo</b> / <b>demo1234</b></div>
-  </div>
-</div></section>
-
-<!-- ================= PROFIL USER ================= -->
-<section class="halaman" id="r-profil-user"><div class="pf-wrap">
-  <div class="kk-card pf-hero">
-    <div class="pf-av" id="pfAvatar"></div>
-    <h2 id="pfNama">-</h2>
-    <small id="pfUser"></small><small id="pfKontak"></small><small id="pfAktif"></small>
-  </div>
-  <div class="pf-stat">
-    <div><b id="pfTotal">-</b><span>Laporan</span></div><div><b id="pfProses">-</b><span>Diproses</span></div>
-    <div><b id="pfSelesai">-</b><span>Selesai</span></div><div><b id="pfPoin">-</b><span>Poin ⭐</span></div>
-  </div>
-  <div class="up-hint" style="text-align:center">Poin: +10 per laporan terkirim, +20 saat laporan selesai ditangani.</div>
-  <div class="kk-card pf-menu">
-    <a class="pf-item" href="#/akun"><span>👤 Akun</span><span>›</span></a>
-    <a class="pf-item" href="#/rekaman"><span>🗂️ Rekaman</span><span>›</span></a>
-    <a class="pf-item" href="#/preferensi"><span>⚙️ Preferensi</span><span>›</span></a>
-    <a class="pf-item" href="#/informasi"><span>ℹ️ Informasi</span><span>›</span></a>
-  </div>
-  <button type="button" class="btn btn-danger" id="pfKeluar" style="margin-top:16px">🚪 Logout</button>
-</div></section>
-
-<!-- ================= AKUN ================= -->
-<section class="halaman" id="r-akun"><div class="pf-wrap">
-  <a class="pf-back" href="#/profil">‹ Profil</a>
-  <div class="kk-card" style="text-align:left">
-    <h2 class="ak-judul">Akun</h2>
-    <input type="file" accept="image/*" id="akInFoto" hidden>
-    <div class="ak-avbox"><div class="ak-av" id="akAvatar" title="Ubah foto"></div><button type="button" class="ak-cam" id="akFotoBtn" aria-label="Ubah foto profil">📷</button></div>
-    <div class="notice" id="notAk"></div>
-    <form id="akForm" novalidate>
-      <div id="akFields"></div>
-      <button class="btn" type="submit" id="btnAkSimpan">Simpan</button>
-    </form>
-  </div>
-</div></section>
-
-<!-- ================= REKAMAN / PREFERENSI / INFORMASI ================= -->
-<section class="halaman" id="r-rekaman"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
-  <div class="kk-card" style="text-align:left"><h2 class="ak-judul">Rekaman</h2>
-    <div class="up-hint" style="margin:-6px 0 10px">Riwayat laporan yang pernah Anda kirim.</div><div id="rkList"></div></div></div></section>
-<section class="halaman" id="r-preferensi"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
-  <div class="kk-card" style="text-align:left"><h2 class="ak-judul">Preferensi</h2>
-    <label class="pr-baris"><span><b>Muat ulang otomatis</b><small>Perbarui peta dan daftar laporan di Beranda tiap 60 detik.</small></span><input type="checkbox" id="prAuto"></label>
-    <label class="pr-baris"><span><b>Ingat kota pilihan</b><small>Simpan kota terakhir di perangkat ini.</small></span><input type="checkbox" id="prKota"></label>
-  </div></div></section>
-<section class="halaman" id="r-informasi"><div class="pf-wrap"><a class="pf-back" href="#/profil">‹ Profil</a>
-  <div class="kk-card info-teks" style="text-align:left"><h2 class="ak-judul">Informasi</h2>
-    <p><b>KotaKita – Lapor Jalan</b> (prototipe). Laporkan kerusakan jalan lewat foto, lokasi, dan keterangan; pantau statusnya dari Baru hingga Selesai.</p>
-    <p><b>Mode tamu</b> hanya menampilkan pratinjau Beranda. Lokasi, Upload, dan Laporan membutuhkan akun.</p>
-    <p><b>Poin</b>: +10 per laporan terkirim dan +20 saat laporan selesai ditangani.</p>
-    <p>Peta dan pencarian memakai OpenStreetMap, Nominatim, dan Photon; data laporan disimpan di Supabase.</p></div></div></section>
-
-<!-- ================= 1. REGISTER ================= -->
-<section class="halaman" id="r-register">
-  <div class="auth-wrap"><div class="auth-card">
-    <div class="brand">🚧 Lapor Jalan</div>
-    <h1>Buat Akun</h1>
-    <p class="sub">Daftar untuk mulai melaporkan jalan rusak</p>
-    <div class="notice" id="notReg"></div>
-
-    <form id="formReg" novalidate autocomplete="on">
-      <div class="field" data-f="kontak">
-        <label for="regKontak">Email / No. Telp</label>
-        <input id="regKontak" type="text" inputmode="email" autocomplete="email" placeholder="nama@email.com atau 08123456789">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-f="nama">
-        <label for="regNama">Nama</label>
-        <input id="regNama" type="text" autocomplete="name" maxlength="60" placeholder="Nama lengkap">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-f="tgl">
-        <label for="regTgl">Tanggal Lahir</label>
-        <input id="regTgl" type="date" autocomplete="bday">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-f="kota">
-        <label for="regKota">Kota</label>
-        <input id="regKota" type="text" autocomplete="address-level2" maxlength="60" placeholder="Contoh: Bandung">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-f="username">
-        <label for="regUser">Username</label>
-        <input id="regUser" type="text" autocomplete="username" maxlength="20" autocapitalize="none" spellcheck="false" placeholder="huruf kecil, angka, _ atau .">
-        <div class="err"></div>
-        <div class="hint">4–20 karakter, diawali huruf.</div>
-      </div>
-      <div class="field" data-f="password">
-        <label for="regPass">Password</label>
-        <div class="pw-wrap">
-          <input id="regPass" type="password" autocomplete="new-password" maxlength="72" placeholder="Minimal 8 karakter">
-          <button type="button" class="pw-toggle" data-target="regPass">Lihat</button>
+    <div class="kk-city-wrap">
+      <button class="city-picker" id="kotaBtn" type="button"
+              aria-label="Pilih Kota" aria-haspopup="dialog" aria-expanded="false">
+        <svg class="icon" aria-hidden="true"><use href="#icon-pin"/></svg>
+        <span id="kotaLabel">Bandung</span>
+        <span class="kk-city-arrow" aria-hidden="true">▾</span>
+      </button>
+      <section class="kk-city-panel" id="kotaPanel" role="dialog"
+               aria-label="Pilih kota" hidden>
+        <label class="kk-city-label" for="kotaCari">Cari kota di Indonesia</label>
+        <input id="kotaCari" type="search" placeholder="Nama kota atau singkatan (mis. bdg)"
+               autocomplete="off" spellcheck="false">
+        <div class="kk-city-list-head" aria-hidden="true">
+          <span>Nama Kota</span><span>Provinsi</span>
         </div>
-        <div class="err"></div>
-        <div class="hint">Minimal 8 karakter, mengandung huruf dan angka.</div>
-      </div>
-      <button class="btn" id="btnLanjut" type="submit">Lanjut</button>
-    </form>
-    <div class="tautan">Sudah punya akun? <a href="#/login">Masuk</a></div>
-  </div></div>
-</section>
-
-<!-- ================= 2. LOGIN ================= -->
-<section class="halaman" id="r-login">
-  <div class="auth-wrap"><div class="auth-card">
-    <div class="brand">🚧 Lapor Jalan</div>
-    <h1>Masuk</h1>
-    <p class="sub">Selamat datang kembali</p>
-    <div class="notice" id="notLogin"></div>
-
-    <form id="formLogin" novalidate>
-      <div class="field" data-f="username">
-        <label for="logUser">Username</label>
-        <input id="logUser" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-f="password">
-        <label for="logPass">Password <a class="lupa" href="#/lupa">Lupa Kata Sandi?</a></label>
-        <div class="pw-wrap">
-          <input id="logPass" type="password" autocomplete="current-password" maxlength="72">
-          <button type="button" class="pw-toggle" data-target="logPass">Lihat</button>
-        </div>
-        <div class="err"></div>
-      </div>
-      <button class="btn" id="btnMasuk" type="submit">Masuk</button>
-    </form>
-    <div class="tautan">Belum punya akun? <a href="#/register">Daftar</a></div>
-  </div></div>
-</section>
-
-<!-- ================= Lupa kata sandi ================= -->
-<section class="halaman" id="r-lupa">
-  <div class="auth-wrap"><div class="auth-card">
-    <div class="brand">🚧 Lapor Jalan</div>
-    <h1>Lupa Kata Sandi</h1>
-    <p class="sub">Masukkan username atau email akun Anda. Kami kirim tautan untuk membuat password baru.</p>
-    <div class="notice" id="notLupa"></div>
-    <form id="formLupa" novalidate>
-      <div class="field" data-f="id">
-        <label for="lupaId">Username atau Email</label>
-        <input id="lupaId" type="text" autocapitalize="none" spellcheck="false">
-        <div class="err"></div>
-      </div>
-      <button class="btn" id="btnLupa" type="submit">Kirim Tautan Reset</button>
-    </form>
-    <div class="tautan"><a href="#/login">← Kembali ke Masuk</a></div>
-  </div></div>
-</section>
-
-<!-- ================= Reset password (dari link email) ================= -->
-<section class="halaman" id="r-reset">
-  <div class="auth-wrap"><div class="auth-card">
-    <div class="brand">🚧 Lapor Jalan</div>
-    <h1>Password Baru</h1>
-    <p class="sub">Buat password baru untuk akun Anda</p>
-    <div class="notice" id="notReset"></div>
-    <form id="formReset" novalidate>
-      <div class="field" data-f="password">
-        <label for="resPass">Password baru</label>
-        <div class="pw-wrap">
-          <input id="resPass" type="password" autocomplete="new-password" maxlength="72">
-          <button type="button" class="pw-toggle" data-target="resPass">Lihat</button>
-        </div>
-        <div class="err"></div>
-        <div class="hint">Minimal 8 karakter, mengandung huruf dan angka.</div>
-      </div>
-      <div class="field" data-f="ulang">
-        <label for="resPass2">Ulangi password baru</label>
-        <input id="resPass2" type="password" autocomplete="new-password" maxlength="72">
-        <div class="err"></div>
-      </div>
-      <button class="btn" id="btnReset" type="submit">Simpan Password</button>
-    </form>
-  </div></div>
-</section>
-
-<!-- ================= DASHBOARD KOTAKITA ================= -->
-<section class="halaman" id="r-kotakita">
-  <main class="kk-main">
-    <div class="gst-banner" id="kkGuestBanner" hidden>
-      <span>👋 Anda melihat <b>pratinjau sebagai tamu</b>. Masuk untuk memakai Lokasi, Upload, dan Laporan.</span>
-      <span class="acts"><a class="btn btn-kecil" href="#/profil">Masuk</a><a class="btn btn-kecil btn-warning" href="#/register">Daftar</a></span>
+        <div class="kk-city-list" id="kotaList" role="listbox" aria-label="Daftar kota"></div>
+        <p class="kk-city-empty" id="kotaKosong" hidden>Kota tidak ditemukan.</p>
+      </section>
     </div>
-    <div class="kk-grid">
-      <div class="kk-card kk-mapcard" id="kkMapCard">
+
+    <nav class="navigation" aria-label="Navigasi utama">
+      <a class="active" href="dashboard.html">Beranda</a>
+      <a href="lokasi.html">Lokasi</a>
+      <a href="uploadLaporan.html">Upload Laporan</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="points" aria-label="23 poin" href="Profil-Poin(Semua).html" style="text-decoration:none;color:#FFFFFF;cursor:pointer">
+        <span class="coin" aria-hidden="true">★</span>
+        <span>23 Poin</span>
+      </a>
+      </div>
+
+      <a class="profile" href="Profil.html" aria-label="Profil Pengguna">
+        <svg class="icon" aria-hidden="true"><use href="#icon-profile"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD -->
+  <main class="dashboard">
+    <div class="dashboard__top">
+      <section aria-labelledby="home-title">
+        <h1 class="section-title" id="home-title">Beranda</h1>
+
         <div class="kk-searchbar">
-          <div class="kk-search">
-            <span>🔎</span>
-            <input id="kkCari" type="text" placeholder="Cari nama jalan..." autocomplete="off" spellcheck="false" aria-label="Cari jalan">
-            <button type="button" id="kkCariHapus" hidden aria-label="Hapus">✕</button>
-            <div class="kk-suggest" id="kkSuggest" hidden></div>
+          <div class="kk-search" role="search">
+            <svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg>
+            <input type="search" id="kkCari" name="location" autocomplete="off"
+                   placeholder="Cari jalan atau lokasi..." aria-label="Cari jalan atau lokasi"
+                   aria-controls="kkSuggest" aria-autocomplete="list">
+            <button type="button" id="kkCariHapus" hidden aria-label="Hapus pencarian">✕</button>
+            <div class="kk-suggest" id="kkSuggest" role="listbox"
+                 aria-label="Saran lokasi" hidden></div>
           </div>
-          <button type="button" class="kk-chip" id="btnLokasiSaya">🎯 Lokasi saya</button>
+          <button type="button" class="kk-chip" id="btnLokasiSaya">
+            <svg class="kk-gps-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3" fill="currentColor"/>
+              <path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span>Lokasi saya</span>
+          </button>
+          <!-- Kompatibilitas jika js/dashboard.js lama masih memakai #cariLokasi -->
+          <input type="search" id="cariLokasi" aria-hidden="true" tabindex="-1"
+                 autocomplete="off" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
         </div>
-        <div class="kk-note" id="kkStatusPeta"></div>
-        <div id="kkMap"></div>
-        <div class="kk-legenda">
-          <span><i style="background:#f2b705"></i>Ringan</span>
-          <span><i style="background:#ff922b"></i>Sedang</span>
-          <span><i style="background:#e03131"></i>Parah</span>
-          <span style="opacity:.7">• Pin pudar = sudah selesai</span>
-        </div>
-      </div>
 
-      <aside class="kk-card">
-        <div class="kk-head">
-          <div><h2>Isu Terdekat</h2><div class="sub" id="isuSub"></div></div>
-          <button type="button" id="btnRefresh" title="Muat ulang laporan" aria-label="Muat ulang">↻</button>
+        <div id="map" class="map" role="region" aria-label="Peta laporan di sekitar Anda"></div>
+      </section>
+
+      <section aria-labelledby="issues-title">
+        <h2 class="section-title" id="issues-title">Isu Terdekat</h2>
+        <p class="kk-sub" id="isuInfo" aria-live="polite"></p>
+
+        <div class="issues" id="daftarIsu" aria-live="polite">
+          <p class="kk-info">Memuat laporan…</p>
         </div>
-        <div id="isuList"></div>
-      </aside>
+      </section>
     </div>
 
-    <section class="kk-terbaru">
-      <div class="kk-head"><h2>Laporan Terbaru</h2></div>
-      <div class="kk-terbaru-grid" id="terbaruGrid"></div>
+    <section class="latest" aria-labelledby="latest-title">
+      <h2 class="section-title" id="latest-title">Laporan Terbaru</h2>
+
+      <div class="reports" id="daftarLaporan" aria-live="polite">
+        <p class="kk-info">Memuat laporan…</p>
+      </div>
     </section>
   </main>
-</section>
 
-<!-- ================= 1. UPLOAD LAPORAN ================= -->
-<section class="halaman" id="r-upload">
-  <div class="up-wrap">
-    <div class="up-head">
-      <h1>Upload Laporan</h1>
-      <p>Laporkan masalah di sekitar Anda. Semakin jelas foto, lokasi, dan keterangannya, semakin cepat laporan ditangani.</p>
-    </div>
-
-    <form id="upForm" novalidate>
-      <!-- Foto -->
-      <div class="kk-card up-card">
-        <h3 class="up-judul"><span class="up-no">1</span> Foto</h3>
-        <div class="up-foto-aksi">
-          <button type="button" class="up-btn-foto" id="upBtnKamera">📷 Kamera</button>
-          <button type="button" class="up-btn-foto" id="upBtnGaleri">🖼️ Galeri</button>
-        </div>
-        <input type="file" id="upInKamera" accept="image/*" capture="environment" hidden>
-        <input type="file" id="upInGaleri" accept="image/*" hidden>
-        <div class="up-preview" id="upPreviewBox" hidden>
-          <img id="upPreview" alt="Pratinjau foto laporan">
-          <button type="button" id="upGantiFoto">✕ Ganti foto</button>
-        </div>
-        <div class="up-err" id="errFoto"></div>
-      </div>
-
-      <!-- Lokasi -->
-      <div class="kk-card up-card">
-        <h3 class="up-judul"><span class="up-no">2</span> Lokasi</h3>
-        <div class="up-lok-aksi">
-          <button type="button" class="kk-chip" id="upBtnGPS">📍 Gunakan lokasi saya</button>
-          <span class="up-hint" id="upGpsStatus">Ketuk peta atau geser pin untuk menyesuaikan lokasi.</span>
-        </div>
-        <div id="upMap"></div>
-        <div class="up-hint" id="upKoord">Koordinat belum dipilih.</div>
-        <label class="up-label" for="upAlamat">Alamat</label>
-        <input class="up-input" id="upAlamat" type="text" maxlength="300" autocomplete="off" placeholder="Terisi otomatis dari peta, bisa Anda ubah">
-        <div class="up-hint"><span id="upAlamatStatus"></span> <a href="#" id="upAlamatAuto" hidden>↻ Isi ulang dari peta</a></div>
-        <div class="up-err" id="errLokasi"></div>
-      </div>
-
-      <!-- Kategori -->
-      <div class="kk-card up-card">
-        <h3 class="up-judul"><span class="up-no">3</span> Kategori</h3>
-        <div class="up-kat" id="upKategori" role="group" aria-label="Kategori laporan"></div>
-        <div class="up-err" id="errKategori"></div>
-      </div>
-
-      <!-- Keparahan -->
-      <div class="kk-card up-card">
-        <h3 class="up-judul"><span class="up-no">4</span> Keparahan</h3>
-        <div class="up-sev" id="upKeparahan" role="group" aria-label="Tingkat keparahan">
-          <button type="button" data-v="ringan" aria-pressed="false">🟡 Ringan</button>
-          <button type="button" data-v="sedang" aria-pressed="false">🟠 Sedang</button>
-          <button type="button" data-v="parah" aria-pressed="false">🔴 Parah</button>
-        </div>
-        <div class="up-err" id="errKeparahan"></div>
-      </div>
-
-      <!-- Deskripsi -->
-      <div class="kk-card up-card">
-        <h3 class="up-judul"><span class="up-no">5</span> Deskripsi</h3>
-        <textarea class="up-input" id="upDeskripsi" rows="4" maxlength="500" placeholder="Jelaskan masalahnya: apa yang rusak, seberapa besar, apakah membahayakan pengguna jalan…"></textarea>
-        <div class="up-hitung" id="upHitung">0/500</div>
-        <div class="up-err" id="errDeskripsi"></div>
-      </div>
-
-      <div class="up-err" id="errUmum" style="margin-bottom:10px"></div>
-      <button type="submit" class="up-konfirmasi" id="upBtnKonfirmasi">Konfirmasi</button>
-    </form>
-  </div>
-</section>
-
-<!-- ================= 2. KONFIRMASI ================= -->
-<section class="halaman" id="r-konfirmasi">
-  <div class="kf-wrap">
-    <div class="kk-card kf-card">
-      <div id="kfMuat" class="kk-info">⏳ Memeriksa laporan Anda…</div>
-
-      <div id="kfGagal" hidden>
-        <p id="kfGagalTeks" class="kk-info"></p>
-        <button type="button" class="up-konfirmasi" id="kfKeUpload">Ke Halaman Upload</button>
-      </div>
-
-      <div id="kfOk" hidden>
-        <div class="kf-ikon" aria-hidden="true">
-          <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#2f9e44"/><path d="M14 27l8 8 16-17" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <h1>Laporan Terkirim</h1>
-        <p>Terima kasih. Laporan Anda sudah kami terima dan akan segera ditindaklanjuti.</p>
-        <div class="kf-kode" id="kfKode">-</div>
-        <div class="kf-aksi">
-          <button type="button" class="sekunder" id="kfBeranda">Beranda</button>
-          <button type="button" class="primer" id="kfDetail">Detail Laporan</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= 3. DETAIL LAPORAN ================= -->
-<section class="halaman" id="r-detail">
-  <div class="dt-wrap">
-    <div class="kk-card">
-      <div id="dtMuat" class="kk-info">⏳ Memuat detail laporan…</div>
-      <div id="dtGagal" class="kk-info" hidden></div>
-
-      <div id="dtIsi" hidden>
-        <div class="dt-top">
-          <h1>Detail Laporan</h1>
-          <span class="dt-status baru" id="dtStatus"></span>
-        </div>
-        <img class="dt-foto" id="dtFoto" alt="Foto laporan">
-        <div class="dt-grid">
-          <div class="dt-item"><div class="k">Kategori</div><div class="v" id="dtKategori">-</div></div>
-          <div class="dt-item"><div class="k">Keparahan</div><div class="v" id="dtKeparahan">-</div></div>
-          <div class="dt-item dt-penuh"><div class="k">Lokasi</div><div class="v" id="dtLokasi">-</div><div class="up-hint" id="dtKoord"></div></div>
-          <div class="dt-item"><div class="k">Jumlah pelapor</div><div class="v" id="dtPelapor">-</div><div class="up-hint">Termasuk Anda. Dihitung dari laporan berkategori sama dalam radius 50 m yang belum selesai.</div></div>
-          <div class="dt-item"><div class="k">Dilaporkan</div><div class="v" id="dtWaktu">-</div><div class="up-hint" id="dtKode"></div></div>
-          <div class="dt-item dt-penuh"><div class="k">Deskripsi</div><div class="v dt-desk" id="dtDeskripsi">-</div></div>
-          <div class="dt-item dt-penuh" id="dtCatatanBox" hidden><div class="catatan"><b>💬 Catatan petugas:</b><br><span id="dtCatatan"></span></div></div>
-        </div>
-      </div>
-
-      <button type="button" class="up-konfirmasi" id="dtKembali" style="margin-top:22px">Kembali</button>
-    </div>
-  </div>
-</section>
-
-<!-- ================= LAPORAN SAYA (fitur lama, kini lewat navbar) ================= -->
-<section class="halaman" id="r-laporan">
-  <!-- Laporan saya -->
-  <div class="tabisi aktif" id="tabSaya">
-    <div class="card" style="text-align:left;">
-      <h3 style="margin-top:0">Laporan Saya</h3>
-      <div id="daftarSaya">Memuat...</div>
-      <hr class="garis">
-      <div class="lbl">🔎 Cek status dengan kode laporan</div>
-      <div class="baris-cek">
-        <input type="text" id="inKode" placeholder="LJ-XXXXXXXX" maxlength="20" autocomplete="off">
-        <button class="btn btn-kecil" id="btnCek">Cek</button>
-      </div>
-      <div id="hasilCek"></div>
-    </div>
-  </div>
-</section>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-/* =====================================================================
-   Konfigurasi & Supabase
-   ===================================================================== */
-// Simpan hash awal SEBELUM library Supabase memprosesnya (link email: konfirmasi / reset)
-const HASH_AWAL = location.hash;
-const DARI_RECOVERY = HASH_AWAL.includes('type=recovery');
-const DARI_SIGNUP   = HASH_AWAL.includes('type=signup');
-const GALAT_LINK    = (/error_description=([^&]+)/.exec(HASH_AWAL) || [])[1];
+/* Tangkap instance Leaflet yang dibuat js/dashboard.js agar fitur pencarian dapat mengontrol peta yang sama. */
+(function () {
+  if (!window.L || window.L.__kkMapCaptureInstalled) return;
+  const originalMap = window.L.map;
+  window.L.map = function () {
+    const instance = originalMap.apply(this, arguments);
+    window.kkLeafletMap = instance;
+    instance.whenReady(function () { window.kkLeafletMap = instance; });
+    return instance;
+  };
+  window.L.__kkMapCaptureInstalled = true;
+})();
+</script>
 
-const SUPABASE_URL = "https://ilmnhyyarurqszcyidnx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbW5oeXlhcnVycXN6Y3lpZG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1Nzc0MzQsImV4cCI6MjEwNzE1MzQzNH0.sbvZvD_WOHvpTpwy6dc9Kcdql4BLqKjQR10v5VmJrFo";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { flowType: 'implicit', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-});
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/dashboard.js"></script>
+<script>
+(function () {
+  'use strict';
 
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const BASE_URL = location.origin + location.pathname;   // tujuan redirect link email (tanpa hash)
+  const cities = [
+    {name:'Bandung', province:'Jawa Barat', lat:-6.9175, lon:107.6191, aliases:['bdg']},
+    {name:'Jakarta', province:'DKI Jakarta', lat:-6.2088, lon:106.8456, aliases:['jkt','dki']},
+    {name:'Surabaya', province:'Jawa Timur', lat:-7.2575, lon:112.7521, aliases:['sby','sbya']},
+    {name:'Semarang', province:'Jawa Tengah', lat:-6.9667, lon:110.4167, aliases:['smg']},
+    {name:'Yogyakarta', province:'DI Yogyakarta', lat:-7.7956, lon:110.3695, aliases:['jogja','yogya','yk']},
+    {name:'Medan', province:'Sumatera Utara', lat:3.5952, lon:98.6722, aliases:['mdn']},
+    {name:'Makassar', province:'Sulawesi Selatan', lat:-5.1477, lon:119.4327, aliases:['mks']},
+    {name:'Denpasar', province:'Bali', lat:-8.6705, lon:115.2126, aliases:['dps']},
+    {name:'Palembang', province:'Sumatera Selatan', lat:-2.9761, lon:104.7754, aliases:['plm']},
+    {name:'Pekanbaru', province:'Riau', lat:0.5071, lon:101.4478, aliases:['pkb']},
+    {name:'Padang', province:'Sumatera Barat', lat:-0.9471, lon:100.4172, aliases:['pdg']},
+    {name:'Bandar Lampung', province:'Lampung', lat:-5.3971, lon:105.2668, aliases:['lampung','bdl']},
+    {name:'Bogor', province:'Jawa Barat', lat:-6.5971, lon:106.8060, aliases:['bgr']},
+    {name:'Depok', province:'Jawa Barat', lat:-6.4025, lon:106.7942, aliases:['dpk']},
+    {name:'Bekasi', province:'Jawa Barat', lat:-6.2383, lon:106.9756, aliases:['bks']},
+    {name:'Tangerang', province:'Banten', lat:-6.1783, lon:106.6319, aliases:['tng']},
+    {name:'Serang', province:'Banten', lat:-6.1201, lon:106.1503, aliases:['srg']},
+    {name:'Cirebon', province:'Jawa Barat', lat:-6.7320, lon:108.5523, aliases:['crb']},
+    {name:'Tasikmalaya', province:'Jawa Barat', lat:-7.3274, lon:108.2207, aliases:['tsm']},
+    {name:'Sukabumi', province:'Jawa Barat', lat:-6.9277, lon:106.9299, aliases:['skb']},
+    {name:'Malang', province:'Jawa Timur', lat:-7.9666, lon:112.6326, aliases:['mlg']},
+    {name:'Surakarta', province:'Jawa Tengah', lat:-7.5755, lon:110.8243, aliases:['solo']},
+    {name:'Mataram', province:'Nusa Tenggara Barat', lat:-8.5833, lon:116.1167, aliases:['mtr']},
+    {name:'Kupang', province:'Nusa Tenggara Timur', lat:-10.1772, lon:123.6070, aliases:['kpg']},
+    {name:'Pontianak', province:'Kalimantan Barat', lat:-0.0263, lon:109.3425, aliases:['ptk']},
+    {name:'Banjarmasin', province:'Kalimantan Selatan', lat:-3.3186, lon:114.5944, aliases:['bjm']},
+    {name:'Balikpapan', province:'Kalimantan Timur', lat:-1.2379, lon:116.8529, aliases:['bpp']},
+    {name:'Samarinda', province:'Kalimantan Timur', lat:-0.5022, lon:117.1537, aliases:['smd']},
+    {name:'Manado', province:'Sulawesi Utara', lat:1.4748, lon:124.8421, aliases:['mdo']},
+    {name:'Jayapura', province:'Papua', lat:-2.5916, lon:140.6690, aliases:['jyp']},
+    {name:'Banda Aceh', province:'Aceh', lat:5.5483, lon:95.3238, aliases:['bna']},
+    {name:'Jambi', province:'Jambi', lat:-1.6101, lon:103.6131, aliases:['jbi']},
+    {name:'Bengkulu', province:'Bengkulu', lat:-3.7928, lon:102.2608, aliases:['bkl']},
+    {name:'Ambon', province:'Maluku', lat:-3.6954, lon:128.1814, aliases:['amb']},
+    {name:'Ternate', province:'Maluku Utara', lat:0.7893, lon:127.3774, aliases:['trt']},
+    {name:'Kendari', province:'Sulawesi Tenggara', lat:-3.9985, lon:122.5129, aliases:['kdi']},
+    {name:'Palu', province:'Sulawesi Tengah', lat:-0.9003, lon:119.8779, aliases:['plw']},
+    {name:'Gorontalo', province:'Gorontalo', lat:0.5435, lon:123.0568, aliases:['gto']},
+    {name:'Bontang', province:'Kalimantan Timur', lat:0.1333, lon:117.5000, aliases:[]},
+    {name:'Sumedang', province:'Jawa Barat', lat:-6.8586, lon:107.9160, aliases:['smdg']}
+  ];
 
-/* Login simulasi (demo): set MODE_DEMO = false untuk menonaktifkan sepenuhnya */
-const MODE_DEMO = true;
-const DEMO = { username: 'demo', password: 'demo1234' };
-const KUNCI_DEMO = 'kk_demo_sesi', KUNCI_DEMO_PROFIL = 'kk_demo_profil', KUNCI_DEMO_LAP = 'kk_demo_laporan';
+  const $ = id => document.getElementById(id);
+  const cityBtn = $('kotaBtn'), cityPanel = $('kotaPanel'), cityInput = $('kotaCari');
+  const cityLabel = $('kotaLabel'), cityList = $('kotaList'), cityEmpty = $('kotaKosong');
+  const searchInput = $('kkCari'), clearBtn = $('kkCariHapus'), suggestPanel = $('kkSuggest');
+  const gpsBtn = $('btnLokasiSaya'), legacySearch = $('cariLokasi');
+  let searchTimer = null, activeRequest = 0, searchMarker = null, gpsMarker = null;
 
-/* =====================================================================
-   Validasi input
-   ===================================================================== */
-const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const RE_USERNAME = /^[a-z][a-z0-9_.]{3,19}$/;
-const RE_NAMA = /^[\p{L}][\p{L}\s.'-]{1,59}$/u;
-
-function normalisasiTelp(s) {
-    const d = String(s).replace(/[\s\-().]/g, '');
-    const m = /^(?:\+62|62|0)(8[1-9][0-9]{7,10})$/.exec(d);
-    return m ? '+62' + m[1] : null;
-}
-function umurDari(tglStr) {
-    const t = new Date(tglStr + 'T00:00:00');
-    if (isNaN(t)) return null;
-    const now = new Date();
-    let umur = now.getFullYear() - t.getFullYear();
-    const m = now.getMonth() - t.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < t.getDate())) umur--;
-    return umur;
-}
-function cekPassword(p) {
-    if (p.length < 8) return "Password minimal 8 karakter.";
-    if (p.length > 72) return "Password maksimal 72 karakter.";
-    if (!/[A-Za-z]/.test(p) || !/[0-9]/.test(p)) return "Password harus mengandung huruf dan angka.";
-    return null;
-}
-
-/* Tampilkan / hapus pesan error pada field */
-function setErr(form, nama, pesan) {
-    const f = form.querySelector(`.field[data-f="${nama}"]`);
-    if (!f) return;
-    f.classList.toggle('salah', !!pesan);
-    const e = f.querySelector('.err, .ok-teks');
-    e.className = 'err';
-    e.textContent = pesan || '';
-}
-function bersihkanErr(form) { form.querySelectorAll('.field').forEach(f => { f.classList.remove('salah'); const e = f.querySelector('.err, .ok-teks'); e.className = 'err'; e.textContent = ''; }); }
-function notice(id, teks, tipe) {
-    const el = $(id);
-    el.className = 'notice' + (teks ? ' ' + tipe : '');
-    el.textContent = teks || '';
-}
-
-// Tombol "Lihat/Sembunyikan" password
-document.querySelectorAll('.pw-toggle').forEach(b => b.addEventListener('click', () => {
-    const inp = $(b.dataset.target);
-    const tampil = inp.type === 'password';
-    inp.type = tampil ? 'text' : 'password';
-    b.textContent = tampil ? 'Sembunyi' : 'Lihat';
-}));
-
-/* =====================================================================
-   Router berbasis hash
-   ===================================================================== */
-let modeReset = false;            // true hanya saat datang dari link reset password di email
-let pesanLoginBerikut = null;     // pesan yang ditampilkan di halaman login berikutnya
-let profil = null;
-let pesanGuestBerikut = null;     // pesan di halaman Profil (tamu) setelah diarahkan ke login
-
-const RUTE = {
-    '/register':    { el: 'r-register' },
-    '/login':       { el: 'r-login' },
-    '/lupa':        { el: 'r-lupa' },
-    '/reset':       { el: 'r-reset' },
-    '/welcome':     { el: 'r-welcome' },
-    '/dashboard':   { el: 'r-kotakita',    nav: true },                       // tamu boleh (pratinjau)
-    '/profil':      { el: null, dinamis: true, nav: true },                   // tamu: login, user: profil
-    '/akun':        { el: 'r-akun',        butuhLogin: true, nav: true },
-    '/rekaman':     { el: 'r-rekaman',     butuhLogin: true, nav: true },
-    '/preferensi':  { el: 'r-preferensi',  butuhLogin: true, nav: true },
-    '/informasi':   { el: 'r-informasi',   butuhLogin: true, nav: true },
-    '/upload':      { el: 'r-upload',      butuhLogin: true, nav: true },
-    '/laporan':     { el: 'r-laporan',     butuhLogin: true, nav: true },
-    '/konfirmasi':  { el: 'r-konfirmasi',  butuhLogin: true, nav: true },   // #/konfirmasi?kode=LJ-XXXXXXXX
-    '/detail':      { el: 'r-detail',      butuhLogin: true, nav: true }    // #/detail?kode=LJ-XXXXXXXX
-};
-
-function go(path) {
-    if (location.hash === '#' + path) router(); else location.hash = path;
-}
-
-let rutePar = new URLSearchParams();   // parameter query pada hash, mis. #/detail?kode=LJ-XXXXXXXX
-let jumlahNavigasi = 0;
-
-async function router() {
-    jumlahNavigasi++;
-    const hashAsli = location.hash;
-    const [pathMentah, qs = ''] = hashAsli.replace(/^#/, '').split('?');
-    let path = pathMentah;
-    rutePar = new URLSearchParams(qs);
-    const session = await ambilSesi();
-    KK.guest = !session;
-
-    if (!RUTE[path]) path = session ? '/dashboard' : '/welcome';
-    if (path === '/reset' && !(modeReset && session)) path = '/login';
-    if (RUTE[path].butuhLogin && !session) { if (!pesanGuestBerikut) pesanGuestBerikut = 'Silakan masuk untuk mengakses fitur ini.'; path = '/profil'; }
-    if (session && !modeReset && ['/login', '/register', '/lupa', '/welcome'].includes(path)) path = '/dashboard';
-
-    const hashAkhir = '#' + path + (path === pathMentah && qs ? '?' + qs : '');
-    if (hashAsli !== hashAkhir) history.replaceState(null, '', hashAkhir);
-
-    const elId = RUTE[path].dinamis ? (session ? 'r-profil-user' : 'r-profil-guest') : RUTE[path].el;
-    document.querySelectorAll('.halaman').forEach(h => h.classList.toggle('aktif', h.id === elId));
-    window.scrollTo(0, 0);
-
-    // Navbar KotaKita hanya tampil di halaman setelah login
-    const navAktif = !!RUTE[path].nav;
-    $('navbar').style.display = navAktif ? 'flex' : 'none';
-    document.body.classList.toggle('tema-kk', navAktif);
-    tutupSemuaDropdown();
-    if (path !== '/dashboard') hentikanAutoRefresh();
-    if (navAktif) { await muatProfil(session); renderNavbar(session); setMenuAktif(path); }
-
-    if (path === '/login' && pesanLoginBerikut) {
-        notice('notLogin', pesanLoginBerikut.teks, pesanLoginBerikut.tipe);
-        pesanLoginBerikut = null;
-    }
-    if (path === '/dashboard') await masukKotaKita();
-    if (path === '/laporan') await muatLaporanSaya();
-    if (path === '/upload') await masukUpload();
-    if (path === '/konfirmasi') await masukKonfirmasi();
-    if (path === '/detail') await masukDetail();
-    if (path === '/profil') await masukProfil(session);
-    if (path === '/akun') await masukAkun(session);
-    if (path === '/rekaman') await masukRekaman(session);
-    if (path === '/preferensi') masukPreferensi();
-}
-
-window.addEventListener('hashchange', router);
-
-db.auth.onAuthStateChange((event) => {
-    if (event === 'PASSWORD_RECOVERY') { modeReset = true; go('/reset'); }
-});
-
-async function muatProfil(session) {
-    if (!session) { profil = null; return null; }
-    if (adalahDemo(session)) { profil = { ...profilDemo() }; return profil; }
-    const { data } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-    profil = data || null;
-    return profil;
-}
-
-/* =====================================================================
-   1. REGISTER
-   ===================================================================== */
-const formReg = $('formReg');
-const hariIni = new Date();
-$('regTgl').max = hariIni.toISOString().slice(0, 10);
-$('regTgl').min = `${hariIni.getFullYear() - 120}-01-01`;
-
-let cekUserTimer = null;
-$('regUser').addEventListener('input', () => {
-    const v = $('regUser').value.trim().toLowerCase();
-    const f = formReg.querySelector('.field[data-f="username"]');
-    clearTimeout(cekUserTimer);
-    setErr(formReg, 'username', '');
-    f.querySelector('.hint').style.display = '';
-    if (!v) return;
-    if (!RE_USERNAME.test(v)) { setErr(formReg, 'username', 'Username 4–20 karakter: huruf kecil, angka, _ atau ., diawali huruf.'); return; }
-    cekUserTimer = setTimeout(async () => {
-        const { data, error } = await db.rpc('username_tersedia', { p_username: v });
-        if ($('regUser').value.trim().toLowerCase() !== v) return;
-        if (error) return;
-        if (data === false) setErr(formReg, 'username', 'Username sudah dipakai.');
-        else { const e = f.querySelector('.err'); e.className = 'ok-teks'; e.textContent = '✓ Username tersedia'; }
-    }, 450);
-});
-
-function petaGalatDaftar(err) {
-    const m = (err.message || '').toLowerCase();
-    if (err.status === 429 || m.includes('rate limit')) return "Terlalu banyak percobaan pendaftaran. Coba lagi beberapa saat lagi.";
-    if (m.includes('already registered') || m.includes('already been registered')) return "Email/nomor ini sudah terdaftar. Silakan masuk.";
-    if (m.includes('database error')) return "Pendaftaran ditolak: username mungkin sudah dipakai atau data tidak valid.";
-    if (m.includes('phone') && (m.includes('provider') || m.includes('unsupported') || m.includes('disabled'))) return "Pendaftaran dengan nomor telepon belum diaktifkan di server. Gunakan email.";
-    if (m.includes('invalid') && m.includes('email')) return "Format email tidak diterima server.";
-    if (m.includes('password')) return "Password ditolak server: " + err.message;
-    return "Pendaftaran gagal: " + err.message;
-}
-
-formReg.addEventListener('submit', async e => {
-    e.preventDefault();
-    bersihkanErr(formReg);
-    notice('notReg', '');
-
-    const kontakRaw = $('regKontak').value.trim();
-    const nama = $('regNama').value.trim().replace(/\s+/g, ' ');
-    const tgl = $('regTgl').value;
-    const kota = $('regKota').value.trim().replace(/\s+/g, ' ');
-    const username = $('regUser').value.trim().toLowerCase();
-    const password = $('regPass').value;
-
-    let valid = true;
-    const salah = (f, p) => { setErr(formReg, f, p); valid = false; };
-
-    let email = null, telp = null;
-    if (!kontakRaw) salah('kontak', 'Email atau nomor telepon wajib diisi.');
-    else if (kontakRaw.includes('@')) {
-        if (!RE_EMAIL.test(kontakRaw)) salah('kontak', 'Format email tidak valid.');
-        else email = kontakRaw.toLowerCase();
-    } else {
-        telp = normalisasiTelp(kontakRaw);
-        if (!telp) salah('kontak', 'Nomor telepon tidak valid. Contoh: 08123456789.');
-    }
-    if (!RE_NAMA.test(nama)) salah('nama', 'Nama 2–60 karakter, hanya huruf, spasi, titik, apostrof, atau strip.');
-    if (!tgl) salah('tgl', 'Tanggal lahir wajib diisi.');
-    else {
-        const u = umurDari(tgl);
-        if (u === null) salah('tgl', 'Tanggal lahir tidak valid.');
-        else if (u < 0) salah('tgl', 'Tanggal lahir tidak boleh di masa depan.');
-        else if (u < 13) salah('tgl', 'Usia minimal 13 tahun untuk mendaftar.');
-        else if (u > 120) salah('tgl', 'Tanggal lahir tidak valid.');
-    }
-    if (kota.length < 2 || kota.length > 60) salah('kota', 'Kota 2–60 karakter.');
-    if (!RE_USERNAME.test(username)) salah('username', 'Username 4–20 karakter: huruf kecil, angka, _ atau ., diawali huruf.');
-    const pw = cekPassword(password);
-    if (pw) salah('password', pw);
-    if (!valid) { formReg.querySelector('.salah input')?.focus(); return; }
-
-    const btn = $('btnLanjut');
-    btn.disabled = true; btn.textContent = 'Menyimpan...';
-    try {
-        const { data: tersedia, error: eU } = await db.rpc('username_tersedia', { p_username: username });
-        if (eU) throw eU;
-        if (tersedia === false) { setErr(formReg, 'username', 'Username sudah dipakai.'); return; }
-
-        const meta = { username, nama, tgl_lahir: tgl, kota };
-        const payload = email
-            ? { email, password, options: { data: meta, emailRedirectTo: BASE_URL } }
-            : { phone: telp, password, options: { data: meta } };
-
-        const { data, error } = await db.auth.signUp(payload);
-        if (error) { notice('notReg', petaGalatDaftar(error), 'err'); return; }
-
-        // Email sudah terdaftar (Supabase menyamarkannya sebagai sukses tanpa identitas)
-        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-            notice('notReg', 'Email ini sudah terdaftar. Silakan masuk atau gunakan "Lupa Kata Sandi".', 'err');
-            return;
-        }
-
-        const perluKonfirmasi = !data.session;
-        if (data.session) await db.auth.signOut();   // alur: setelah daftar, user masuk lewat halaman login
-        formReg.reset();
-        pesanLoginBerikut = {
-            tipe: 'ok',
-            teks: perluKonfirmasi && email
-                ? 'Akun berhasil dibuat. Kami mengirim email konfirmasi — buka tautannya, lalu masuk dengan username Anda.'
-                : 'Akun berhasil dibuat. Silakan masuk dengan username dan password Anda.'
-        };
-        go('/login');
-    } catch (err) {
-        console.error(err);
-        notice('notReg', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
-    } finally {
-        btn.disabled = false; btn.textContent = 'Lanjut';
-    }
-});
-
-/* =====================================================================
-   2. LOGIN
-   ===================================================================== */
-const formLogin = $('formLogin');
-let gagalBeruntun = 0, kunciSampai = 0;
-
-async function prosesLogin(form, uEl, pEl, btn, notId) {
-    bersihkanErr(form);
-    notice(notId, '');
-
-    const username = uEl.value.trim().toLowerCase();
-    const password = pEl.value;
-    let valid = true;
-    if (!username) { setErr(form, 'username', 'Username wajib diisi.'); valid = false; }
-    else if (!RE_USERNAME.test(username)) { setErr(form, 'username', 'Format username tidak valid.'); valid = false; }
-    if (!password) { setErr(form, 'password', 'Password wajib diisi.'); valid = false; }
-    if (!valid) return;
-
-    if (Date.now() < kunciSampai) {
-        alert(`Terlalu banyak percobaan gagal. Coba lagi dalam ${Math.ceil((kunciSampai - Date.now()) / 1000)} detik.`);
-        return;
-    }
-    const gagal = () => {
-        gagalBeruntun++;
-        if (gagalBeruntun >= 5) { kunciSampai = Date.now() + 30000; gagalBeruntun = 0; }
-        alert('password itu salah');   // pesan sama untuk username tak dikenal / password salah
-    };
-
-    btn.disabled = true; btn.textContent = 'Memeriksa...';
-    try {
-        // Login simulasi (tanpa server)
-        if (MODE_DEMO && username === DEMO.username) {
-            if (password !== (profilDemo().password || DEMO.password)) { gagal(); return; }
-            simpanLS(KUNCI_DEMO, { aktif: true });
-            gagalBeruntun = 0; pEl.value = '';
-            go('/dashboard');
-            return;
-        }
-
-        // Cari identitas login (email/telepon) milik username ini
-        const { data: kontak, error: eK } = await db.rpc('kontak_dari_username', { p_username: username });
-        if (eK) throw eK;
-
-        let hasil = { error: { message: 'Invalid login credentials' } };
-        if (kontak) {
-            hasil = kontak.includes('@')
-                ? await db.auth.signInWithPassword({ email: kontak, password })
-                : await db.auth.signInWithPassword({ phone: kontak, password });
-        }
-
-        if (hasil.error) {
-            const m = (hasil.error.message || '').toLowerCase();
-            if (m.includes('not confirmed')) {
-                alert('Email Anda belum dikonfirmasi. Buka email konfirmasi yang kami kirim, lalu coba masuk lagi.');
-            } else if (hasil.error.status === 429) {
-                alert('Terlalu banyak percobaan. Coba lagi beberapa saat lagi.');
-            } else gagal();
-            return;
-        }
-
-        gagalBeruntun = 0;
-        pEl.value = '';
-        go('/dashboard');
-    } catch (err) {
-        console.error(err);
-        notice(notId, 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
-    } finally {
-        btn.disabled = false; btn.textContent = 'Masuk';
-    }
-}
-formLogin.addEventListener('submit', e => { e.preventDefault(); prosesLogin(formLogin, $('logUser'), $('logPass'), $('btnMasuk'), 'notLogin'); });
-$('formProfilGuest').addEventListener('submit', e => { e.preventDefault(); prosesLogin($('formProfilGuest'), $('pgUser'), $('pgPass'), $('btnPgMasuk'), 'notPg'); });
-
-/* ---------- Lupa kata sandi ---------- */
-const formLupa = $('formLupa');
-formLupa.addEventListener('submit', async e => {
-    e.preventDefault();
-    bersihkanErr(formLupa);
-    notice('notLupa', '');
-    const v = $('lupaId').value.trim().toLowerCase();
-    if (!v) { setErr(formLupa, 'id', 'Isi username atau email Anda.'); return; }
-    if (v.includes('@') ? !RE_EMAIL.test(v) : !RE_USERNAME.test(v)) {
-        setErr(formLupa, 'id', 'Format username atau email tidak valid.'); return;
-    }
-
-    const btn = $('btnLupa');
-    btn.disabled = true; btn.textContent = 'Mengirim...';
-    try {
-        let email = null;
-        if (v.includes('@')) email = v;
-        else {
-            const { data: kontak } = await db.rpc('kontak_dari_username', { p_username: v });
-            if (kontak && kontak.includes('@')) email = kontak;
-        }
-        if (email) {
-            const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: BASE_URL });
-            if (error && error.status === 429) {
-                notice('notLupa', 'Terlalu banyak permintaan. Coba lagi beberapa saat lagi.', 'err'); return;
-            }
-        }
-        // Pesan sama apa pun hasilnya, agar tidak membocorkan akun mana yang terdaftar
-        notice('notLupa', 'Jika akun tersebut terdaftar dengan email, tautan untuk membuat password baru sudah dikirim. Cek inbox/spam Anda. (Akun yang mendaftar dengan nomor telepon tidak bisa reset mandiri — hubungi admin.)', 'info');
-    } catch (err) {
-        console.error(err);
-        notice('notLupa', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi internet.'), 'err');
-    } finally {
-        btn.disabled = false; btn.textContent = 'Kirim Tautan Reset';
-    }
-});
-
-/* ---------- Reset password (setelah klik link di email) ---------- */
-const formReset = $('formReset');
-formReset.addEventListener('submit', async e => {
-    e.preventDefault();
-    bersihkanErr(formReset);
-    notice('notReset', '');
-    const p1 = $('resPass').value, p2 = $('resPass2').value;
-    let valid = true;
-    const pw = cekPassword(p1);
-    if (pw) { setErr(formReset, 'password', pw); valid = false; }
-    if (p1 !== p2) { setErr(formReset, 'ulang', 'Konfirmasi password tidak sama.'); valid = false; }
-    if (!valid) return;
-
-    const btn = $('btnReset');
-    btn.disabled = true; btn.textContent = 'Menyimpan...';
-    try {
-        const { error } = await db.auth.updateUser({ password: p1 });
-        if (error) {
-            const m = (error.message || '').toLowerCase();
-            notice('notReset', m.includes('different') ? 'Password baru harus berbeda dari password lama.' : 'Gagal menyimpan: ' + error.message, 'err');
-            return;
-        }
-        modeReset = false;
-        await db.auth.signOut();
-        formReset.reset();
-        pesanLoginBerikut = { tipe: 'ok', teks: 'Password berhasil diubah. Silakan masuk dengan password baru.' };
-        go('/login');
-    } catch (err) {
-        notice('notReset', 'Terjadi gangguan: ' + (err.message || 'periksa koneksi.'), 'err');
-    } finally {
-        btn.disabled = false; btn.textContent = 'Simpan Password';
-    }
-});
-
-// Potong persegi dari tengah, kecilkan ke 512px, simpan JPEG (dipakai Profil > Akun)
-async function cropAvatar(file, ukuran = 512, kualitas = 0.85) {
-    const bmp = await createImageBitmap(file);
-    const sisi = Math.min(bmp.width, bmp.height);
-    const sx = (bmp.width - sisi) / 2, sy = (bmp.height - sisi) / 2;
-    const c = document.createElement('canvas');
-    c.width = c.height = Math.min(ukuran, sisi);
-    c.getContext('2d').drawImage(bmp, sx, sy, sisi, sisi, 0, 0, c.width, c.height);
-    return await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
-}
-
-/* =====================================================================
-   DASHBOARD KOTAKITA
-   ===================================================================== */
-const KK = {
-    map: null, layer: null, markerAnchor: null,
-    laporan: [], dimuat: false, errLaporan: null,
-    kota: null, anchor: null, kotaDipulihkan: false,
-    daftarKota: null, daftarPromise: null, timer: null
-};
-const WARNA_T = { ringan: '#f2b705', sedang: '#ff922b', parah: '#e03131' };
-let pendingScroll = null;
-
-const tunggu = ms => new Promise(r => setTimeout(r, ms));
-function bacaLS(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
-function simpanLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* abaikan */ } }
-
-/* ---------- Util: jarak, waktu, judul ---------- */
-function jarakKm(a, r) {
-    const R = 6371, rad = x => x * Math.PI / 180;
-    const dLat = rad(r.latitude - a.lat), dLon = rad(r.longitude - a.lon);
-    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(r.latitude)) * Math.sin(dLon / 2) ** 2;
-    return 2 * R * Math.asin(Math.sqrt(h));
-}
-function fmtJarak(km) { return km < 1 ? Math.round(km * 1000) + ' m' : km.toLocaleString('id-ID', { maximumFractionDigits: 1 }) + ' km'; }
-
-const RTF = new Intl.RelativeTimeFormat('id', { numeric: 'auto' });
-function waktuRelatif(iso) {
-    const t = new Date(iso).getTime();
-    if (isNaN(t)) return '-';
-    const d = Math.round((t - Date.now()) / 1000), a = Math.abs(d);
-    if (a < 45) return 'baru saja';
-    if (a < 3600) return RTF.format(Math.round(d / 60), 'minute');
-    if (a < 86400) return RTF.format(Math.round(d / 3600), 'hour');
-    if (a < 2592000) return RTF.format(Math.round(d / 86400), 'day');
-    if (a < 31536000) return RTF.format(Math.round(d / 2592000), 'month');
-    return RTF.format(Math.round(d / 31536000), 'year');
-}
-// Tabel laporan tidak punya kolom judul: judul = kalimat pertama deskripsi
-function judulLaporan(r) {
-    const d = (r.deskripsi || '').replace(/\s+/g, ' ').trim();
-    if (d) { const k = d.split(/[.!?]\s/)[0]; return k.length > 64 ? k.slice(0, 61).trimEnd() + '…' : k; }
-    return 'Jalan rusak' + (r.tingkat ? ` (${r.tingkat})` : '');
-}
-const tingkatOk = r => ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
-
-/* ---------- Reverse geocoding (nama jalan) dengan antrean + cache ---------- */
-let revCache = bacaLS('kk_rev_v1') || {};
-const revAntri = [];
-let revJalan = false;
-const kunciRev = r => r.latitude.toFixed(4) + ',' + r.longitude.toFixed(4);
-function namaLokasi(r) { return revCache[kunciRev(r)] || `${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}`; }
-function mintaReverse(r) {
-    const k = kunciRev(r);
-    if (revCache[k] || revAntri.some(x => x.k === k)) return;
-    revAntri.push({ k, r });
-    jalankanReverse();
-}
-async function jalankanReverse() {
-    if (revJalan) return;
-    revJalan = true;
-    while (revAntri.length) {
-        const { k, r } = revAntri.shift();
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=id&lat=${r.latitude}&lon=${r.longitude}`);
-            if (res.ok) {
-                const j = await res.json();
-                const a = j.address || {};
-                const jalan = a.road || a.pedestrian || a.footway || a.neighbourhood;
-                const area = a.suburb || a.village || a.city_district || a.town || a.city || a.county;
-                const nama = [jalan, area].filter(Boolean).join(', ') || (j.display_name || '').split(',').slice(0, 2).join(',').trim();
-                if (nama) {
-                    revCache[k] = nama;
-                    const keys = Object.keys(revCache);
-                    if (keys.length > 300) delete revCache[keys[0]];
-                    simpanLS('kk_rev_v1', revCache);
-                    document.querySelectorAll(`[data-rev="${k}"]`).forEach(el => { el.textContent = nama; });
-                }
-            }
-        } catch (e) { /* biarkan tampil koordinat */ }
-        await tunggu(1100);   // batas Nominatim: 1 permintaan/detik
-    }
-    revJalan = false;
-}
-
-/* ---------- Navbar ---------- */
-function inisial(nama) { return (nama || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase(); }
-function renderNavbar(session) {
-    const guest = !session;
-    const nama = guest ? 'Tamu' : ((profil && profil.nama) || session.user.email || 'Pengguna');
-    $('umNama').textContent = nama;
-    $('umUser').textContent = guest ? 'Belum masuk' : (profil ? '@' + profil.username : '');
-    const b = $('avatarBtn');
-    if (guest) b.textContent = '👤';
-    else if (profil && profil.foto_url) b.innerHTML = `<img src="${esc(profil.foto_url)}" alt="">`;
-    else b.textContent = inisial(nama);
-    ['umProfil', 'umKeluar'].forEach(i => { $(i).hidden = guest; });
-    ['umMasuk', 'umDaftar'].forEach(i => { $(i).hidden = !guest; });
-}
-function setMenuAktif(path) {
-    const peta = { '/dashboard': 'beranda', '/upload': 'upload', '/konfirmasi': 'upload', '/laporan': 'laporan', '/detail': 'laporan', '/profil': 'profil', '/akun': 'profil', '/rekaman': 'profil', '/preferensi': 'profil', '/informasi': 'profil' };
-    let aktif = peta[path];
-    if (path === '/dashboard' && pendingScroll === 'lokasi') aktif = 'lokasi';
-    document.querySelectorAll('#kkMenu a').forEach(a => a.classList.toggle('aktif', a.dataset.m === aktif));
-}
-$('kkMenu').addEventListener('click', e => {
-    const a = e.target.closest('a');
-    if (!a || !['beranda', 'lokasi'].includes(a.dataset.m)) return;
-    e.preventDefault();
-    if (KK.guest && a.dataset.m === 'lokasi') { arahLogin('Masuk untuk memakai fitur Lokasi.'); return; }
-    const sudahDiBeranda = location.hash === '#/dashboard';
-    pendingScroll = a.dataset.m;
-    if (sudahDiBeranda) { setMenuAktif('/dashboard'); lakukanScroll(); } else go('/dashboard');
-});
-function lakukanScroll() {
-    if (pendingScroll === 'lokasi') { $('kkMapCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => $('kkCari').focus({ preventScroll: true }), 400); }
-    else if (pendingScroll === 'beranda') window.scrollTo({ top: 0, behavior: 'smooth' });
-    pendingScroll = null;
-}
-
-function tutupSemuaDropdown() {
-    $('kotaPanel').hidden = true; $('kotaBtn').setAttribute('aria-expanded', 'false');
-    $('avatarMenu').hidden = true;
-    $('kkSuggest').hidden = true;
-}
-document.addEventListener('click', e => {
-    if (!e.target.closest('#kkKotaWrap')) { $('kotaPanel').hidden = true; $('kotaBtn').setAttribute('aria-expanded', 'false'); }
-    if (!e.target.closest('.kk-avatar-wrap')) $('avatarMenu').hidden = true;
-    if (!e.target.closest('.kk-search')) $('kkSuggest').hidden = true;
-});
-$('avatarBtn').addEventListener('click', () => { $('avatarMenu').hidden = !$('avatarMenu').hidden; });
-$('umKeluar').addEventListener('click', keluar);
-$('umProfil').addEventListener('click', () => go('/profil'));
-$('umMasuk').addEventListener('click', () => go('/profil'));
-$('umDaftar').addEventListener('click', () => go('/register'));
-async function keluar() {
-    hentikanAutoRefresh();
-    try { localStorage.removeItem(KUNCI_DEMO); } catch (e) { /* abaikan */ }
-    try { await db.auth.signOut(); } catch (e) { console.warn(e); }
-    upReset();
-    profil = null; KK.laporan = []; KK.dimuat = false;
-    KK.anchor = null; KK.kota = null; KK.kotaDipulihkan = false;
-    if (KK.map && KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; }
-    try { localStorage.removeItem('kk_kota_pilihan'); } catch (e) { /* abaikan */ }
-    $('kotaLabel').textContent = 'Pilih kota'; $('kkCari').value = ''; $('kkCariHapus').hidden = true;
-    go('/welcome');
-}
-
-/* ---------- Dropdown kota + fuzzy search ---------- */
-// Sumber data wilayah = API v2 emsifa. JANGAN pakai API lama (emsifa.github.io/api-wilayah-indonesia/api/...):
-// URL itu dialihkan (redirect) ke http://www.emsifa.com (tanpa HTTPS) sehingga diblokir browser
-// (mixed content) dan muncul sebagai "TypeError: Failed to fetch".
-const SUMBER_WILAYAH = [
-    { nama: 'emsifa.com (resmi)', base: 'https://www.emsifa.com/api-wilayah-indonesia/v2' },
-    { nama: 'mirror GitHub',      base: 'https://raw.githubusercontent.com/emsifa/api-wilayah-indonesia/gh-pages/v2' }
-];
-// Cadangan terakhir bila SEMUA sumber gagal: 98 kota dari snapshot API v2 (11 Okt 2026) — [nama, provinsi, lat, lng]
-const KOTA_CADANGAN = [
-    ["Kota Banda Aceh","Aceh",5.55,95.3178], ["Kota Sabang","Aceh",5.8927,95.3211], ["Kota Lhokseumawe","Aceh",5.1794,97.1489], ["Kota Langsa","Aceh",4.4695,97.9664], ["Kota Subulussalam","Aceh",2.6708,97.993],
-    ["Kota Medan","Sumatera Utara",3.5902,98.675], ["Kota Pematangsiantar","Sumatera Utara",2.9565,99.0618], ["Kota Sibolga","Sumatera Utara",1.746,98.7756], ["Kota Tanjungbalai","Sumatera Utara",2.9478,99.7667], ["Kota Binjai","Sumatera Utara",3.603,98.4832], ["Kota Tebing Tinggi","Sumatera Utara",3.3276,99.1663], ["Kota Padangsidimpuan","Sumatera Utara",1.3776,99.2714], ["Kota Gunungsitoli","Sumatera Utara",1.2826,97.6135],
-    ["Kota Padang","Sumatera Barat",-0.8759,100.3873], ["Kota Solok","Sumatera Barat",-0.7995,100.6528], ["Kota Sawahlunto","Sumatera Barat",-0.675,100.7675], ["Kota Padang Panjang","Sumatera Barat",-0.4621,100.3904], ["Kota Bukittinggi","Sumatera Barat",-0.2855,100.3678], ["Kota Payakumbuh","Sumatera Barat",-0.2225,100.632], ["Kota Pariaman","Sumatera Barat",-0.629,100.1377],
-    ["Kota Pekanbaru","Riau",0.5134,101.447], ["Kota Dumai","Riau",1.6054,101.3917],
-    ["Kota Jambi","Jambi",-1.6305,103.6073], ["Kota Sungai Penuh","Jambi",-2.0709,101.3961],
-    ["Kota Palembang","Sumatera Selatan",-2.991,104.7568], ["Kota Pagar Alam","Sumatera Selatan",-4.0393,103.197], ["Kota Lubuk Linggau","Sumatera Selatan",-3.3258,102.8254], ["Kota Prabumulih","Sumatera Selatan",-3.3689,104.3084],
-    ["Kota Bengkulu","Bengkulu",-3.7928,102.2608],
-    ["Kota Bandar Lampung","Lampung",-5.4296,105.2626], ["Kota Metro","Lampung",-5.1137,105.3069],
-    ["Kota Pangkal Pinang","Kepulauan Bangka Belitung",-2.141,106.1159],
-    ["Kota Batam","Kepulauan Riau",1.1287,104.0553], ["Kota Tanjung Pinang","Kepulauan Riau",0.9653,104.441],
-    ["Kota Administrasi Jakarta Pusat","Daerah Khusus Ibukota Jakarta",-6.1729,106.8187], ["Kota Administrasi Jakarta Utara","Daerah Khusus Ibukota Jakarta",-6.12,106.8925], ["Kota Administrasi Jakarta Barat","Daerah Khusus Ibukota Jakarta",-6.1843,106.7366], ["Kota Administrasi Jakarta Selatan","Daerah Khusus Ibukota Jakarta",-6.2478,106.8076], ["Kota Administrasi Jakarta Timur","Daerah Khusus Ibukota Jakarta",-6.2137,106.944],
-    ["Kota Bogor","Jawa Barat",-6.5951,106.7941], ["Kota Sukabumi","Jawa Barat",-6.9176,106.9319], ["Kota Bandung","Jawa Barat",-6.9107,107.6099], ["Kota Cirebon","Jawa Barat",-6.7067,108.5582], ["Kota Bekasi","Jawa Barat",-6.236,106.9942], ["Kota Depok","Jawa Barat",-6.3942,106.8227], ["Kota Cimahi","Jawa Barat",-6.8708,107.5552], ["Kota Tasikmalaya","Jawa Barat",-7.3161,108.197], ["Kota Banjar","Jawa Barat",-7.3622,108.5596],
-    ["Kota Magelang","Jawa Tengah",-7.5037,110.2215], ["Kota Surakarta","Jawa Tengah",-7.5693,110.8295], ["Kota Salatiga","Jawa Tengah",-7.3304,110.5008], ["Kota Semarang","Jawa Tengah",-6.9817,110.4122], ["Kota Pekalongan","Jawa Tengah",-6.8969,109.6621], ["Kota Tegal","Jawa Tengah",-6.8704,109.1374],
-    ["Kota Yogyakarta","Daerah Istimewa Yogyakarta",-7.7999,110.3914],
-    ["Kota Kediri","Jawa Timur",-7.8122,112.0143], ["Kota Blitar","Jawa Timur",-8.0992,112.1646], ["Kota Malang","Jawa Timur",-7.9778,112.6338], ["Kota Probolinggo","Jawa Timur",-7.7537,113.2142], ["Kota Pasuruan","Jawa Timur",-7.6474,112.9086], ["Kota Mojokerto","Jawa Timur",-7.4628,112.4334], ["Kota Madiun","Jawa Timur",-7.6244,111.5206], ["Kota Surabaya","Jawa Timur",-7.2589,112.747], ["Kota Batu","Jawa Timur",-7.8625,112.5134],
-    ["Kota Tangerang","Banten",-6.1644,106.6411], ["Kota Cilegon","Banten",-6.0098,106.0421], ["Kota Serang","Banten",-6.1197,106.1735], ["Kota Tangerang Selatan","Banten",-6.3216,106.7077],
-    ["Kota Denpasar","Bali",-8.6545,115.2165],
-    ["Kota Mataram","Nusa Tenggara Barat",-8.5827,116.1081], ["Kota Bima","Nusa Tenggara Barat",-8.4617,118.7487],
-    ["Kota Kupang","Nusa Tenggara Timur",-10.1539,123.6194],
-    ["Kota Pontianak","Kalimantan Barat",-0.0221,109.3381], ["Kota Singkawang","Kalimantan Barat",0.9048,108.9774],
-    ["Kota Palangkaraya","Kalimantan Tengah",-2.174,113.8803],
-    ["Kota Banjarmasin","Kalimantan Selatan",-3.3275,114.589], ["Kota Banjarbaru","Kalimantan Selatan",-3.4386,114.8311],
-    ["Kota Balikpapan","Kalimantan Timur",-1.2763,116.8278], ["Kota Samarinda","Kalimantan Timur",-0.4914,117.146], ["Kota Bontang","Kalimantan Timur",0.0695,117.4442],
-    ["Kota Tarakan","Kalimantan Utara",3.3137,117.6049],
-    ["Kota Manado","Sulawesi Utara",1.4846,124.8491], ["Kota Bitung","Sulawesi Utara",1.4454,125.182], ["Kota Tomohon","Sulawesi Utara",1.3145,124.8274], ["Kota Kotamobagu","Sulawesi Utara",0.7435,124.3127],
-    ["Kota Palu","Sulawesi Tengah",-0.9,119.891],
-    ["Kota Makassar","Sulawesi Selatan",-5.1332,119.4078], ["Kota Parepare","Sulawesi Selatan",-4.0278,119.6333], ["Kota Palopo","Sulawesi Selatan",-3.0084,120.2016],
-    ["Kota Kendari","Sulawesi Tenggara",-3.9729,122.5117], ["Kota Bau Bau","Sulawesi Tenggara",-5.4851,122.5848],
-    ["Kota Gorontalo","Gorontalo",0.5319,123.0595],
-    ["Kota Ambon","Maluku",-3.6943,128.1813], ["Kota Tual","Maluku",-5.6347,132.7517],
-    ["Kota Ternate","Maluku Utara",0.7858,127.3878], ["Kota Tidore Kepulauan","Maluku Utara",0.6716,127.4467],
-    ["Kota Jayapura","Papua",-2.5626,140.6926],
-    ["Kota Sorong","Papua Barat Daya",-0.8811,131.2876],
-];
-
-// fetch JSON dengan batas waktu + pesan error yang jelas
-async function ambilJson(url, ms = 8000) {
-    const ac = new AbortController();
-    const t = setTimeout(() => ac.abort(), ms);
-    try {
-        const res = await fetch(url, { signal: ac.signal });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return await res.json();
-    } catch (e) {
-        if (e.name === 'AbortError') throw new Error('waktu habis (' + ms / 1000 + ' dtk)');
-        if (e instanceof TypeError) throw new Error('tidak dapat dijangkau (jaringan/CORS/diblokir browser)');
-        throw e;
-    } finally { clearTimeout(t); }
-}
-
-function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
-function kapital(s) { return String(s).toLowerCase().replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Dki|Di|Ntb|Ntt)\b/g, x => x.toUpperCase()); }
-function lev(a, b) {
-    if (a === b) return 0;
-    const m = a.length, n = b.length;
-    if (!m) return n; if (!n) return m;
-    let prev = Array.from({ length: n + 1 }, (_, j) => j);
-    for (let i = 1; i <= m; i++) {
-        const cur = [i];
-        for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-        prev = cur;
-    }
-    return prev[n];
-}
-function subseq(t, s) {
-    if (t[0] !== s[0]) return false;
-    let i = 0;
-    for (const c of s) { if (c === t[i]) i++; if (i === t.length) return true; }
-    return false;
-}
-function bentukItemKota(nama, prov, lat, lng) {
-    const n = kapital(nama);
-    const inti = n.replace(/^(Kota Adm(?:inistrasi)?\.?|Kabupaten Adm(?:inistrasi)?\.?|Kota|Kabupaten|Kab\.)\s+/i, '');
-    return { nama: n, inti, prov: kapital(prov), jenis: /^kota/i.test(n) ? 'Kota' : 'Kabupaten',
-             n: norm(n), i: norm(inti), p: norm(prov), kata: norm(inti).split(' '), lat, lng };
-}
-function skorToken(t, it) {
-    if (it.i === t) return 1000;
-    if (it.n === t) return 990;
-    if (it.i.startsWith(t)) return 900 - it.i.length;
-    if (it.kata.some(w => w.startsWith(t))) return 800 - it.i.length;
-    if (it.n.includes(t)) return 700 - it.i.length;
-    if (t.length >= 4) {                       // toleransi salah ketik
-        const maks = t.length <= 5 ? 1 : 2;
-        let best = 9;
-        for (const w of it.kata) best = Math.min(best, lev(t, w), lev(t, w.slice(0, t.length)));
-        if (best <= maks) return 600 - best * 100 - it.i.length;
-    }
-    if (t.length >= 2 && subseq(t, it.i.replace(/ /g, ''))) return 450 - it.i.length;   // singkatan: bdg, jkt
-    if (t.length >= 3 && it.p.includes(t)) return 300;                                    // cocok nama provinsi
+  function normalize(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  function fuzzyScore(query, candidate) {
+    const q = normalize(query), c = normalize(candidate);
+    if (!q) return 1;
+    if (c === q) return 100;
+    if (c.startsWith(q)) return 80;
+    if (c.includes(q)) return 60;
+    const words = c.split(' ');
+    if (words.some(word => word.startsWith(q))) return 45;
+    // Approximate typo tolerance: allow one missing/extra character for longer terms.
+    if (q.length >= 4 && words.some(word => Math.abs(word.length - q.length) <= 1 &&
+        (word.includes(q) || q.includes(word)))) return 25;
     return 0;
-}
-function cariFuzzy(q, daftar, maks = 60) {
-    const nq = norm(q);
-    if (!nq) return daftar.slice(0, maks);
-    const toks = nq.split(' ');
-    const hasil = [];
-    for (const it of daftar) {
-        let tot = 0, ok = true;
-        for (const t of toks) { const sk = skorToken(t, it); if (!sk) { ok = false; break; } tot += sk; }
-        if (ok) hasil.push({ it, s: tot / toks.length + (it.jenis === 'Kota' ? 5 : 0) });
-    }
-    hasil.sort((a, b) => b.s - a.s || a.it.nama.localeCompare(b.it.nama, 'id'));
-    return hasil.slice(0, maks).map(x => x.it);
-}
+  }
 
-async function muatDaftarKota() {
-    if (KK.daftarKota && !KK.daftarOffline) return KK.daftarKota;
-    if (KK.daftarPromise) return KK.daftarPromise;
-    KK.daftarPromise = (async () => {
-        try {
-            try { localStorage.removeItem('kk_kota_list_v1'); } catch (e) { /* cache lama (API v1) dibuang */ }
-            let mentah = null;
-            const cache = bacaLS('kk_kota_list_v2');
-            if (cache && Date.now() - cache.t < 30 * 864e5 && Array.isArray(cache.data) && cache.data.length > 400) mentah = cache.data;
-            const galat = [];
-            for (const sb of (mentah ? [] : SUMBER_WILAYAH)) {
-                try {
-                    const provs = (await ambilJson(`${sb.base}/provinces.json`)).data;
-                    if (!Array.isArray(provs) || !provs.length) throw new Error('format data provinsi tidak dikenali');
-                    const per = await Promise.all(provs.map(async p => {
-                        const j = await ambilJson(`${sb.base}/regencies/${p.id}.json`);
-                        return (j.data || []).map(x => ({ n: x.name, p: p.name, lat: x.lat, lng: x.lng }));
-                    }));
-                    const hasil = per.flat();
-                    if (hasil.length < 400) throw new Error('data tidak lengkap (' + hasil.length + ' kab/kota)');
-                    mentah = hasil;
-                    simpanLS('kk_kota_list_v2', { t: Date.now(), data: mentah });
-                    break;
-                } catch (e) { galat.push(`${sb.nama}: ${e.message}`); console.warn('Daftar kota gagal dari', sb.nama, e); }
-            }
-            KK.daftarOffline = !mentah;
-            KK.galatDaftar = galat.join(' · ');
-            if (!mentah) mentah = KOTA_CADANGAN.map(([n, p, lat, lng]) => ({ n, p, lat, lng }));
-            KK.daftarKota = mentah.map(x => bentukItemKota(x.n, x.p, x.lat, x.lng))
-                .sort((a, b) => (a.jenis === b.jenis ? a.nama.localeCompare(b.nama, 'id') : a.jenis === 'Kota' ? -1 : 1));
-            return KK.daftarKota;
-        } finally { KK.daftarPromise = null; }
-    })();
-    return KK.daftarPromise;
-}
-
-let kotaTampil = [], kotaIdx = -1;
-function renderDaftarKota() {
-    const box = $('kotaList');
-    if (!KK.daftarKota) return;
-    kotaTampil = cariFuzzy($('kotaCari').value, KK.daftarKota);
-    kotaIdx = kotaTampil.length ? 0 : -1;
-    const catatan = KK.daftarOffline
-        ? `<div class="kk-info">⚠️ Daftar lengkap tidak bisa dimuat (${esc(KK.galatDaftar)}). Menampilkan ${KK.daftarKota.length} kota dari data cadangan. <a href="#" id="kotaUlang">Coba muat daftar lengkap</a></div>` : '';
-    if (!kotaTampil.length) { box.innerHTML = catatan + '<div class="kk-info">Kota tidak ditemukan. Coba ejaan lain.</div>'; return; }
-    box.innerHTML = catatan + kotaTampil.map((it, i) =>
-        `<button type="button" class="kota-item${i === 0 ? ' fokus' : ''}" data-i="${i}" role="option"><span>${esc(it.nama)}</span><small>${esc(it.prov)}</small></button>`).join('');
-}
-async function bukaDropdownKota() {
-    $('avatarMenu').hidden = true;
-    $('kotaPanel').hidden = false;
-    $('kotaBtn').setAttribute('aria-expanded', 'true');
-    $('kotaCari').value = '';
-    $('kotaCari').focus();
-    const box = $('kotaList');
-    if (!KK.daftarKota) {
-        box.innerHTML = '<div class="kk-info">⏳ Memuat daftar kota Indonesia…</div>';
-        try { await muatDaftarKota(); }
-        catch (e) { box.innerHTML = `<div class="kk-info">❌ Gagal memuat daftar kota (${esc(e.message)}). <a href="#" id="kotaUlang">Coba lagi</a></div>`; return; }
-    }
-    renderDaftarKota();
-}
-$('kotaBtn').addEventListener('click', () => {
-    if (KK.guest) { arahLogin('Masuk untuk memilih kota dan memakai fitur Lokasi.'); return; }
-    $('kotaPanel').hidden ? bukaDropdownKota() : tutupSemuaDropdown();
-});
-$('kotaCari').addEventListener('input', renderDaftarKota);
-$('kotaCari').addEventListener('keydown', e => {
-    if (e.key === 'Escape') { tutupSemuaDropdown(); return; }
-    if (!kotaTampil.length) return;
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        kotaIdx = (kotaIdx + (e.key === 'ArrowDown' ? 1 : -1) + kotaTampil.length) % kotaTampil.length;
-        const els = $('kotaList').querySelectorAll('.kota-item');
-        els.forEach((el, i) => el.classList.toggle('fokus', i === kotaIdx));
-        els[kotaIdx].scrollIntoView({ block: 'nearest' });
-    } else if (e.key === 'Enter') { e.preventDefault(); pilihKota(kotaTampil[kotaIdx]); }
-});
-$('kotaList').addEventListener('click', e => {
-    if (e.target.id === 'kotaUlang') { e.preventDefault(); KK.daftarKota = null; bukaDropdownKota(); return; }
-    const b = e.target.closest('.kota-item');
-    if (b) pilihKota(kotaTampil[+b.dataset.i]);
-});
-
-/* ---------- Geokode kota (Nominatim, 1x per pilihan, di-cache) ---------- */
-async function geokodeKota(item) {
-    const kunci = item.nama + '|' + item.prov;
-    const cache = bacaLS('kk_geo_v1') || {};
-    if (cache[kunci]) return cache[kunci];
-    const bersih = item.nama.replace(/\bAdm(?:inistrasi)?\.?\s*/i, '');
-    const kandidat = [[bersih, item.prov, 'Indonesia'], [item.inti, item.prov, 'Indonesia']].map(a => a.filter(Boolean).join(', '));
-    for (let i = 0; i < kandidat.length; i++) {
-        if (i > 0) await tunggu(1100);
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=id&accept-language=id&q=${encodeURIComponent(kandidat[i])}`);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const arr = await res.json();
-        if (arr.length) {
-            const a = arr[0];
-            const g = { lat: +a.lat, lon: +a.lon, bbox: (a.boundingbox || []).map(Number) };
-            cache[kunci] = g;
-            simpanLS('kk_geo_v1', cache);
-            return g;
-        }
-    }
-    throw new Error('lokasi tidak ditemukan');
-}
-function setStatusPeta(t) { $('kkStatusPeta').textContent = t || ''; }
-
-async function pilihKota(item, simpan = true) {
-    tutupSemuaDropdown();
-    $('kotaLabel').textContent = item.nama;
-    setStatusPeta('⏳ Memuat lokasi ' + item.nama + '…');
-    try {
-        const g = await geokodeKota(item).catch(e => {
-            if (item.lat != null && item.lng != null) return { lat: item.lat, lon: item.lng, bbox: [] };   // cadangan: titik pusat dari API wilayah
-            throw e;
-        });
-        KK.kota = { ...item, ...g };
-        if (simpan && PREF.ingatKota) simpanLS('kk_kota_pilihan', { nama: item.nama, inti: item.inti, prov: item.prov, jenis: item.jenis, g });
-        terapkanKota(g, item.nama);
-        setStatusPeta('');
-    } catch (e) {
-        setStatusPeta(`Lokasi "${item.nama}" tidak ditemukan di layanan peta (${e.message}).`);
-    }
-}
-function terapkanKota(g, label) {
-    if (KK.map) {
-        if (g.bbox && g.bbox.length === 4) KK.map.fitBounds([[g.bbox[0], g.bbox[2]], [g.bbox[1], g.bbox[3]]], { maxZoom: 14 });
-        else KK.map.setView([g.lat, g.lon], 12);
-    }
-    $('kkCari').value = ''; $('kkCariHapus').hidden = true;
-    setAnchor({ lat: g.lat, lon: g.lon, label, marker: false });
-}
-function pulihkanKota() {
-    const sv = bacaLS('kk_kota_pilihan');
-    if (sv && sv.nama && sv.g) {
-        const item = bentukItemKota(sv.nama, sv.prov || '');
-        KK.kota = { ...item, ...sv.g };
-        $('kotaLabel').textContent = sv.nama;
-        terapkanKota(sv.g, sv.nama);
-    } else if (profil && profil.kota) {
-        // Belum pernah memilih: pakai kota dari data pendaftaran akun
-        pilihKota({ nama: profil.kota, inti: profil.kota, prov: '', jenis: '' }, false);
-    }
-}
-
-/* ---------- Peta ---------- */
-function initPeta() {
-    if (KK.map) return;
-    if (typeof L === 'undefined') { setStatusPeta('Pustaka peta (Leaflet) gagal dimuat. Periksa koneksi internet.'); return; }
-    KK.map = L.map('kkMap').setView([-2.5489, 118.0149], 5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(KK.map);
-    KK.layer = L.layerGroup().addTo(KK.map);
-}
-function ikonPin(t) {
-    return L.divIcon({ className: '', html: `<div class="pin" style="background:${WARNA_T[t] || '#6c757d'}"></div>`, iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -26] });
-}
-function badgeTingkat(t) { return t ? `<span class="badge ${t}">${t}</span>` : ''; }
-
-function renderMarkers() {
-    if (!KK.map || !KK.layer) return;
-    KK.layer.clearLayers();
-    KK.laporan.forEach(r => {
-        const t = tingkatOk(r);
-        const mk = L.marker([r.latitude, r.longitude], { icon: ikonPin(t), opacity: r.status === 'selesai' ? 0.45 : 1 });
-        mk.bindPopup(`<div style="min-width:160px"><b>${esc(judulLaporan(r))}</b><br>${badgeTingkat(t)} <small>${esc(waktuRelatif(r.waktu))}</small>` +
-            `<br><img src="${esc(r.foto_url)}" style="width:100%;max-width:200px;margin-top:6px;border-radius:8px" alt=""></div>`);
-        mk.addTo(KK.layer);
-        r._m = mk;
+  function getMap() { return window.kkLeafletMap || window.map || window.leafletMap || window.peta || null; }
+  function ensureMapReady(callback) {
+    const map = getMap();
+    if (map && typeof map.setView === 'function') callback(map);
+    else setTimeout(() => {
+      const later = getMap();
+      if (later && typeof later.setView === 'function') callback(later);
+      else console.warn('Peta Leaflet belum tersedia. Pastikan js/dashboard.js membuat peta pada #map.');
+    }, 700);
+  }
+  function moveMap(lat, lon, zoom, title, kind) {
+    ensureMapReady(map => {
+      map.setView([lat, lon], zoom, {animate:true});
+      if (!window.L) return;
+      const icon = window.L.divIcon({
+        className: 'kk-search-marker',
+        html: kind === 'gps'
+          ? '<span class="kk-map-dot kk-map-dot-gps"></span>'
+          : '<span class="kk-map-dot"></span>',
+        iconSize: [24, 24], iconAnchor: [12, 12]
+      });
+      const target = kind === 'gps' ? 'gps' : 'search';
+      if (target === 'gps') {
+        if (gpsMarker) map.removeLayer(gpsMarker);
+        gpsMarker = window.L.marker([lat, lon], {icon, title:title || 'Lokasi saya'}).addTo(map);
+        gpsMarker.bindPopup(title || 'Lokasi saya');
+      } else {
+        if (searchMarker) map.removeLayer(searchMarker);
+        searchMarker = window.L.marker([lat, lon], {icon, title:title || 'Lokasi pilihan'}).addTo(map);
+        searchMarker.bindPopup(title || 'Lokasi pilihan').openPopup();
+      }
+      setTimeout(() => map.invalidateSize(), 120);
     });
-}
-function setAnchor(a) {
-    KK.anchor = a;
-    if (KK.map) {
-        if (KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; }
-        if (a.marker) {
-            KK.markerAnchor = L.marker([a.lat, a.lon], { icon: L.divIcon({ className: '', html: '<div class="pin anchor"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), zIndexOffset: 1000 })
-                .addTo(KK.map).bindPopup(esc(a.label));
-        }
+  }
+
+  function renderCities(query) {
+    if (!cityList) return;
+    const q = normalize(query);
+    const ranked = cities.map(city => {
+      const candidates = [city.name, city.province, ...city.aliases];
+      const score = Math.max(...candidates.map(candidate => fuzzyScore(q, candidate)));
+      return {city, score};
+    }).filter(item => !q || item.score > 0)
+      .sort((a,b) => b.score - a.score || a.city.name.localeCompare(b.city.name, 'id'));
+    cityList.replaceChildren();
+    ranked.forEach(({city}) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'kk-city-option'; button.setAttribute('role','option');
+      const name = document.createElement('strong'); name.textContent = city.name;
+      const province = document.createElement('span'); province.textContent = city.province;
+      button.append(name, province);
+      button.addEventListener('click', () => selectCity(city));
+      cityList.appendChild(button);
+    });
+    if (cityEmpty) cityEmpty.hidden = ranked.length > 0;
+  }
+  function selectCity(city) {
+    cityLabel.textContent = city.name;
+    cityBtn.setAttribute('aria-label', 'Pilih kota: ' + city.name);
+    cityBtn.setAttribute('aria-expanded', 'false');
+    cityPanel.hidden = true;
+    localStorage.setItem('kotakita.selectedCity', JSON.stringify({name:city.name, province:city.province, lat:city.lat, lon:city.lon}));
+    moveMap(city.lat, city.lon, 13, city.name + ', ' + city.province, 'city');
+  }
+
+  if (cityBtn && cityPanel) {
+    let savedCity = null;
+    try { savedCity = JSON.parse(localStorage.getItem('kotakita.selectedCity') || 'null'); } catch (_) {}
+    const initialCity = cities.find(city => savedCity && normalize(city.name) === normalize(savedCity.name))
+      || cities.find(city => city.name === 'Bandung');
+    cityLabel.textContent = initialCity.name;
+    renderCities('');
+    cityBtn.addEventListener('click', () => {
+      cityPanel.hidden = !cityPanel.hidden;
+      cityBtn.setAttribute('aria-expanded', String(!cityPanel.hidden));
+      if (!cityPanel.hidden) { renderCities(cityInput.value); cityInput.focus(); }
+    });
+    cityInput.addEventListener('input', () => renderCities(cityInput.value));
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.kk-city-wrap')) {
+        cityPanel.hidden = true; cityBtn.setAttribute('aria-expanded','false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        cityPanel.hidden = true; suggestPanel.hidden = true;
+        cityBtn.setAttribute('aria-expanded','false');
+      }
+    });
+    // Terapkan kota yang tersimpan atau default setelah peta siap.
+    const cityToApply = savedCity ? (cities.find(city => normalize(city.name) === normalize(savedCity.name)) || initialCity) : initialCity;
+    moveMap(cityToApply.lat, cityToApply.lon, 12, cityToApply.name + ', ' + cityToApply.province, 'city');
+  }
+
+  function renderSuggestions(items, query) {
+    suggestPanel.replaceChildren();
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'sg'; empty.textContent = query ? 'Lokasi tidak ditemukan. Coba kata kunci lain.' : '';
+      suggestPanel.appendChild(empty); suggestPanel.hidden = !query;
+      return;
     }
-    renderIsu();
-}
-function bukaLaporanDiPeta(r) {
-    if (!KK.map || !r._m) return;
-    $('kkMapCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    KK.map.setView([r.latitude, r.longitude], 17);
-    setTimeout(() => r._m.openPopup(), 250);
-}
+    items.forEach(item => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'sg'; button.setAttribute('role','option');
+      const title = document.createElement('b');
+      title.textContent = item.name || item.display_name || 'Lokasi';
+      const detail = document.createElement('span');
+      detail.textContent = item.detail || item.display_name || '';
+      button.append(title, detail);
+      button.addEventListener('click', () => {
+        const lat = Number(item.lat), lon = Number(item.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        searchInput.value = item.name || item.display_name || '';
+        if (legacySearch) { legacySearch.value = searchInput.value; legacySearch.dispatchEvent(new Event('input', {bubbles:true})); }
+        syncClearButton(); suggestPanel.hidden = true;
+        moveMap(lat, lon, 16, searchInput.value, 'search');
+      });
+      suggestPanel.appendChild(button);
+    });
+    suggestPanel.hidden = false;
+  }
 
-/* ---------- Data laporan (RPC laporan_publik) ---------- */
-function pesanErrLaporan(err) {
-    const m = (err.message || '') + ' ' + (err.details || '');
-    if (err.code === 'PGRST202' || /laporan_publik/i.test(m)) return 'Fungsi database "laporan_publik" belum dibuat di Supabase. Jalankan file setup-kotakita.sql.';
-    return 'Gagal memuat laporan: ' + (err.message || 'periksa koneksi');
-}
-async function muatLaporanKK() {
-    const { data, error } = await db.rpc('laporan_publik', { p_limit: 500 });
-    if (error) { KK.errLaporan = pesanErrLaporan(error); KK.laporan = []; }
-    else {
-        KK.errLaporan = null;
-        KK.laporan = (data || []).map(r => ({ ...r, latitude: Number(r.latitude), longitude: Number(r.longitude) }))
-            .filter(r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude));
-    }
-    KK.dimuat = true;
-    renderMarkers(); renderIsu(); renderTerbaru();
-}
-
-function isuTerdekat(n = 5) {
-    if (!KK.anchor) return [];
-    return KK.laporan.filter(r => r.status !== 'selesai')
-        .map(r => ({ r, d: jarakKm(KK.anchor, r) }))
-        .sort((a, b) => a.d - b.d).slice(0, n);
-}
-function renderIsu() {
-    const box = $('isuList'), sub = $('isuSub');
-    if (KK.guest) { sub.textContent = 'Pratinjau tamu'; box.innerHTML = '<div class="kk-info">🔒 Masuk untuk melihat isu terdekat dari lokasi Anda.<br><br><a class="btn btn-kecil" href="#/profil" style="display:inline-block;text-decoration:none">Masuk</a></div>'; return; }
-    if (!KK.dimuat) { sub.textContent = ''; box.innerHTML = '<div class="kk-info">⏳ Memuat laporan…</div>'; return; }
-    if (KK.errLaporan) { sub.textContent = ''; box.innerHTML = `<div class="kk-info">❌ ${esc(KK.errLaporan)}</div>`; return; }
-    if (!KK.anchor) { sub.textContent = ''; box.innerHTML = '<div class="kk-info">Pilih kota, cari nama jalan, atau tekan "Lokasi saya" untuk melihat isu terdekat.</div>'; return; }
-    sub.textContent = 'Terdekat dari ' + KK.anchor.label;
-    const daftar = isuTerdekat();
-    if (!daftar.length) { box.innerHTML = '<div class="kk-info">Belum ada laporan aktif (belum selesai) di database.</div>'; return; }
-    box.innerHTML = daftar.map(({ r, d }, i) => {
-        const t = tingkatOk(r);
-        return `<button type="button" class="isu-item" data-i="${i}">
-            <span class="dot ${t || 'none'}" title="${t || 'tingkat belum diisi'}"></span>
-            <span class="isu-body">
-                <span class="isu-judul">${esc(judulLaporan(r))}</span>
-                <span class="isu-lok">📍 <span data-rev="${kunciRev(r)}">${esc(namaLokasi(r))}</span> · ${esc(fmtJarak(d))}</span>
-                <span class="isu-waktu">🕒 ${esc(waktuRelatif(r.waktu))}</span>
-            </span><span class="isu-panah">›</span></button>`;
-    }).join('');
-    box.querySelectorAll('.isu-item').forEach(el => el.addEventListener('click', () => bukaLaporanDiPeta(daftar[+el.dataset.i].r)));
-    daftar.forEach(({ r }) => mintaReverse(r));
-}
-function renderTerbaru() {
-    const box = $('terbaruGrid');
-    if (KK.errLaporan) { box.innerHTML = `<div class="kk-card kk-info" style="grid-column:1/-1">❌ ${esc(KK.errLaporan)}</div>`; return; }
-    const tiga = [...KK.laporan].sort((a, b) => new Date(b.waktu) - new Date(a.waktu)).slice(0, 3);
-    if (!tiga.length) { box.innerHTML = '<div class="kk-card kk-info" style="grid-column:1/-1">Belum ada laporan di database.</div>'; return; }
-    box.innerHTML = tiga.map((r, i) => `
-        <article class="tb-card" data-i="${i}">
-            <img src="${esc(r.foto_url)}" alt="" loading="lazy" onerror="this.style.display='none'">
-            <div class="tb-shade"></div>
-            <span class="tb-badge">${badgeTingkat(tingkatOk(r))}</span>
-            <div class="tb-body">
-                <div class="tb-lok">📍 <span data-rev="${kunciRev(r)}">${esc(namaLokasi(r))}</span></div>
-                <div class="tb-desk">${r.deskripsi ? esc(r.deskripsi) : '<i>(tanpa deskripsi)</i>'}</div>
-                <div class="tb-waktu">🕒 ${esc(waktuRelatif(r.waktu))}</div>
-            </div></article>`).join('');
-    box.querySelectorAll('.tb-card').forEach(el => el.addEventListener('click', () => bukaLaporanDiPeta(tiga[+el.dataset.i])));
-    tiga.forEach(mintaReverse);
-}
-
-/* ---------- Pencarian jalan (autocomplete Photon/OpenStreetMap) ---------- */
-let cariTimer = null, cariAbort = null, hasilCari = [], cariIdx = -1;
-function tampilSuggest(html) { const b = $('kkSuggest'); b.innerHTML = html; b.hidden = false; }
-
-$('kkCari').addEventListener('input', () => {
-    const q = $('kkCari').value.trim();
-    clearTimeout(cariTimer);
-    $('kkCariHapus').hidden = !q;
-    if (q.length < 3) { if (cariAbort) cariAbort.abort(); $('kkSuggest').hidden = true; return; }
-    cariTimer = setTimeout(() => cariJalan(q), 450);   // debounce: layanan publik dibatasi ±1 req/detik
-});
-$('kkCariHapus').addEventListener('click', () => {
-    $('kkCari').value = ''; $('kkCariHapus').hidden = true; $('kkSuggest').hidden = true; $('kkCari').focus();
-});
-async function cariJalan(q) {
-    if (cariAbort) cariAbort.abort();
-    cariAbort = new AbortController();
-    tampilSuggest('<div class="kk-info">⏳ Mencari…</div>');
-    const p = new URLSearchParams({ q, limit: '10', osm_tag: 'highway' });
-    if (KK.kota && KK.kota.bbox && KK.kota.bbox.length === 4) { const [sel, ut, bar, tim] = KK.kota.bbox; p.set('bbox', `${bar},${sel},${tim},${ut}`); }
-    else p.set('bbox', '95,-11.5,141.5,6.5');    // seluruh Indonesia
+  async function geocode(query, requestId) {
+    const endpoint = 'https://photon.komoot.io/api/?q=' + encodeURIComponent(query) +
+      '&lat=-2.5&lon=118&limit=7&lang=id';
     try {
-        const res = await fetch('https://photon.komoot.io/api/?' + p.toString(), { signal: cariAbort.signal });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const j = await res.json();
-        const lihat = new Set();
-        hasilCari = (j.features || []).filter(f => f.properties && f.properties.name && f.geometry).map(f => ({
-            nama: f.properties.name,
-            sub: [f.properties.district || f.properties.locality, f.properties.city || f.properties.county, f.properties.state].filter(Boolean).join(', '),
-            lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], extent: f.properties.extent
-        })).filter(h => { const k = h.nama + '|' + h.sub; if (lihat.has(k)) return false; lihat.add(k); return true; });
-        cariIdx = -1;
-        if (!hasilCari.length) { tampilSuggest(`<div class="kk-info">Tidak ada jalan "${esc(q)}" ditemukan${KK.kota ? ' di area ' + esc(KK.kota.nama) : ''}.</div>`); return; }
-        tampilSuggest(hasilCari.map((h, i) => `<button type="button" class="sg" data-i="${i}"><b>${esc(h.nama)}</b><span>${esc(h.sub || 'Indonesia')}</span></button>`).join(''));
-    } catch (e) {
-        if (e.name === 'AbortError') return;
-        tampilSuggest(`<div class="kk-info">❌ Pencarian jalan gagal (${esc(e.message)}). Coba lagi sebentar lagi.</div>`);
-    }
-}
-$('kkSuggest').addEventListener('click', e => { const b = e.target.closest('.sg'); if (b) pilihJalan(hasilCari[+b.dataset.i]); });
-$('kkCari').addEventListener('keydown', e => {
-    if (e.key === 'Escape') { $('kkSuggest').hidden = true; return; }
-    const els = $('kkSuggest').querySelectorAll('.sg');
-    if (!els.length || $('kkSuggest').hidden) return;
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        cariIdx = (cariIdx + (e.key === 'ArrowDown' ? 1 : -1) + els.length) % els.length;
-        els.forEach((el, i) => el.classList.toggle('fokus', i === cariIdx));
-    } else if (e.key === 'Enter') { e.preventDefault(); pilihJalan(hasilCari[cariIdx >= 0 ? cariIdx : 0]); }
-});
-function pilihJalan(h) {
-    if (!h) return;
-    $('kkCari').value = h.nama; $('kkCariHapus').hidden = false; $('kkSuggest').hidden = true;
-    if (KK.map) {
-        if (Array.isArray(h.extent) && h.extent.length === 4) KK.map.fitBounds([[h.extent[3], h.extent[0]], [h.extent[1], h.extent[2]]], { maxZoom: 17, padding: [30, 30] });
-        else KK.map.setView([h.lat, h.lon], 17);
-    }
-    setAnchor({ lat: h.lat, lon: h.lon, label: h.nama + (h.sub ? ', ' + h.sub : ''), marker: true });
-}
-$('btnLokasiSaya').addEventListener('click', () => {
-    if (KK.guest) { arahLogin('Masuk untuk memakai fitur Lokasi.'); return; }
-    if (!navigator.geolocation) { setStatusPeta('Browser Anda tidak mendukung GPS.'); return; }
-    setStatusPeta('⏳ Mencari lokasi Anda…');
-    navigator.geolocation.getCurrentPosition(pos => {
-        setStatusPeta('');
-        if (KK.map) KK.map.setView([pos.coords.latitude, pos.coords.longitude], 15);
-        setAnchor({ lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Lokasi Anda', marker: true });
-    }, err => setStatusPeta('Lokasi tidak bisa diakses: ' + err.message), { enableHighAccuracy: true, timeout: 15000 });
-});
-$('btnRefresh').addEventListener('click', muatLaporanKK);
-
-/* ---------- Masuk halaman Beranda ---------- */
-function hentikanAutoRefresh() { if (KK.timer) { clearInterval(KK.timer); KK.timer = null; } }
-async function masukKotaKita() {
-    initPeta();
-    const mode = KK.guest ? 'guest' : 'user';
-    if (KK.modeTerakhir !== mode) {      // ganti tamu <-> user: bersihkan state lokasi
-        KK.modeTerakhir = mode; KK.kotaDipulihkan = false; KK.anchor = null; KK.kota = null;
-        if (KK.map) { if (KK.markerAnchor) { KK.map.removeLayer(KK.markerAnchor); KK.markerAnchor = null; } KK.map.setView([-2.5489, 118.0149], 5); }
-        $('kkCari').value = ''; $('kkCariHapus').hidden = true; $('kotaLabel').textContent = 'Pilih kota';
-    }
-    terapkanModeTamu();
-    if (KK.map) KK.map.invalidateSize();
-    if (!KK.kotaDipulihkan) { KK.kotaDipulihkan = true; if (!KK.guest) pulihkanKota(); }
-    renderIsu();
-    await muatLaporanKK();
-    hentikanAutoRefresh();
-    if (PREF.autoRefresh) KK.timer = setInterval(muatLaporanKK, 60000);
-    if (pendingScroll) lakukanScroll();
-}
-
-/* ---------- Laporan saya ---------- */
-const LABEL_STATUS = { baru: '🆕 Baru diterima', diproses: '🛠️ Sedang diproses', selesai: '✅ Selesai ditangani' };
-
-async function muatLaporanSaya() {
-    const box = $('daftarSaya');
-    box.textContent = 'Memuat...';
-    try {
-        const session = await ambilSesi();
-        if (!session) return;
-        const data = await ambilLaporanSaya(session);
-        if (!data.length) { box.innerHTML = '<p style="color:#777">Belum ada laporan. Buat laporan pertama Anda lewat menu Upload.</p>'; return; }
-        box.innerHTML = data.map(r => {
-            const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
-            const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
-            return `<div class="item-laporan">
-                <img src="${esc(r.foto_url)}" alt="">
-                <div>
-                    <div><span class="kode">${esc(r.kode || '-')}</span>
-                        ${tg ? `<span class="badge ${tg}">${tg}</span>` : ''}
-                        <span class="badge ${st}">${LABEL_STATUS[st]}</span></div>
-                    <div class="meta">${esc(new Date(r.waktu).toLocaleString('id-ID'))}</div>
-                    ${r.deskripsi ? `<div style="font-size:14px">${esc(r.deskripsi)}</div>` : ''}
-                    ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}
-                    ${r.kode ? `<a class="lihat-detail" href="#/detail?kode=${encodeURIComponent(r.kode)}">Lihat detail ›</a>` : ''}
-                </div></div>`;
-        }).join('');
-    } catch (err) {
-        console.error(err);
-        box.textContent = 'Gagal memuat laporan: ' + (err.message || 'periksa koneksi.');
-    }
-}
-
-/* ---------- Cek status dengan kode ---------- */
-async function cekStatus() {
-    const kode = $('inKode').value.trim().toUpperCase();
-    const hasil = $('hasilCek');
-    hasil.style.display = 'block';
-    if (!kode) { hasil.textContent = '⚠️ Masukkan kode laporan dulu.'; return; }
-    hasil.textContent = '⏳ Mencari laporan...';
-    try {
-        const { data, error } = await db.rpc('cek_laporan', { p_kode: kode });
-        if (error) throw error;
-        if (!data || !data.length) { hasil.textContent = '❌ Kode tidak ditemukan. Periksa kembali penulisannya.'; return; }
-        const r = data[0];
-        const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
-        const tg = ['ringan', 'sedang', 'parah'].includes(r.tingkat) ? r.tingkat : null;
-        hasil.innerHTML = `
-            <div class="hasil-baris"><b>Kode:</b> ${esc(r.kode)}</div>
-            <div class="hasil-baris"><b>Status:</b> <span class="badge ${st}">${LABEL_STATUS[st]}</span></div>
-            ${tg ? `<div class="hasil-baris"><b>Tingkat:</b> <span class="badge ${tg}">${tg}</span></div>` : ''}
-            <div class="hasil-baris"><b>Dilaporkan:</b> ${esc(new Date(r.waktu).toLocaleString('id-ID'))}</div>
-            ${r.deskripsi ? `<div class="hasil-baris"><b>Deskripsi:</b> ${esc(r.deskripsi)}</div>` : ''}
-            ${r.catatan_admin ? `<div class="catatan"><b>💬 Catatan petugas:</b><br>${esc(r.catatan_admin)}</div>` : ''}`;
-    } catch (err) {
-        hasil.textContent = '❌ Gagal mengecek: ' + (err.message || 'gangguan jaringan');
-    }
-}
-$('btnCek').addEventListener('click', cekStatus);
-$('inKode').addEventListener('keydown', e => { if (e.key === 'Enter') cekStatus(); });
-
-/* =====================================================================
-   LAPORAN: utilitas, Upload Laporan, Konfirmasi, Detail
-   ===================================================================== */
-function buatKode() {
-    const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    const acak = new Uint32Array(8);
-    crypto.getRandomValues(acak);
-    return 'LJ-' + Array.from(acak, n => huruf[n % huruf.length]).join('');
-}
-async function kompres(file, maxSisi = 1280, kualitas = 0.8) {
-    try {
-        const bmp = await createImageBitmap(file);
-        const skala = Math.min(1, maxSisi / Math.max(bmp.width, bmp.height));
-        const c = document.createElement('canvas');
-        c.width = Math.round(bmp.width * skala); c.height = Math.round(bmp.height * skala);
-        c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-        const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', kualitas));
-        return (blob && blob.size < file.size) ? blob : file;
-    } catch (e) { return file; }
-}
-
-const KATEGORI = [
-    { nama: 'Jalan Rusak', ikon: '🛣️' }, { nama: 'Sampah', ikon: '🗑️' }, { nama: 'Banjir', ikon: '🌊' },
-    { nama: 'Rambu', ikon: '🚸' }, { nama: 'Trotoar', ikon: '🚶' }, { nama: 'Lainnya', ikon: '📌' }
-];
-const KEPARAHAN = {
-    ringan: { label: 'Ringan', warna: '#f2b705' },
-    sedang: { label: 'Sedang', warna: '#ff922b' },
-    parah:  { label: 'Parah',  warna: '#e03131' }
-};
-const BATAS_FOTO = 15 * 1024 * 1024;
-
-/* ---------- Upload Laporan ---------- */
-const UP = { map: null, marker: null, foto: null, fotoUrl: null, lat: null, lon: null,
-             kategori: null, tingkat: null, alamatManual: false, kirim: false, revTimer: null, revAbort: null };
-
-(function bangunKategori() {
-    $('upKategori').innerHTML = KATEGORI.map(k =>
-        `<button type="button" data-k="${esc(k.nama)}" aria-pressed="false"><span class="ik">${k.ikon}</span>${esc(k.nama)}</button>`).join('');
-})();
-
-function upErr(id, pesan) {
-    const el = $(id);
-    el.textContent = pesan || '';
-    const kartu = el.closest('.up-card');
-    if (kartu) kartu.classList.toggle('salah', !!pesan);
-}
-
-function upIkon() {
-    const warna = UP.tingkat ? KEPARAHAN[UP.tingkat].warna : '#0a2463';
-    return L.divIcon({ className: '', html: `<div class="pin" style="background:${warna}"></div>`, iconSize: [26, 26], iconAnchor: [13, 26] });
-}
-
-function upInitPeta() {
-    if (UP.map) { setTimeout(() => UP.map.invalidateSize(), 150); return; }
-    if (typeof L === 'undefined') {
-        $('upMap').innerHTML = '<div class="kk-info">Peta tidak dapat dimuat. Gunakan tombol "Gunakan lokasi saya" dan isi alamat secara manual.</div>';
-        return;
-    }
-    const a = KK.anchor;
-    UP.map = L.map('upMap').setView(a ? [a.lat, a.lon] : [-2.5489, 118.0149], a ? 14 : 5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(UP.map);
-    UP.map.on('click', e => upSetLokasi(e.latlng.lat, e.latlng.lng, false));
-    setTimeout(() => UP.map.invalidateSize(), 150);
-    if (UP.lat !== null) upSetLokasi(UP.lat, UP.lon, true);
-}
-
-function upSetLokasi(lat, lon, pindah) {
-    UP.lat = lat; UP.lon = lon;
-    $('upKoord').textContent = `Koordinat: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-    upErr('errLokasi', '');
-    if (UP.map && typeof L !== 'undefined') {
-        if (!UP.marker) {
-            UP.marker = L.marker([lat, lon], { draggable: true, icon: upIkon() }).addTo(UP.map);
-            UP.marker.on('dragend', () => { const p = UP.marker.getLatLng(); upSetLokasi(p.lat, p.lng, false); });
-        } else UP.marker.setLatLng([lat, lon]);
-        if (pindah) UP.map.setView([lat, lon], Math.max(UP.map.getZoom(), 17));
-    }
-    upJadwalAlamat();
-}
-
-function upAmbilGPS() {
-    const st = $('upGpsStatus'), btn = $('upBtnGPS');
-    if (!navigator.geolocation) { st.textContent = 'Browser tidak mendukung GPS. Ketuk peta untuk memilih lokasi.'; return; }
-    st.textContent = '⏳ Mencari lokasi Anda…'; btn.disabled = true;
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            upSetLokasi(pos.coords.latitude, pos.coords.longitude, true);
-            st.textContent = `✅ Lokasi terkunci (akurasi ±${Math.round(pos.coords.accuracy)} m). Geser pin bila kurang tepat.`;
-            btn.disabled = false;
-        },
-        err => {
-            st.textContent = (err.code === 1 ? 'Izin lokasi ditolak.' : 'GPS gagal.') + ' Ketuk peta untuk memilih lokasi secara manual.';
-            btn.disabled = false;
-        },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-    );
-}
-
-// Alamat otomatis dari peta (Nominatim reverse). Berhenti menimpa setelah user mengetik alamat sendiri.
-function upJadwalAlamat() {
-    clearTimeout(UP.revTimer);
-    if (UP.alamatManual) return;
-    $('upAlamatStatus').textContent = '⏳ Mencari alamat…';
-    UP.revTimer = setTimeout(upCariAlamat, 700);
-}
-async function upCariAlamat() {
-    if (UP.lat === null) return;
-    if (UP.revAbort) UP.revAbort.abort();
-    const ac = UP.revAbort = new AbortController();
-    const lat = UP.lat, lon = UP.lon, st = $('upAlamatStatus');
-    st.textContent = '⏳ Mencari alamat…';
-    try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=id&lat=${lat}&lon=${lon}`, { signal: ac.signal });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const j = await res.json(), a = j.address || {};
-        const bagian = [a.road || a.pedestrian || a.footway || a.path, a.suburb || a.village || a.neighbourhood, a.city_district, a.city || a.town || a.county, a.state];
-        const teks = [...new Set(bagian.filter(Boolean))].join(', ') || j.display_name || '';
-        if (UP.lat !== lat || UP.lon !== lon || UP.alamatManual) return;
-        if (!teks) throw new Error('alamat kosong');
-        $('upAlamat').value = teks.slice(0, 300);
-        upErr('errLokasi', '');
-        st.textContent = '✓ Alamat terisi otomatis dari peta (boleh Anda ubah).';
-    } catch (e) {
-        if (e.name === 'AbortError') return;
-        st.textContent = 'Alamat otomatis tidak tersedia. Silakan ketik alamat secara manual.';
-    }
-}
-
-function upSetFoto(file) {
-    if (!file) return;
-    if (!/^image\//.test(file.type)) { upErr('errFoto', 'File harus berupa gambar (JPG, PNG, dll).'); return; }
-    if (file.size > BATAS_FOTO) { upErr('errFoto', 'Ukuran foto terlalu besar (maksimal 15 MB).'); return; }
-    if (UP.fotoUrl) URL.revokeObjectURL(UP.fotoUrl);
-    UP.foto = file;
-    UP.fotoUrl = URL.createObjectURL(file);
-    $('upPreview').src = UP.fotoUrl;
-    $('upPreviewBox').hidden = false;
-    upErr('errFoto', '');
-    if (UP.lat === null) upAmbilGPS();      // foto baru diambil → langsung cari lokasi
-}
-function upHapusFoto() {
-    if (UP.fotoUrl) URL.revokeObjectURL(UP.fotoUrl);
-    UP.foto = null; UP.fotoUrl = null;
-    $('upPreview').removeAttribute('src'); $('upPreviewBox').hidden = true;
-    $('upInKamera').value = ''; $('upInGaleri').value = '';
-}
-
-function upPilihKategori(nama) {
-    UP.kategori = nama;
-    $('upKategori').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === nama)));
-    upErr('errKategori', '');
-}
-function upPilihKeparahan(v) {
-    UP.tingkat = v;
-    $('upKeparahan').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
-    upErr('errKeparahan', '');
-    if (UP.marker && typeof L !== 'undefined') UP.marker.setIcon(upIkon());
-}
-
-function upReset() {
-    upHapusFoto();
-    clearTimeout(UP.revTimer); if (UP.revAbort) UP.revAbort.abort();
-    UP.lat = UP.lon = null; UP.kategori = null; UP.tingkat = null; UP.alamatManual = false;
-    if (UP.map && UP.marker) { UP.map.removeLayer(UP.marker); }
-    UP.marker = null;
-    $('upKoord').textContent = 'Koordinat belum dipilih.';
-    $('upAlamat').value = ''; $('upAlamatStatus').textContent = ''; $('upAlamatAuto').hidden = true;
-    $('upGpsStatus').textContent = 'Ketuk peta atau geser pin untuk menyesuaikan lokasi.';
-    $('upDeskripsi').value = ''; $('upHitung').textContent = '0/500';
-    $('upKategori').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
-    $('upKeparahan').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
-    ['errFoto', 'errLokasi', 'errKategori', 'errKeparahan', 'errDeskripsi', 'errUmum'].forEach(id => upErr(id, ''));
-}
-
-function upValidasi() {
-    let pertama = null;
-    const salah = (id, pesan) => { upErr(id, pesan); if (!pertama) pertama = $(id); };
-    ['errFoto', 'errLokasi', 'errKategori', 'errKeparahan', 'errDeskripsi', 'errUmum'].forEach(id => upErr(id, ''));
-
-    if (!UP.foto) salah('errFoto', 'Foto wajib diisi: ambil dari kamera atau pilih dari galeri.');
-    if (UP.lat === null || UP.lon === null || !isFinite(UP.lat) || !isFinite(UP.lon)) salah('errLokasi', 'Tentukan lokasi dengan tombol GPS atau ketuk peta.');
-    else {
-        const al = $('upAlamat').value.trim().replace(/\s+/g, ' ');
-        if (al.length < 5) salah('errLokasi', 'Alamat wajib diisi (minimal 5 karakter).');
-        else if (al.length > 300) salah('errLokasi', 'Alamat maksimal 300 karakter.');
-    }
-    if (!KATEGORI.some(k => k.nama === UP.kategori)) salah('errKategori', 'Pilih salah satu kategori.');
-    if (!KEPARAHAN[UP.tingkat]) salah('errKeparahan', 'Pilih tingkat keparahan.');
-    const d = $('upDeskripsi').value.trim();
-    if (d.length < 10) salah('errDeskripsi', 'Deskripsi minimal 10 karakter.');
-    else if (d.length > 500) salah('errDeskripsi', 'Deskripsi maksimal 500 karakter.');
-
-    if (pertama) pertama.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return !pertama;
-}
-
-function petaGalatLaporan(err) {
-    const m = String((err && err.message) || err || '').toLowerCase();
-    if ((m.includes('kategori') || m.includes('alamat')) && (m.includes('column') || m.includes('schema cache'))) return 'Database belum diperbarui. Jalankan setup-upload-detail.sql di Supabase SQL Editor.';
-    if (m.includes('row-level security') || m.includes('permission denied')) return 'Akun Anda tidak diizinkan mengirim laporan (kebijakan database). Hubungi admin.';
-    if (m.includes('violates check constraint')) return 'Data laporan ditolak database. Periksa kategori, alamat, dan deskripsi.';
-    if (m.includes('failed to fetch') || m.includes('network')) return 'Koneksi bermasalah. Periksa internet Anda lalu coba lagi.';
-    return 'Gagal mengirim laporan: ' + ((err && err.message) || 'terjadi kesalahan.');
-}
-
-async function upKonfirmasi(e) {
-    e.preventDefault();
-    if (UP.kirim) return;
-    if (!upValidasi()) return;
-    UP.kirim = true;
-    const btn = $('upBtnKonfirmasi');
-    btn.disabled = true; btn.textContent = 'Mengirim…';
-    try {
-        const session = await ambilSesi();
-        if (!session) { go('/profil'); return; }
-        if (adalahDemo(session)) { await kirimDemo(); return; }
-
-        const foto = await kompres(UP.foto);
-        const namaFile = `jalan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-        const { error: eUp } = await db.storage.from('foto_laporan').upload(namaFile, foto, { contentType: foto.type || 'image/jpeg' });
-        if (eUp) throw eUp;
-        const { data: u } = db.storage.from('foto_laporan').getPublicUrl(namaFile);
-
-        // user_id terisi otomatis oleh database (default auth.uid()); status default 'baru'
-        const baris = {
-            latitude: UP.lat, longitude: UP.lon, foto_url: u.publicUrl,
-            alamat: $('upAlamat').value.trim().replace(/\s+/g, ' '),
-            kategori: UP.kategori, tingkat: UP.tingkat,
-            deskripsi: $('upDeskripsi').value.trim()
+      const response = await fetch(endpoint, {headers:{'Accept':'application/json'}});
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const data = await response.json();
+      if (requestId !== activeRequest) return;
+      const items = (data.features || []).map(feature => {
+        const props = feature.properties || {};
+        const coords = feature.geometry && feature.geometry.coordinates || [];
+        const parts = [props.street, props.name, props.city, props.district, props.state, props.country]
+          .filter((v, i, a) => v && a.indexOf(v) === i);
+        return {
+          name: props.name || props.street || props.city || props.district || 'Lokasi',
+          detail: parts.join(', '),
+          lat: coords[1], lon: coords[0]
         };
-        let kode = null, eIns = null;
-        for (let i = 0; i < 3; i++) {                       // ulangi bila kode kebetulan bentrok (unique)
-            kode = buatKode();
-            ({ error: eIns } = await db.from('laporan_jalan').insert([{ ...baris, kode }]));
-            if (!eIns || eIns.code !== '23505') break;
-        }
-        if (eIns) throw eIns;
-
-        upReset();
-        go(`/konfirmasi?kode=${encodeURIComponent(kode)}`);
-    } catch (err) {
-        console.error(err);
-        upErr('errUmum', petaGalatLaporan(err));
-    } finally {
-        UP.kirim = false; btn.disabled = false; btn.textContent = 'Konfirmasi';
+      });
+      renderSuggestions(items, query);
+    } catch (error) {
+      if (requestId !== activeRequest) return;
+      renderSuggestions([], query);
+      console.warn('Geocoding Photon gagal:', error);
     }
-}
+  }
 
-$('upBtnKamera').addEventListener('click', () => $('upInKamera').click());
-$('upBtnGaleri').addEventListener('click', () => $('upInGaleri').click());
-$('upInKamera').addEventListener('change', e => upSetFoto(e.target.files && e.target.files[0]));
-$('upInGaleri').addEventListener('change', e => upSetFoto(e.target.files && e.target.files[0]));
-$('upGantiFoto').addEventListener('click', upHapusFoto);
-$('upBtnGPS').addEventListener('click', upAmbilGPS);
-$('upKategori').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (b) upPilihKategori(b.dataset.k); });
-$('upKeparahan').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (b) upPilihKeparahan(b.dataset.v); });
-$('upDeskripsi').addEventListener('input', () => { $('upHitung').textContent = $('upDeskripsi').value.length + '/500'; upErr('errDeskripsi', ''); });
-$('upAlamat').addEventListener('input', () => { UP.alamatManual = true; $('upAlamatAuto').hidden = false; $('upAlamatStatus').textContent = ''; upErr('errLokasi', ''); });
-$('upAlamatAuto').addEventListener('click', e => { e.preventDefault(); UP.alamatManual = false; $('upAlamatAuto').hidden = true; if (UP.lat !== null) upCariAlamat(); });
-$('upForm').addEventListener('submit', upKonfirmasi);
+  function syncClearButton() {
+    if (clearBtn) clearBtn.hidden = !searchInput.value.trim();
+  }
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      syncClearButton();
+      if (legacySearch) {
+        legacySearch.value = searchInput.value;
+        legacySearch.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+      clearTimeout(searchTimer);
+      const query = searchInput.value.trim();
+      if (query.length < 3) { suggestPanel.hidden = true; return; }
+      searchTimer = setTimeout(() => {
+        const requestId = ++activeRequest;
+        geocode(query, requestId);
+      }, 350);
+    });
+    searchInput.addEventListener('keydown', event => {
+      if (event.key === 'Escape') suggestPanel.hidden = true;
+      if (event.key === 'Enter') {
+        const first = suggestPanel.querySelector('.sg');
+        if (!suggestPanel.hidden && first && first.tagName === 'BUTTON') { event.preventDefault(); first.click(); }
+      }
+    });
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = ''; syncClearButton(); suggestPanel.hidden = true;
+      if (legacySearch) { legacySearch.value = ''; legacySearch.dispatchEvent(new Event('input', {bubbles:true})); }
+      searchInput.focus();
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.kk-searchbar')) suggestPanel.hidden = true;
+    });
+  }
 
-async function masukUpload() { upInitPeta(); }
-
-/* ---------- Data detail (RPC detail_laporan) ---------- */
-function kodeDariRute() {
-    const k = (rutePar.get('kode') || '').trim().toUpperCase();
-    return /^[A-Z0-9-]{4,24}$/.test(k) ? k : null;
-}
-async function ambilDetail(kode) {
-    const sDemo = await ambilSesi();
-    if (adalahDemo(sDemo)) return demoLaporan().find(x => x.kode === kode) || null;
-    const { data, error } = await db.rpc('detail_laporan', { p_kode: kode });
-    if (error) throw error;
-    return (data && data[0]) || null;
-}
-function pesanGalatDetail(err) {
-    const m = String((err && err.message) || '').toLowerCase();
-    if (err && (err.code === 'PGRST202' || m.includes('could not find the function'))) return 'Fungsi database detail_laporan belum dibuat. Jalankan setup-upload-detail.sql di Supabase SQL Editor.';
-    return 'Gagal memuat laporan: ' + ((err && err.message) || 'periksa koneksi internet.');
-}
-
-/* ---------- Konfirmasi ---------- */
-async function masukKonfirmasi() {
-    const muat = $('kfMuat'), ok = $('kfOk'), gagal = $('kfGagal');
-    muat.hidden = false; ok.hidden = true; gagal.hidden = true;
-    const kode = kodeDariRute();
-    const tampilGagal = teks => { muat.hidden = true; ok.hidden = true; gagal.hidden = false; $('kfGagalTeks').textContent = teks; };
-    if (!kode) { tampilGagal('Kode laporan tidak valid.'); return; }
-    try {
-        const d = await ambilDetail(kode);
-        if (!d) { tampilGagal('Laporan tidak ditemukan di akun Anda, jadi belum bisa dikonfirmasi.'); return; }
-        $('kfKode').textContent = d.kode;
-        $('kfDetail').dataset.kode = d.kode;
-        muat.hidden = true; gagal.hidden = true; ok.hidden = false;
-    } catch (err) { console.error(err); tampilGagal(pesanGalatDetail(err)); }
-}
-$('kfBeranda').addEventListener('click', () => go('/dashboard'));
-$('kfDetail').addEventListener('click', () => { const k = $('kfDetail').dataset.kode; if (k) go(`/detail?kode=${encodeURIComponent(k)}`); });
-$('kfKeUpload').addEventListener('click', () => go('/upload'));
-
-/* ---------- Detail ---------- */
-const STATUS_DETAIL = { baru: 'Akan Segera Ditangani', diproses: 'Sedang Ditangani', selesai: 'Selesai Ditangani' };
-
-async function masukDetail() {
-    const muat = $('dtMuat'), isi = $('dtIsi'), gagal = $('dtGagal');
-    muat.hidden = false; isi.hidden = true; gagal.hidden = true;
-    const tampilGagal = teks => { muat.hidden = true; isi.hidden = true; gagal.hidden = false; gagal.textContent = teks; };
-    const kode = kodeDariRute();
-    if (!kode) { tampilGagal('Kode laporan tidak valid.'); return; }
-    try {
-        const d = await ambilDetail(kode);
-        if (!d) { tampilGagal('Laporan tidak ditemukan. Hanya laporan milik akun Anda yang bisa dibuka.'); return; }
-        renderDetail(d);
-        muat.hidden = true; gagal.hidden = true; isi.hidden = false;
-    } catch (err) { console.error(err); tampilGagal(pesanGalatDetail(err)); }
-}
-
-function renderDetail(d) {
-    const st = STATUS_DETAIL[d.status] ? d.status : 'baru';
-    const elSt = $('dtStatus');
-    elSt.textContent = STATUS_DETAIL[st];
-    elSt.className = 'dt-status ' + st;
-
-    const foto = $('dtFoto');
-    foto.src = d.foto_url || '';
-    foto.hidden = !d.foto_url;
-
-    $('dtKategori').textContent = d.kategori || 'Belum dikategorikan';
-
-    const kep = KEPARAHAN[d.tingkat];
-    $('dtKeparahan').innerHTML = kep
-        ? `<span class="dt-kep"><span class="dot ${esc(d.tingkat)}"></span>${esc(kep.label)}</span>`
-        : '-';
-
-    const lat = Number(d.latitude), lon = Number(d.longitude);
-    const lok = $('dtLokasi');
-    if (d.alamat) { lok.textContent = d.alamat; }
-    else {   // laporan lama tanpa alamat: tampilkan nama jalan hasil reverse geocoding
-        const r = { latitude: lat, longitude: lon };
-        lok.innerHTML = `<span data-rev="${esc(kunciRev(r))}">${esc(namaLokasi(r))}</span>`;
-        mintaReverse(r);
+  if (gpsBtn) gpsBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('Browser ini tidak mendukung GPS.'); return;
     }
-    $('dtKoord').innerHTML = `${lat.toFixed(6)}, ${lon.toFixed(6)} · <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" rel="noopener">Buka di peta</a>`;
-
-    const n = Number(d.jumlah_pelapor) || 1;
-    $('dtPelapor').textContent = `${n.toLocaleString('id-ID')} pelapor`;
-    $('dtWaktu').textContent = new Date(d.waktu).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) + ` (${waktuRelatif(d.waktu)})`;
-    $('dtKode').textContent = 'Kode: ' + d.kode;
-    $('dtDeskripsi').textContent = d.deskripsi || '-';
-    $('dtCatatanBox').hidden = !d.catatan_admin;
-    $('dtCatatan').textContent = d.catatan_admin || '';
-}
-
-$('dtKembali').addEventListener('click', () => {
-    if (jumlahNavigasi > 1 && history.length > 1) history.back(); else go('/laporan');
-});
-
-/* =====================================================================
-   FITUR BARU: sesi simulasi, mode tamu, Profil, Akun, Rekaman, Preferensi
-   ===================================================================== */
-let PREF = { autoRefresh: true, ingatKota: true, ...(bacaLS('kk_pref_v1') || {}) };
-const POIN = { kirim: 10, selesai: 20 };
-const blobKeDataUrl = b => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(b); });
-
-function profilDemo() {
-    let p = bacaLS(KUNCI_DEMO_PROFIL);
-    if (!p) {
-        p = { id: 'demo-user', nama: 'Pengguna Demo', username: DEMO.username, email: 'demo@kotakita.id', telp: '', kota: 'Bandung', foto_url: null, password: DEMO.password, created_at: new Date().toISOString() };
-        simpanLS(KUNCI_DEMO_PROFIL, p);
-    }
-    return p;
-}
-const demoLaporan = () => bacaLS(KUNCI_DEMO_LAP) || [];
-function adalahDemo(s) { return !!(s && s.user && s.user.demo); }
-async function ambilSesi() {
-    const { data: { session } } = await db.auth.getSession();
-    if (session) return session;
-    if (MODE_DEMO && (bacaLS(KUNCI_DEMO) || {}).aktif) {
-        const p = profilDemo();
-        return { user: { id: p.id, email: p.email, phone: p.telp, created_at: p.created_at, demo: true } };
-    }
-    return null;
-}
-function arahLogin(pesan) { pesanGuestBerikut = pesan || null; go('/profil'); }
-
-function terapkanModeTamu() {
-    const g = KK.guest;
-    $('kkGuestBanner').hidden = !g;
-    $('kkCari').readOnly = g;
-    $('kkCari').placeholder = g ? '🔒 Masuk untuk mencari jalan' : 'Cari nama jalan...';
-    $('btnLokasiSaya').textContent = g ? '🔒 Lokasi saya' : '🎯 Lokasi saya';
-    if (g) $('kotaLabel').textContent = 'Pilih kota 🔒';
-}
-$('kkCari').addEventListener('focus', () => { if (KK.guest) { $('kkCari').blur(); arahLogin('Masuk untuk mencari jalan dan memakai fitur Lokasi.'); } });
-$('wlMulai').addEventListener('click', () => go('/dashboard'));
-$('wlMasuk').addEventListener('click', () => go('/login'));
-$('pgDemo').hidden = !MODE_DEMO;
-
-async function ambilLaporanSaya(session, batas = 50) {
-    if (adalahDemo(session)) return demoLaporan().slice(0, batas);
-    const { data, error } = await db.from('laporan_jalan')
-        .select('kode,tingkat,status,waktu,deskripsi,catatan_admin,foto_url')
-        .eq('user_id', session.user.id).order('waktu', { ascending: false }).limit(batas);
-    if (error) throw error;
-    return data || [];
-}
-async function kirimDemo() {      // laporan simulasi: disimpan lokal, tidak dikirim ke server
-    const foto = await kompres(UP.foto, 640, 0.7);
-    const kode = buatKode();
-    const lap = demoLaporan();
-    lap.unshift({ kode, latitude: UP.lat, longitude: UP.lon, foto_url: await blobKeDataUrl(foto),
-        alamat: $('upAlamat').value.trim().replace(/\s+/g, ' '), kategori: UP.kategori, tingkat: UP.tingkat,
-        deskripsi: $('upDeskripsi').value.trim(), status: 'baru', waktu: new Date().toISOString(), catatan_admin: null, jumlah_pelapor: 1 });
-    try { localStorage.setItem(KUNCI_DEMO_LAP, JSON.stringify(lap.slice(0, 20))); } catch (e) { throw new Error('penyimpanan lokal penuh'); }
-    upReset();
-    go(`/konfirmasi?kode=${encodeURIComponent(kode)}`);
-}
-async function unggahAvatar(blob, session) {
-    if (adalahDemo(session)) { const p = profilDemo(); p.foto_url = await blobKeDataUrl(blob); simpanLS(KUNCI_DEMO_PROFIL, p); return p.foto_url; }
-    const uid = session.user.id, path = `${uid}/avatar.jpg`;
-    const { error: eUp } = await db.storage.from('avatar').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
-    if (eUp) throw eUp;
-    const { data: u } = db.storage.from('avatar').getPublicUrl(path);
-    const url = `${u.publicUrl}?v=${Date.now()}`;
-    const { error: eDb } = await db.from('profiles').update({ foto_url: url }).eq('id', uid);
-    if (eDb) throw eDb;
-    return url;
-}
-
-/* ---------- Profil ---------- */
-async function masukProfil(session) {
-    if (!session) { notice('notPg', pesanGuestBerikut || '', 'info'); pesanGuestBerikut = null; return; }
-    const p = profil || {};
-    const nama = p.nama || session.user.email || 'Pengguna';
-    $('pfAvatar').innerHTML = p.foto_url ? `<img src="${esc(p.foto_url)}" alt="">` : esc(inisial(nama));
-    $('pfNama').textContent = nama;
-    $('pfUser').textContent = p.username ? '@' + p.username : '';
-    $('pfKontak').textContent = session.user.email || p.email || session.user.phone || p.telp || '';
-    const t = new Date(p.created_at || session.user.created_at);
-    $('pfAktif').textContent = isNaN(t) ? '' : 'Aktif sejak ' + t.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const isi = v => ['pfTotal', 'pfProses', 'pfSelesai', 'pfPoin'].forEach((id, i) => { $(id).textContent = v[i]; });
-    isi(['…', '…', '…', '…']);
-    try {
-        const d = await ambilLaporanSaya(session, 500);
-        const sel = d.filter(x => x.status === 'selesai').length, pro = d.filter(x => x.status === 'diproses').length;
-        isi([d.length, pro, sel, d.length * POIN.kirim + sel * POIN.selesai]);
-    } catch (e) { isi(['-', '-', '-', '-']); }
-}
-$('pfKeluar').addEventListener('click', () => { if (confirm('Keluar dari akun?')) keluar(); });
-
-/* ---------- Akun ---------- */
-const AKF = [['nama', 'akNama', 'Nama', 'text', 'name'], ['email', 'akEmail', 'Email', 'email', 'email'], ['telp', 'akTelp', 'No. Telepon', 'tel', 'tel'],
-             ['username', 'akUser', 'Username', 'text', 'username'], ['password', 'akPass', 'Kata Sandi', 'password', 'new-password']];
-const IKON_EDIT = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
-$('akFields').innerHTML = AKF.map(([k, id, lbl, tipe, ac]) =>
-    `<div class="field" data-f="${k}"><label for="${id}">${lbl}</label><div class="ak-in"><input id="${id}" type="${tipe}" autocomplete="${ac}" maxlength="72" readonly>` +
-    `<button type="button" class="ak-edit" data-k="${k}" aria-label="Ubah ${lbl}">${IKON_EDIT}</button></div><div class="err"></div></div>`).join('');
-const AK = { foto: null, edit: {}, asli: {} };
-
-async function masukAkun(session) {
-    AK.foto = null; AK.edit = {}; $('akInFoto').value = '';
-    const p = profil || {};
-    AK.asli = { nama: p.nama || '', email: session.user.email || p.email || '', telp: session.user.phone || p.telp || '', username: p.username || '', password: '••••••••' };
-    AKF.forEach(([k, id]) => { const i = $(id); i.value = AK.asli[k]; i.readOnly = true; i.placeholder = ''; });
-    $('akForm').querySelectorAll('.ak-edit').forEach(b => b.classList.remove('on'));
-    bersihkanErr($('akForm')); notice('notAk', '');
-    $('akAvatar').innerHTML = p.foto_url ? `<img src="${esc(p.foto_url)}" alt="">` : esc(inisial(AK.asli.nama || session.user.email || '?'));
-}
-$('akForm').addEventListener('click', e => {
-    const b = e.target.closest('.ak-edit'); if (!b) return;
-    const k = b.dataset.k, inp = $(AKF.find(f => f[0] === k)[1]);
-    AK.edit[k] = !AK.edit[k];
-    inp.readOnly = !AK.edit[k]; b.classList.toggle('on', !!AK.edit[k]);
-    inp.value = (k === 'password' && AK.edit[k]) ? '' : AK.asli[k];      // klik lagi = batal
-    inp.placeholder = (k === 'password' && AK.edit[k]) ? 'Kata sandi baru' : '';
-    if (AK.edit[k]) inp.focus();
-});
-$('akFotoBtn').addEventListener('click', () => $('akInFoto').click());
-$('akAvatar').addEventListener('click', () => $('akInFoto').click());
-$('akInFoto').addEventListener('change', async e => {
-    const f = e.target.files && e.target.files[0]; if (!f) return;
-    if (!f.type.startsWith('image/') || f.size > BATAS_FOTO) { notice('notAk', 'Pilih file gambar, maksimal 15 MB.', 'err'); return; }
-    try {
-        AK.foto = await cropAvatar(f);
-        $('akAvatar').innerHTML = `<img src="${URL.createObjectURL(AK.foto)}" alt="">`;
-        notice('notAk', 'Foto dipilih. Tekan Simpan untuk menyimpannya.', 'info');
-    } catch (err) { notice('notAk', 'Foto tidak bisa dibaca. Coba foto lain.', 'err'); }
-});
-$('akForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const f = $('akForm'), a = AK.asli, v = {};
-    bersihkanErr(f); notice('notAk', '');
-    const session = await ambilSesi();
-    if (!session) { arahLogin('Sesi berakhir. Silakan masuk lagi.'); return; }
-    const demo = adalahDemo(session);
-    let ok = true;
-    const salah = (k, m) => { setErr(f, k, m); ok = false; };
-    const nilai = k => $(AKF.find(x => x[0] === k)[1]).value;
-
-    if (AK.edit.nama) { const n = nilai('nama').trim().replace(/\s+/g, ' '); if (!RE_NAMA.test(n)) salah('nama', 'Nama 2–60 karakter, hanya huruf, spasi, titik, apostrof, atau strip.'); else if (n !== a.nama) v.nama = n; }
-    if (AK.edit.email) { const m = nilai('email').trim().toLowerCase(); if (!RE_EMAIL.test(m)) salah('email', 'Format email tidak valid.'); else if (m !== a.email.toLowerCase()) v.email = m; }
-    if (AK.edit.telp) { const t = normalisasiTelp(nilai('telp')); if (!t) salah('telp', 'Nomor telepon tidak valid. Contoh: 08123456789.'); else if (t !== normalisasiTelp(a.telp)) v.telp = t; }
-    if (AK.edit.username) {
-        const u = nilai('username').trim().toLowerCase();
-        if (!RE_USERNAME.test(u)) salah('username', 'Username 4–20 karakter: huruf kecil, angka, _ atau ., diawali huruf.');
-        else if (u !== a.username) {
-            if (!demo) { const { data: ada } = await db.rpc('username_tersedia', { p_username: u }); if (ada === false) salah('username', 'Username sudah dipakai.'); else v.username = u; }
-            else v.username = u;
-        }
-    }
-    if (AK.edit.password) { const pw = cekPassword(nilai('password')); if (pw) salah('password', pw); else v.password = nilai('password'); }
-    if (!ok) { f.querySelector('.salah input')?.focus(); return; }
-    if (!Object.keys(v).length && !AK.foto) { notice('notAk', 'Tidak ada perubahan untuk disimpan.', 'info'); return; }
-
-    const btn = $('btnAkSimpan');
-    btn.disabled = true; btn.textContent = 'Menyimpan...';
-    let pesan = 'Perubahan berhasil disimpan.';
-    try {
-        if (demo) {
-            const p = profilDemo();
-            ['nama', 'email', 'telp', 'username', 'password'].forEach(k => { if (v[k]) p[k] = v[k]; });
-            if (AK.foto) p.foto_url = await blobKeDataUrl(AK.foto);
-            simpanLS(KUNCI_DEMO_PROFIL, p);
-        } else {
-            if (AK.foto) await unggahAvatar(AK.foto, session);
-            const up = {}; if (v.nama) up.nama = v.nama; if (v.username) up.username = v.username;
-            if (Object.keys(up).length) { const { error } = await db.from('profiles').update(up).eq('id', session.user.id); if (error) throw error; }
-            if (v.email) { const { error } = await db.auth.updateUser({ email: v.email }, { emailRedirectTo: BASE_URL }); if (error) throw error; pesan += ' Cek email baru Anda untuk mengonfirmasi alamat tersebut.'; }
-            if (v.telp) { const { error } = await db.auth.updateUser({ phone: v.telp }); if (error) throw error; }
-            if (v.password) { const { error } = await db.auth.updateUser({ password: v.password }); if (error) throw error; }
-        }
-        const s2 = await ambilSesi();
-        await muatProfil(s2); renderNavbar(s2); await masukAkun(s2);
-        notice('notAk', pesan, 'ok');
-    } catch (err) {
-        console.error(err);
-        if (err.code === '23505') setErr(f, 'username', 'Username sudah dipakai.');
-        notice('notAk', 'Gagal menyimpan: ' + (err.message || 'periksa koneksi.'), 'err');
-    } finally { btn.disabled = false; btn.textContent = 'Simpan'; }
-});
-
-/* ---------- Rekaman & Preferensi ---------- */
-async function masukRekaman(session) {
-    const box = $('rkList'); box.textContent = 'Memuat...';
-    try {
-        const d = await ambilLaporanSaya(session, 100);
-        box.innerHTML = d.length ? d.map(r => {
-            const st = ['baru', 'diproses', 'selesai'].includes(r.status) ? r.status : 'baru';
-            return `<a class="rk-item" href="#/detail?kode=${encodeURIComponent(r.kode)}"><b style="font-family:monospace">${esc(r.kode)}</b> <span class="badge ${st}">${LABEL_STATUS[st]}</span>` +
-                `<small>${esc(new Date(r.waktu).toLocaleString('id-ID'))}${r.deskripsi ? ' · ' + esc(r.deskripsi.slice(0, 70)) : ''}</small></a>`;
-        }).join('') : '<p class="kk-info">Belum ada rekaman. Buat laporan pertama Anda lewat menu Upload.</p>';
-    } catch (err) { box.textContent = 'Gagal memuat rekaman: ' + (err.message || 'periksa koneksi.'); }
-}
-function masukPreferensi() { $('prAuto').checked = PREF.autoRefresh; $('prKota').checked = PREF.ingatKota; }
-$('prAuto').addEventListener('change', e => { PREF.autoRefresh = e.target.checked; simpanLS('kk_pref_v1', PREF); if (!PREF.autoRefresh) hentikanAutoRefresh(); });
-$('prKota').addEventListener('change', e => {
-    PREF.ingatKota = e.target.checked; simpanLS('kk_pref_v1', PREF);
-    if (!PREF.ingatKota) { try { localStorage.removeItem('kk_kota_pilihan'); } catch (x) { /* abaikan */ } }
-});
-
-/* =====================================================================
-   Mulai aplikasi
-   ===================================================================== */
-(async function mulai() {
-    if (DARI_RECOVERY) { modeReset = true; history.replaceState(null, '', BASE_URL + '#/reset'); }
-    else if (DARI_SIGNUP) { history.replaceState(null, '', BASE_URL + '#/dashboard'); }   // baru konfirmasi email
-    else if (GALAT_LINK) {
-        history.replaceState(null, '', BASE_URL + '#/login');
-        pesanLoginBerikut = { tipe: 'err', teks: 'Tautan tidak valid atau sudah kedaluwarsa: ' + decodeURIComponent(GALAT_LINK.replace(/\+/g, ' ')) };
-    }
-    await router();
+    gpsBtn.disabled = true;
+    const oldText = gpsBtn.querySelector('span');
+    if (oldText) oldText.textContent = 'Mencari lokasi…';
+    navigator.geolocation.getCurrentPosition(position => {
+      const {latitude, longitude, accuracy} = position.coords;
+      moveMap(latitude, longitude, 16, 'Lokasi saya (akurasi ±' + Math.round(accuracy) + ' m)', 'gps');
+      gpsBtn.disabled = false;
+      if (oldText) oldText.textContent = 'Lokasi saya';
+    }, error => {
+      gpsBtn.disabled = false;
+      if (oldText) oldText.textContent = 'Lokasi saya';
+      const message = error.code === 1
+        ? 'Izin lokasi ditolak. Aktifkan izin lokasi pada browser.'
+        : error.code === 2 ? 'Lokasi tidak tersedia. Coba lagi di tempat terbuka.'
+        : 'Permintaan GPS terlalu lama. Coba lagi.';
+      alert(message);
+    }, {enableHighAccuracy:true, timeout:12000, maximumAge:30000});
+  });
 })();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const go = (url) => { if (url) window.location.href = url; };
+
+  // Kontrol hapus untuk search bar Beranda.
+  const inputCariBeranda = document.getElementById('cariLokasi');
+  const tombolHapusCari = document.getElementById('kkCariHapus');
+  const saranCariBeranda = document.getElementById('kkSuggest');
+  if (inputCariBeranda && tombolHapusCari) {
+    const sinkronTombolHapus = () => { tombolHapusCari.hidden = !inputCariBeranda.value.trim(); };
+    inputCariBeranda.addEventListener('input', sinkronTombolHapus);
+    tombolHapusCari.addEventListener('click', () => {
+      inputCariBeranda.value = '';
+      sinkronTombolHapus();
+      if (saranCariBeranda) saranCariBeranda.hidden = true;
+      inputCariBeranda.focus();
+      inputCariBeranda.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    sinkronTombolHapus();
+  }
+  document.querySelectorAll('form').forEach(form => form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.classList.contains('login__form')) { go('dashboard.html'); return; }
+    if (form.classList.contains('registration__form')) { go('login.html'); return; }
+    if (form.querySelector('input[type="file"]')) { go('detail-after-UploadLaporan.html'); return; }
+  }));
+  document.querySelectorAll('.issue-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.issue-btn').forEach(x => x.classList.remove('selected')); btn.classList.add('selected');
+  }));
+  document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active')); btn.classList.add('active');
+  }));
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    const c=btn.className; if(c.includes('vouchers')) go('Profil-Poin(Semua).html#voucher'); else if(c.includes('history')) go('rekamLaporan.html'); else go('Profil-Poin(Semua).html');
+  }));
+  document.querySelectorAll('.save').forEach(btn => btn.addEventListener('click', () => { alert('Perubahan berhasil disimpan.'); }));
+  document.querySelectorAll('.logout').forEach(btn => btn.addEventListener('click', () => go('welcome.html')));
+  document.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', () => go('detail-after-UploadLaporan.html')));
+  document.querySelectorAll('.detail-button.withdraw').forEach(btn => btn.addEventListener('click', () => { if(confirm('Tarik laporan ini?')) go('rekamLaporan.html'); }));
+  document.querySelectorAll('.download').forEach(btn => btn.addEventListener('click', () => {
+    const blob=new Blob(['Riwayat laporan KotaKita'],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='riwayat-laporan.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }));
+  document.querySelectorAll('.redeem:not(:disabled)').forEach(btn => btn.addEventListener('click', () => alert('Penukaran poin dipilih. Konfirmasi transaksi memerlukan backend aplikasi.')));
+  document.querySelectorAll('.action').forEach(btn => btn.addEventListener('click', () => alert(btn.classList.contains('feedback')?'Terima kasih atas masukan Anda.':'Silakan gunakan kanal kontak resmi KotaKita.')));
+  // Dropdown kota ditangani oleh modul fitur pencarian lokasi di atas.
+  document.querySelectorAll('.avatar-upload').forEach(btn => btn.addEventListener('click', () => {
+    let i=document.querySelector('#avatar-file'); if(!i){i=document.createElement('input');i.type='file';i.id='avatar-file';i.accept='image/*';i.hidden=true;document.body.appendChild(i);} i.click();
+  }));
+  document.querySelectorAll('.location-card__edit-btn').forEach(btn => btn.addEventListener('click', () => go('lokasi.html')));
+});
 </script>
 </body>
 </html>
