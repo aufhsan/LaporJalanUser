@@ -560,6 +560,8 @@ document.querySelectorAll('.city-picker').forEach(btn=>btn.addEventListener('cli
   if(city&&city.trim()){btn.setAttribute('aria-label','Kota '+city.trim());const t=Array.from(btn.childNodes).find(n=>n.nodeType===3&&n.textContent.trim());if(t)t.textContent=' '+city.trim()+' ';}
 }));
 </script>
-<script type="module" src="js/masukan.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/masukan.js"></script>
 </body>
 </html>
