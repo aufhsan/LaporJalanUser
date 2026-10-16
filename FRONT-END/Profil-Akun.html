@@ -640,13 +640,16 @@ async function muatProfil(user) {
 
 function nilai(row, user, f) {
   const ada = row ? FIELDS[f].filter((c) => c in row) : [];
-  const kIsi = ada.find((c) => row[c] !== null && row[c] !== undefined && row[c] !== '');
+  // nomor telepon: hanya terima isi yang berbentuk nomor (kolom "kontak" bisa berisi email)
+  const layak = (c) => row[c] !== null && row[c] !== undefined && row[c] !== ''
+    && (f !== 'telp' || (/^[0-9+\-\s()]+$/.test(String(row[c]).trim()) && String(row[c]).replace(/\D/g, '').length >= 8));
+  const kIsi = ada.find(layak);
   const v = kIsi ? row[kIsi] : null;
   if (v !== null && v !== undefined && v !== '') return v;
   const m = user.user_metadata || {};
   if (f === 'nama') return m.nama || m.full_name || m.name || '';
   if (f === 'username') return m.username || '';
-  if (f === 'telp') return m.phone || user.phone || '';
+  if (f === 'telp') { const t = String(m.phone || user.phone || ''); return /^[0-9+\-\s()]{8,}$/.test(t) ? t : ''; }
   if (f === 'avatar') return m.avatar_url || '';
   if (f === 'dibuat') return user.created_at || '';
   return '';
