@@ -421,6 +421,36 @@
 }
 /* <<< MOBILE-OPT <<< */
 </style>
+<style>
+/* Mode edit: tanpa kotak fokus bawaan, lebar dibatasi agar muat di dalam field */
+@media (min-width: 768px) {
+  .field-value[contenteditable="true"],
+  .field-value[contenteditable="plaintext-only"] {
+    width: 290px !important;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  /* Setelah ada foto: ikon kamera pindah ke kanan bawah lingkaran */
+  .camera.ada-foto {
+    left: 1030px; top: 497px;
+    width: 52px; height: 52px;
+    padding: 11px; box-sizing: border-box;
+    background: #fff; border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(9, 46, 109, .28);
+    cursor: pointer;
+  }
+}
+.field-value[contenteditable="true"],
+.field-value[contenteditable="plaintext-only"] { outline: none; caret-color: #092e6d; }
+@media (max-width: 767px) {
+  .camera.ada-foto {
+    transform: translate(33px, 33px);
+    padding: 6px; box-sizing: border-box;
+    background: #fff; border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(9, 46, 109, .28);
+  }
+}
+</style>
 </head>
 
 <body>
@@ -668,6 +698,7 @@ function pasang(e, penunjuk, placeholder) {
   if (penunjuk) { penunjuk.style.cursor = 'pointer'; penunjuk.addEventListener('click', () => mulaiEdit(e, placeholder)); }
 }
 
+[el.nama, el.user, el.telp].forEach((e) => { e.spellcheck = false; });
 const pensil = document.querySelectorAll('.edit');   // urutan: nama, username, email, telp
 pasang(el.nama, pensil[0], 'Isi nama');
 pasang(el.user, pensil[1], 'Isi username');
@@ -711,7 +742,10 @@ inputFoto.addEventListener('change', () => {
   avatarFile = f;
   tampilFoto(URL.createObjectURL(f));
 });
+const kamera = document.querySelector('.camera');
+kamera.addEventListener('click', () => inputFoto.click());
 function tampilFoto(url) {
+  kamera.classList.add('ada-foto');
   avatarBtn.style.background = `#f0f8ff center / cover no-repeat url("${url.replace(/"/g, '%22')}")`;
 }
 
@@ -731,6 +765,14 @@ if (ubahSandi) {
 /* ---------- Simpan ---------- */
 function pesanDb(err) {
   if (err && err.code === '23505') return 'Username sudah dipakai pengguna lain.';
+  const m = String((err && err.message) || '').toLowerCase();
+  if (err && (err.code === '42501' || m.includes('row-level security') || m.includes('permission denied')))
+    return 'Akses ditolak: tabel "profiles" belum mengizinkan pengguna mengubah datanya sendiri.\n\n'
+      + 'Jalankan di SQL Editor Supabase:\n\n'
+      + 'grant select, insert, update on public.profiles to authenticated;\n'
+      + 'create policy "profiles_update_own" on public.profiles\n'
+      + '  for update to authenticated\n'
+      + '  using (auth.uid() = id) with check (auth.uid() = id);';
   return K.pesanGalat(err);
 }
 
