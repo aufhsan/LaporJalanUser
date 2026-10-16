@@ -766,14 +766,16 @@ if (ubahSandi) {
 function pesanDb(err) {
   if (err && err.code === '23505') return 'Username sudah dipakai pengguna lain.';
   const m = String((err && err.message) || '').toLowerCase();
+  const detail = err ? `\n\nDetail: [${err.code || '-'}] ${err.message || ''}` : '';
   if (err && (err.code === '42501' || m.includes('row-level security') || m.includes('permission denied')))
     return 'Akses ditolak: tabel "profiles" belum mengizinkan pengguna mengubah datanya sendiri.\n\n'
       + 'Jalankan di SQL Editor Supabase:\n\n'
       + 'grant select, insert, update on public.profiles to authenticated;\n'
+      + 'drop policy if exists "profiles_update_own" on public.profiles;\n'
       + 'create policy "profiles_update_own" on public.profiles\n'
-      + '  for update to authenticated\n'
-      + '  using (auth.uid() = id) with check (auth.uid() = id);';
-  return K.pesanGalat(err);
+      + `  for update to authenticated\n  using (auth.uid() = ${kolId}) with check (auth.uid() = ${kolId});`
+      + detail;
+  return K.pesanGalat(err) + detail;
 }
 
 async function unggahFoto(uid) {
@@ -824,6 +826,7 @@ btnSimpan.addEventListener('click', async () => {
     if (hasil.error) throw hasil.error;
 
     if (dilewati.length) alert('Tersimpan, kecuali: ' + dilewati.join(', ') + '. Kolomnya tidak ditemukan di tabel "profiles".');
+    try { localStorage.setItem('kk:radius', String(radius)); } catch (e) {}   // dipakai halaman peta (dashboard/lokasi/laporan)
     window.location.href = 'Profil.html';
   } catch (err) {
     console.error('[profil-akun]', err);
