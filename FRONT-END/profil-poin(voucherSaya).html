@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil • Poin — Voucher Saya — KotaKita</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #092e6d;
+      --text: #131b2e;
+      --surface: #f7fbfd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background: linear-gradient(90deg, #fff 0%, #d5e1f4 57.2%, #a8bfe7 100%);
+      zoom: 0.67; /* Disamakan dengan Profil-Poin(Semua).html */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      padding: 0;
+      border: 0;
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    img, p, h1, h2, h3 {
+      margin: 0;
+      display: block;
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Header Navbar Glassmorphism Modern */
+    .header {
+      position: fixed;
+      top: 15px;
+      left: 17px;
+      right: 17px;
+      z-index: 1000;
+      min-height: 96px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(177,201,242,0.3));
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 32px rgba(9,46,109,0.12);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--navy);
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .city-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--navy);
+      border-radius: 58px;
+      background: rgba(247,251,253,0.4);
+      color: var(--navy);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .city-picker .icon-arrow {
+      transform: rotate(90deg);
+      width: 18px;
+      height: 18px;
+    }
+
+    .navigation {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-left: auto;
+    }
+
+    .navigation a {
+      position: relative;
+      padding: 12px 0;
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .navigation a.active {
+      font-weight: 600;
+    }
+
+    .navigation a.active::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -2px;
+      left: 0;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--navy);
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: 20px;
+    }
+
+    .points {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 58px;
+      background: linear-gradient(135deg, #3280f3, #0c336c);
+      color: #FFFFFF;
+      font-size: 20px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .coin {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #ffe588;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffdf6d, #ffb300);
+      color: #7a4b00;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .profile {
+      display: grid;
+      place-items: center;
+      width: 49px;
+      height: 49px;
+      border-radius: 50%;
+      background: #b2d1ff;
+      color: var(--navy);
+    }
+
+    /* Layout Konten Utama */
+    .page {
+      position: relative;
+      width: 1920px;
+      height: 1150px;
+      margin: 0 auto;
+      padding-top: 140px;
+    }
+
+    .t {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      line-height: 16px;
+      letter-spacing: .24px;
+    }
+
+    .center {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .breadcrumb {
+      left: 201px;
+      top: 166px;
+      width: 265px;
+      height: 22px;
+      font-size: 32px;
+      font-weight: 600;
+      white-space: pre;
+      color: var(--navy);
+    }
+
+    .breadcrumb strong {
+      font-weight: 700;
+    }
+
+    .page-title {
+      left: 201px;
+      top: 242px;
+      width: 265px;
+      height: 22px;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .balance {
+      position: absolute;
+      left: 195px;
+      top: 303px;
+      width: 679px;
+      height: 219px;
+      border-radius: 20px;
+      background: linear-gradient(103deg, #f4dc3b, #fff 125%);
+    }
+
+    .balance-label {
+      left: 45px;
+      top: 28px;
+      width: 309px;
+      height: 22px;
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    .balance-value {
+      position: absolute;
+      left: 45px;
+      top: 74px;
+      width: 364px;
+      height: 112px;
+      font-size: 128px;
+      font-weight: 700;
+      line-height: 112px;
+      letter-spacing: -3px;
+      white-space: nowrap;
+      color: var(--navy);
+    }
+
+    .balance-value span {
+      font-size: 64px;
+    }
+
+    .balance-art {
+      position: absolute;
+      left: 409px;
+      top: 28px;
+      width: 215px;
+      height: 158px;
+    }
+
+    .earn {
+      position: absolute;
+      left: 195px;
+      top: 540px;
+      width: 679px;
+      height: 468px;
+      border-radius: 20px;
+      background: var(--navy);
+    }
+
+    .earn-title {
+      left: 45px;
+      top: 40px;
+      width: 309px;
+      height: 22px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .earn-row {
+      position: absolute;
+      left: 45px;
+      width: 595px;
+      height: 88px;
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--navy);
+    }
+
+    .earn-row-1 { top: 86px; }
+    .earn-row-2 { top: 195px; }
+    .earn-row-3 { top: 306px; }
+
+    .earn-row .circle {
+      position: absolute;
+      left: 16px;
+      top: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f4dc3b;
+    }
+
+    .earn-row .plus {
+      left: 16px;
+      top: 33px;
+      width: 48px;
+      height: 22px;
+      font-size: 17.5px;
+      font-weight: 600;
+    }
+
+    .earn-row h2 {
+      left: 76px;
+      top: 22px;
+      width: 359px;
+      height: 22px;
+      font-size: 17.5px;
+      font-weight: 600;
+    }
+
+    .earn-row p {
+      left: 76px;
+      top: 44px;
+      width: 498px;
+      height: 22px;
+      font-size: 17.5px;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+
+    .earn-note {
+      left: 45px;
+      top: 406px;
+      width: 498px;
+      height: 22px;
+      color: #fff;
+      font-size: 17.5px;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+
+    /* Tabs Navigasi Poin */
+    .tab {
+      position: absolute;
+      top: 303px;
+      height: 50px;
+      border-radius: 13px;
+      background: var(--surface);
+      color: var(--navy);
+    }
+
+    .tab .t {
+      top: 13px;
+      height: 24px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .tab-redeem { left: 897px; width: 175px; }
+    .tab-redeem .t { left: 8px; width: 159px; }
+
+    .tab-vouchers {
+      left: 1082px;
+      width: 216px;
+      background: var(--navy);
+      color: var(--surface);
+    }
+
+    .tab-vouchers .t { left: 28px; width: 159px; }
+
+    .tab-history { left: 1308px; width: 119px; }
+    .tab-history .t { left: 9px; width: 102px; }
+
+    /* Area Voucher Saya Kosong (Desktop: ditengah panel kanan) */
+    .empty-state {
+      left: 897px;
+      top: 520px;
+      width: 862px;
+      height: 40px;
+      justify-content: center;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    .definitions {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+/* Responsive mobile layout — desktop styles remain unchanged */
+@media (max-width: 767px) {
+  html { overflow-x: hidden; }
+  body { zoom: 1 !important; overflow-x: hidden; }
+  .header {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+    border-radius: 16px !important;
+  }
+  .header > .brand { order: 1 !important; flex: 0 1 auto !important; min-width: 0; gap: 5px !important; font-size: clamp(16px, 4.5vw, 21px) !important; white-space: nowrap; }
+  .header > .brand svg { width: 22px !important; height: 30px !important; }
+  .header > .city-picker { order: 2 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 4px !important; font-size: 12px !important; white-space: nowrap; }
+  .header > .city-picker .icon { width: 16px !important; height: 16px !important; }
+  .header > .header__actions { display: contents !important; }
+  .header .points { order: 3 !important; flex: 0 0 auto !important; height: 34px !important; padding: 0 9px !important; gap: 5px !important; font-size: 12px !important; white-space: nowrap; }
+  .header .points .coin { width: 17px !important; height: 17px !important; font-size: 10px !important; }
+  .header > .profile { order: 4 !important; display: inline-flex !important; flex: 0 0 34px !important; width: 34px !important; height: 34px !important; align-items: center !important; justify-content: center !important; margin: 0 !important; }
+  .header > .profile .icon { width: 22px !important; height: 22px !important; }
+  .header > .navigation { order: 5 !important; flex: 0 0 100% !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 2px 0 0 !important; display: flex !important; flex-flow: row nowrap !important; align-items: center !important; justify-content: space-between !important; gap: clamp(6px, 2.5vw, 14px) !important; overflow-x: auto !important; scrollbar-width: none; }
+  .header > .navigation::-webkit-scrollbar { display: none; }
+  .header > .navigation a { flex: 0 0 auto !important; font-size: clamp(10px, 2.8vw, 13px) !important; line-height: 1.3 !important; padding: 7px 0 !important; white-space: nowrap !important; }
+  .header > .navigation a.active::after { height: 2px !important; bottom: 0 !important; }
+  body { padding-top: 112px; }
+  img, video, iframe, canvas, svg { max-width: 100%; }
+  main, .main-content, .main-content, .content, .page-content, .container, .wrapper, .dashboard-content, .content-wrapper {
+    max-width: 100% !important;
+  }
+  main, .main-content, .content, .page-content, .dashboard-content, .content-wrapper { width: auto; }
+  .main-content, .content, .page-content, .dashboard-content, .content-wrapper { margin-left: 12px !important; margin-right: 12px !important; }
+  input, select, textarea { max-width: 100%; }
+  table { display: block; max-width: 100%; overflow-x: auto; }
+}
+@media (max-width: 420px) {
+  .header { padding: 8px 9px !important; column-gap: 5px !important; }
+  .header > .brand { gap: 3px !important; font-size: 16px !important; }
+  .header > .city-picker { padding: 0 7px !important; }
+  .header .points { padding: 0 7px !important; }
+  .header > .navigation { gap: 7px !important; }
+  .header > .navigation a { font-size: 10px !important; }
+}
+/* >>> MOBILE-OPT >>> */
+@media (max-width: 767px) {
+  body { padding-top: 100px; }
+  .page { width: 100% !important; height: auto !important; padding: 0 12px 24px !important; overflow: visible !important; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+  .page > .t { position: static !important; width: auto !important; height: auto !important; flex: 0 0 100%; line-height: 1.25 !important; white-space: normal !important; margin: 2px 2px 0; }
+  .breadcrumb { order: 0; font-size: 13px !important; margin-top: 4px; white-space: pre !important; display: block !important; }
+  .page-title { order: 1; font-size: 18px !important; }
+  .balance { order: 2; flex: 0 0 100%; position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 14px 16px; border-radius: 16px; overflow: hidden; }
+  .balance .balance-label { position: static !important; width: auto !important; height: auto !important; font-size: 13px !important; margin: 0 0 2px; }
+  .balance-value { position: static !important; width: auto !important; height: auto !important; font-size: 52px !important; line-height: 1.05 !important; letter-spacing: -1px !important; margin: 0; }
+  .balance-value span { font-size: 24px !important; }
+  .balance-art { left: auto !important; right: 8px; top: 50% !important; width: 112px !important; height: 82px !important; transform: translateY(-50%); opacity: .9; }
+  .tab { order: 3; position: relative !important; left: auto !important; top: auto !important; width: auto !important; height: 38px !important; flex: 1 1 28%; border-radius: 11px; display: flex; align-items: center; justify-content: center; }
+  .tab .t { position: static !important; width: auto !important; height: auto !important; font-size: 13px !important; }
+
+  /* Mobile Gap Atas-Bawah untuk Belum Ada Voucher */
+  .empty-state {
+    order: 4;
+    flex: 0 0 100%;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 32px 0 !important; /* Memberikan gap atas dan bawah */
+    padding: 16px 0 !important;
+    text-align: center;
+    justify-content: center;
+    font-size: 15px !important;
+  }
+
+  .earn { order: 5; flex: 0 0 100%; position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .earn > .t { position: static !important; width: auto !important; height: auto !important; margin: 0; white-space: normal !important; }
+  .earn-title { font-size: 15px !important; }
+  .earn-note { font-size: 11.5px !important; letter-spacing: 0 !important; line-height: 1.35 !important; }
+  .earn-row { position: relative !important; left: auto !important; top: auto !important; width: 100% !important; height: auto !important; padding: 10px 12px; border-radius: 14px; display: grid; grid-template-columns: 38px 1fr; column-gap: 10px; row-gap: 1px; align-items: center; }
+  .earn-row .circle { position: static !important; grid-column: 1; grid-row: 1 / 3; width: 36px !important; height: 36px !important; }
+  .earn-row .plus { position: static !important; grid-column: 1; grid-row: 1 / 3; width: auto !important; height: auto !important; justify-self: center; align-self: center; font-size: 13px !important; z-index: 1; }
+  .earn-row h2 { position: static !important; grid-column: 2; grid-row: 1; width: auto !important; height: auto !important; font-size: 13px !important; line-height: 1.3 !important; margin: 0; white-space: normal !important; }
+  .earn-row p { position: static !important; grid-column: 2; grid-row: 2; width: auto !important; height: auto !important; font-size: 11.5px !important; line-height: 1.35 !important; letter-spacing: 0 !important; margin: 0; white-space: normal !important; }
+}
+/* <<< MOBILE-OPT <<< */
+  </style>
+</head>
+<body>
+  <!-- SVG Symbols (Sama seperti Profil-Poin(Cashback).html) -->
+  <svg style="display:none">
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 4 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="icon-pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></symbol>
+    <symbol id="icon-profile" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4" fill="currentColor"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z" fill="currentColor"/></symbol>
+  </svg>
+
+  <!-- Navbar Glassmorphism Modern -->
+  <header class="header">
+    <a class="brand" href="welcome.html">
+      <svg width="37" height="50" viewBox="0 0 40 54">
+        <path fill="#092e6d" fill-rule="evenodd" d="M18 0C10 0 4 6 4 14c0 8 14 21 14 21s14-13 14-21C32 6 26 0 18 0Zm0 8a6 6 0 1 1 0 12 6 6 0 1 1 0-12Z"/>
+        <path fill="#378deb" d="M0 33l10-4v19L0 51Zm28-7 12-6v25l-12 4Z"/>
+        <path fill="#4da6cc" d="m13 40 12-11v17l-12 7Z"/>
+        <path fill="#27afa5" d="M2 52c15 3 24-15 38-13-1 12-14 19-38 13Z"/>
+      </svg>
+      <span>KotaKita</span>
+    </a>
+
+    <button class="city-picker" type="button">
+      <svg class="icon"><use href="#icon-pin"/></svg>
+      <span>Bandung</span>
+    </button>
+
+    <nav class="navigation">
+      <a href="dashboard.html">Beranda</a>
+      <a href="lokasi.html">Lokasi</a>
+      <a href="uploadLaporan.html">Upload Laporan</a>
+      <a href="laporan.html">Laporan</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="points" href="Profil-Poin(Semua).html" style="text-decoration:none;color:#FFFFFF;cursor:pointer"><span class="coin">★</span><span>0 Poin</span></a>
+    </div>
+    <a class="profile" href="Profil.html"><svg class="icon"><use href="#icon-profile"/></svg></a>
+  </header>
+
+  <main class="page">
+    <p class="t breadcrumb">Profil<strong> • Poin</strong></p>
+    <h1 class="t page-title">Poin Saya</h1>
+
+    <section class="balance" aria-label="Saldo poin">
+      <p class="t balance-label">Saldo Poin Kamu</p>
+      <p class="balance-value">0 <span>Poin</span></p>
+      <svg class="balance-art" viewBox="0 0 215 158" aria-hidden="true">
+        <g stroke="#06306f" stroke-width="3">
+          <ellipse cx="57.333335" cy="103.418182" rx="40.133335" ry="40.218182" fill="#06306f" fill-opacity=".12"/>
+          <ellipse cx="137.6" cy="89.054545" rx="51.6" ry="51.709091" fill="#06306f" fill-opacity=".18"/>
+          <ellipse cx="137.6" cy="89.054546" rx="34.4" ry="34.472729" fill="none"/>
+          <path d="m137.6 68.945454 6.02 12.352726 13.616666 2.010911-9.889991 9.623633 2.293331 13.645455-12.04-6.463637-12.04 6.463637 2.293331-13.645455-9.889991-9.623633 13.616666-2.010911Z" fill="#06306f"/>
+          <path d="M189.2 28.727273v17.236364m-8.6-8.618182h17.2M25.8 43.090909v11.490909m-5.733333-5.745454h11.466666" fill="none"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="earn" aria-label="Cara mendapatkan poin">
+      <h2 class="t earn-title">Cara dapat Poin</h2>
+      <div class="earn-row earn-row-1">
+        <span class="circle"></span><span class="t center plus">+10</span>
+        <h2 class="t">Kirim Laporan Valid</h2><p class="t">Otomatis setelah lolos filter dasar/foto jernih</p>
+      </div>
+      <div class="earn-row earn-row-2">
+        <span class="circle"></span><span class="t center plus">+15</span>
+        <h2 class="t">Laporan Dikonfirmasi Admin/Mitra</h2><p class="t">Verifikasi bahwa laporan asli &amp; bukan spam</p>
+      </div>
+      <div class="earn-row earn-row-3">
+        <span class="circle"></span><span class="t center plus">+25</span>
+        <h2 class="t">Laporan Selesai Ditangani</h2><p class="t">Apresiasi karena masalah jalan berhasil terselesaikan</p>
+      </div>
+      <p class="t earn-note">Makin banyak laporan valid, makin banyak poin yang kamu dapat</p>
+    </section>
+
+    <button class="tab tab-redeem" type="button"><span class="t center">Tukar Poin</span></button>
+    <button class="tab tab-vouchers" type="button"><span class="t center">Voucher Saya</span></button>
+    <button class="tab tab-history" type="button"><span class="t center">Riwayat</span></button>
+
+    <p class="t empty-state">Belum ada Voucher</p>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const go = (url) => { if (url) window.location.href = url; };
+      document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+        const c = btn.className;
+        if (c.includes('vouchers')) go('profil-poin(voucherSaya).html');
+        else if (c.includes('history')) go('profil-poin(riwayat).html');
+        else go('Profil-Poin(Semua).html');
+      }));
+    });
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/poin.js"></script>
+<script src="js/lokasiKota.js"></script>
+</body>
+</html>
